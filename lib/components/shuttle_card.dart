@@ -104,7 +104,7 @@ class _ShuttleCardState extends State<ShuttleCard> {
                           const Icon(Icons.departure_board, size: 16),
                           const SizedBox(width: 4),
                           Text(
-                            '隨後班次',
+                            '稍後班次',
                             style: typescale.labelSmall!.copyWith(
                               color: color.onSurfaceVariant,
                             ),
