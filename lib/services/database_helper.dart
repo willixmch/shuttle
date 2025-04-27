@@ -1,6 +1,9 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../data/the_regent_data.dart';
+import '../models/estate.dart';
+import '../models/route.dart';
+import '../models/schedule.dart';
 
 // Singleton class to manage the SQLite database for shuttle bus data.
 class DatabaseHelper {
@@ -132,6 +135,38 @@ class DatabaseHelper {
         }
       }
     }
+  }
+
+  // Fetches all routes from the database, including estate information.
+  Future<List<Routes>> getAllRoutes() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('routes');
+    return List.generate(maps.length, (i) => Routes.fromMap(maps[i]));
+  }
+
+  // Fetches schedules for a specific route and day type (workday or weekend).
+  Future<List<Schedule>> getSchedulesForRoute(String routeId, String dayType) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'schedules',
+      where: 'routeId = ? AND dayType = ?',
+      whereArgs: [routeId, dayType],
+    );
+    return List.generate(maps.length, (i) => Schedule.fromMap(maps[i]));
+  }
+
+  // Fetches the estate for a given estateId.
+  Future<Estate?> getEstateById(String estateId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'estates',
+      where: 'estateId = ?',
+      whereArgs: [estateId],
+    );
+    if (maps.isNotEmpty) {
+      return Estate.fromMap(maps.first);
+    }
+    return null;
   }
 
   // Closes the database connection.

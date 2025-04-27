@@ -2,7 +2,7 @@
 // Defines the Route model to represent a shuttle route (e.g., A 線) in the database.
 // Used to store and retrieve route data from the 'routes' table.
 
-class Route {
+class Routes {
   // Unique identifier for the route (e.g., '0001').
   final String routeId;
 
@@ -15,7 +15,7 @@ class Route {
   // Additional information about the route (e.g., '由天鑽第2座開出').
   final String info;
 
-  const Route({
+  const Routes({
     required this.routeId,
     required this.routeName,
     required this.estateId,
@@ -33,8 +33,8 @@ class Route {
   }
 
   // Creates a Route object from a database row (map).
-  factory Route.fromMap(Map<String, dynamic> map) {
-    return Route(
+  factory Routes.fromMap(Map<String, dynamic> map) {
+    return Routes(
       routeId: map['routeId'] as String,
       routeName: map['routeName'] as String,
       estateId: map['estateId'] as String,
