@@ -2,7 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../data/the_regent_data.dart';
 import '../models/estate.dart';
-import '../models/route.dart';
+import '../models/routes.dart' as model; // Alias to avoid conflicts
 import '../models/schedule.dart';
 
 // Singleton class to manage the SQLite database for shuttle bus data.
@@ -138,10 +138,10 @@ class DatabaseHelper {
   }
 
   // Fetches all routes from the database, including estate information.
-  Future<List<Routes>> getAllRoutes() async {
+  Future<List<model.Routes>> getAllRoutes() async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query('routes');
-    return List.generate(maps.length, (i) => Routes.fromMap(maps[i]));
+    return List.generate(maps.length, (i) => model.Routes.fromMap(maps[i]));
   }
 
   // Fetches schedules for a specific route and day type (workday or weekend).

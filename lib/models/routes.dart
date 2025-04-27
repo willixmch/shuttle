@@ -1,5 +1,5 @@
 // lib/models/route.dart
-// Defines the Route model to represent a shuttle route (e.g., A 線) in the database.
+// Defines the Routes model to represent a shuttle route (e.g., A 線) in the database.
 // Used to store and retrieve route data from the 'routes' table.
 
 class Routes {
@@ -22,7 +22,7 @@ class Routes {
     required this.info,
   });
 
-  // Converts a Route object to a map for database insertion.
+  // Converts a Routes object to a map for database insertion.
   Map<String, dynamic> toMap() {
     return {
       'routeId': routeId,
@@ -32,19 +32,26 @@ class Routes {
     };
   }
 
-  // Creates a Route object from a database row (map).
+  // Creates a Routes object from a database row (map).
   factory Routes.fromMap(Map<String, dynamic> map) {
+    final routeId = map['routeId'];
+    final routeName = map['routeName'];
+    final estateId = map['estateId'];
+    final info = map['info'];
+    if (routeId == null || routeName == null || estateId == null || info == null) {
+      throw Exception('Invalid route data: one or more fields are null in map: $map');
+    }
     return Routes(
-      routeId: map['routeId'] as String,
-      routeName: map['routeName'] as String,
-      estateId: map['estateId'] as String,
-      info: map['info'] as String,
+      routeId: routeId as String,
+      routeName: routeName as String,
+      estateId: estateId as String,
+      info: info as String,
     );
   }
 
   // String representation for debugging.
   @override
   String toString() {
-    return 'Route{routeId: $routeId, routeName: $routeName, estateId: $estateId, info: $info}';
+    return 'Routes{routeId: $routeId, routeName: $routeName, estateId: $estateId, info: $info}';
   }
 }

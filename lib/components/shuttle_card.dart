@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+// Stateful widget to display a shuttle route card with ETA information.
+// Toggles expansion to show upcoming ETAs when tapped.
 class ShuttleCard extends StatefulWidget {
   final String route;
   final String info;
@@ -23,38 +25,33 @@ class _ShuttleCardState extends State<ShuttleCard> {
 
   @override
   Widget build(BuildContext context) {
-
     final color = Theme.of(context).colorScheme;
     final typescale = Theme.of(context).textTheme;
 
     return GestureDetector(
-
       onTap: () {
         setState(() {
           _isExpanded = !_isExpanded;
         });
       },
-
       child: Container(
-
         // Card Styling
         width: double.infinity,
         padding: const EdgeInsets.all(12),
         decoration: ShapeDecoration(
           color: color.surfaceContainer,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8),),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
-
         // Content
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             // Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-
                 // Route
                 Text(
                   widget.route,
@@ -62,7 +59,6 @@ class _ShuttleCardState extends State<ShuttleCard> {
                     color: color.onSurfaceVariant,
                   ),
                 ),
-
                 // Info
                 Text(
                   widget.info,
@@ -72,9 +68,7 @@ class _ShuttleCardState extends State<ShuttleCard> {
                 ),
               ],
             ),
-
             const SizedBox(height: 8),
-
             // ETA
             Text(
               widget.eta,
@@ -82,63 +76,59 @@ class _ShuttleCardState extends State<ShuttleCard> {
                 color: color.onSurface,
               ),
             ),
-
             // Upcoming ETA (Expandable)
             ClipRect(
               child: AnimatedContainer(
-
                 // Config
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
                 height: _isExpanded
                     ? (widget.upcomingEta.length * 32.0 + 40.0)
                     : 0.0,
-                
                 // Content
                 child: SingleChildScrollView(
                   physics: const NeverScrollableScrollPhysics(),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
                       const SizedBox(height: 12),
-
                       // Icon & Title
                       Row(
-                        spacing: 4,
                         children: [
-                          Icon(Icons.departure_board, size: 16,),
+                          const Icon(Icons.departure_board, size: 16),
+                          const SizedBox(width: 4),
                           Text(
                             '隨後班次',
-                            style: typescale.labelSmall!.copyWith(color: color.onSurfaceVariant),
+                            style: typescale.labelSmall!.copyWith(
+                              color: color.onSurfaceVariant,
+                            ),
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 8),
-
                       // Upcoming ETA
                       ...widget.upcomingEta.map((eta) => Row(
-                        spacing: 4,
-                        children: [
-                          Container(
-                            width: 16,
-                            height: 34,
-                            alignment: Alignment.center,
-                            child: VerticalDivider(
-                              width: 1,
-                              color: color.outlineVariant,
-                            ),
-                          ),
-                          Padding(
+                            children: [
+                              Container(
+                                width: 16,
+                                height: 34,
+                                alignment: Alignment.center,
+                                child: VerticalDivider(
+                                  width: 1,
+                                  color: color.outlineVariant,
+                                ),
+                              ),
+                              Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 4),
                                 child: Text(
                                   eta,
-                                  style: typescale.bodyLarge!.copyWith(color: color.onSurface,),
+                                  style: typescale.bodyLarge!.copyWith(
+                                    color: color.onSurface,
+                                  ),
                                 ),
                               ),
-                        ],
-                      )),
+                            ],
+                          )),
                     ],
                   ),
                 ),
