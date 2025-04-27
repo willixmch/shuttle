@@ -1,11 +1,14 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shuttle/components/shuttle_card.dart';
 import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/models/routes.dart' as model; // Alias to avoid conflicts
+import 'package:shuttle/models/schedule.dart';
 import 'package:shuttle/utils/eta_calculator.dart';
 
 // Stateful widget to display the home page with a list of shuttle routes.
+// Refreshes ETAs every 15 seconds using a ValueNotifier for smooth updates.
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -15,9 +18,30 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  Timer? _refreshTimer;
+  List<Map<String, dynamic>> _cachedRouteData = [];
+  late ValueNotifier<List<Map<String, dynamic>>> _etaNotifier;
 
-  // Fetches routes, their estate information, and calculated ETAs from the database.
-  Future<List<Map<String, dynamic>>> _fetchRoutesWithEtas() async {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the ValueNotifier for ETA updates.
+    _etaNotifier = ValueNotifier<List<Map<String, dynamic>>>([]);
+    // Load initial data and start the refresh timer.
+    _loadInitialData();
+    _startRefreshTimer();
+  }
+
+  @override
+  void dispose() {
+    // Cancel the timer and dispose of the ValueNotifier.
+    _refreshTimer?.cancel();
+    _etaNotifier.dispose();
+    super.dispose();
+  }
+
+  // Loads initial route and schedule data from the database.
+  Future<void> _loadInitialData() async {
     final routes = await _dbHelper.getAllRoutes();
     final List<Map<String, dynamic>> routeData = [];
     final currentTime = DateTime.now();
@@ -32,13 +56,42 @@ class _HomeState extends State<Home> {
         routeData.add({
           'route': route,
           'estate': estate,
+          'schedules': schedules,
           'eta': etaData['eta'],
           'upcomingEta': etaData['upcomingEta'],
         });
       }
     }
 
-    return routeData;
+    if (mounted) {
+      setState(() {
+        _cachedRouteData = routeData;
+        _etaNotifier.value = routeData;
+      });
+    }
+  }
+
+  // Starts a 15-second timer to refresh ETAs.
+  void _startRefreshTimer() {
+    _refreshTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
+      if (mounted && _cachedRouteData.isNotEmpty) {
+        final currentTime = DateTime.now();
+        final dayType = EtaCalculator.getDayType(currentTime);
+        final updatedRouteData = _cachedRouteData.map((data) {
+          final schedules = data['schedules'] as List<Schedule>;
+          final etaData = EtaCalculator.calculateEtas(schedules, currentTime);
+          return {
+            'route': data['route'],
+            'estate': data['estate'],
+            'schedules': schedules,
+            'eta': etaData['eta'],
+            'upcomingEta': etaData['upcomingEta'],
+          };
+        }).toList();
+
+        _etaNotifier.value = updatedRouteData;
+      }
+    });
   }
 
   @override
@@ -49,41 +102,36 @@ class _HomeState extends State<Home> {
       ),
       body: Container(
         margin: const EdgeInsets.all(16),
-        child: FutureBuilder<List<Map<String, dynamic>>>(
-          future: _fetchRoutesWithEtas(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              // Show loading indicator while fetching data.
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              // Show error message if data fetching fails.
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              // Show message if no routes are found.
-              return const Center(child: Text('No routes available'));
-            }
+        child: _cachedRouteData.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : ValueListenableBuilder<List<Map<String, dynamic>>>(
+                valueListenable: _etaNotifier,
+                builder: (context, routeData, child) {
+                  if (routeData.isEmpty) {
+                    // Show message if no routes are found.
+                    return const Center(child: Text('No routes available'));
+                  }
 
-            // Build list of ShuttleCard widgets from fetched data.
-            final routeData = snapshot.data!;
-            return ListView.builder(
-              itemCount: routeData.length,
-              itemBuilder: (context, index) {
-                final route = routeData[index]['route'] as model.Routes;
-                final eta = routeData[index]['eta'] as String;
-                final upcomingEta = routeData[index]['upcomingEta'] as List<String>;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: ShuttleCard(
-                    route: route.routeName,
-                    info: route.info,
-                    eta: eta,
-                    upcomingEta: upcomingEta,
-                  ),
-                );
-              },
-            );
-          },
-        ),
+                  // Build list of ShuttleCard widgets from cached data.
+                  return ListView.builder(
+                    itemCount: routeData.length,
+                    itemBuilder: (context, index) {
+                      final route = routeData[index]['route'] as model.Routes;
+                      final eta = routeData[index]['eta'] as String;
+                      final upcomingEta = routeData[index]['upcomingEta'] as List<String>;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: ShuttleCard(
+                          route: route.routeName,
+                          info: route.info,
+                          eta: eta,
+                          upcomingEta: upcomingEta,
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
       ),
     );
   }

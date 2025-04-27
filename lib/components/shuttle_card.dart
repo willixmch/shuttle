@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 // Stateful widget to display a shuttle route card with ETA information.
 // Toggles expansion to show upcoming ETAs when tapped.
+// Uses ValueListenableBuilder for smooth ETA updates.
 class ShuttleCard extends StatefulWidget {
   final String route;
   final String info;
@@ -70,11 +71,16 @@ class _ShuttleCardState extends State<ShuttleCard> {
             ),
             const SizedBox(height: 8),
             // ETA
-            Text(
-              widget.eta,
-              style: typescale.titleLarge!.copyWith(
-                color: color.onSurface,
-              ),
+            ValueListenableBuilder<String>(
+              valueListenable: ValueNotifier<String>(widget.eta),
+              builder: (context, eta, child) {
+                return Text(
+                  eta,
+                  style: typescale.titleLarge!.copyWith(
+                    color: color.onSurface,
+                  ),
+                );
+              },
             ),
             // Upcoming ETA (Expandable)
             ClipRect(
@@ -107,28 +113,35 @@ class _ShuttleCardState extends State<ShuttleCard> {
                       ),
                       const SizedBox(height: 8),
                       // Upcoming ETA
-                      ...widget.upcomingEta.map((eta) => Row(
-                            children: [
-                              Container(
-                                width: 16,
-                                height: 34,
-                                alignment: Alignment.center,
-                                child: VerticalDivider(
-                                  width: 1,
-                                  color: color.outlineVariant,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
-                                child: Text(
-                                  eta,
-                                  style: typescale.bodyLarge!.copyWith(
-                                    color: color.onSurface,
+                      ValueListenableBuilder<List<String>>(
+                        valueListenable: ValueNotifier<List<String>>(widget.upcomingEta),
+                        builder: (context, upcomingEta, child) {
+                          return Column(
+                            children: upcomingEta.map((eta) => Row(
+                              children: [
+                                Container(
+                                  width: 16,
+                                  height: 34,
+                                  alignment: Alignment.center,
+                                  child: VerticalDivider(
+                                    width: 1,
+                                    color: color.outlineVariant,
                                   ),
                                 ),
-                              ),
-                            ],
-                          )),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 4),
+                                  child: Text(
+                                    eta,
+                                    style: typescale.bodyLarge!.copyWith(
+                                      color: color.onSurface,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )).toList(),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
