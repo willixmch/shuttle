@@ -7,7 +7,7 @@ import 'package:shuttle/models/schedule.dart';
 import 'package:shuttle/utils/eta_calculator.dart';
 
 // Stateful widget to display the home page with a list of shuttle routes.
-// Refreshes ETAs every 15 seconds using a ValueNotifier for smooth updates.
+// Stores ETAs as integers, decrements them every 60 seconds, and shifts ETAs when one expires.
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -59,8 +59,8 @@ class _HomeState extends State<Home> {
           'route': route,
           'estate': estate,
           'schedules': schedules,
-          'eta': etaData['eta'],
-          'upcomingEta': etaData['upcomingEta'],
+          'eta': etaData['eta'], // int? (minutes)
+          'upcomingEta': etaData['upcomingEta'], // List<int>
         });
       }
     }
@@ -73,27 +73,62 @@ class _HomeState extends State<Home> {
     }
   }
 
-  // Starts a 15-second timer to refresh ETAs.
+  // Starts a 60-second timer to decrement ETAs and handle expiry.
   void _startRefreshTimer() {
-    _refreshTimer = Timer.periodic(const Duration(seconds: 15), (timer) {
+    _refreshTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
       if (mounted && _cachedRouteData.isNotEmpty) {
         final currentTime = DateTime.now();
-        final dayType = EtaCalculator.getDayType(currentTime);
-        final updatedRouteData =
-            _cachedRouteData.map((data) {
-              final schedules = data['schedules'] as List<Schedule>;
-              final etaData = EtaCalculator.calculateEtas(
-                schedules,
-                currentTime,
-              );
-              return {
-                'route': data['route'],
-                'estate': data['estate'],
-                'schedules': schedules,
-                'eta': etaData['eta'],
-                'upcomingEta': etaData['upcomingEta'],
-              };
-            }).toList();
+        final updatedRouteData = _cachedRouteData.map((data) {
+          final schedules = data['schedules'] as List<Schedule>;
+          int? currentEta = data['eta'] as int?;
+          List<int> upcomingEta = List<int>.from(data['upcomingEta'] as List);
+
+          if (currentEta == null) {
+            return {
+              'route': data['route'],
+              'estate': data['estate'],
+              'schedules': schedules,
+              'eta': null,
+              'upcomingEta': <int>[],
+            };
+          }
+
+          // Decrement all ETAs by 1 minute.
+          currentEta = currentEta - 1;
+          upcomingEta = upcomingEta.map((eta) => eta - 1).toList();
+
+          // Check if the current ETA has reached -1.
+          if (currentEta <= -1) {
+            if (upcomingEta.isNotEmpty) {
+              // Shift the first upcoming ETA to current ETA.
+              currentEta = upcomingEta.removeAt(0);
+              // Calculate a new upcoming ETA if needed.
+              if (upcomingEta.length < 2 && schedules.isNotEmpty) {
+                final lastEta = upcomingEta.isNotEmpty ? upcomingEta.last : currentEta;
+                final nextEta = EtaCalculator.calculateNextEta(
+                  schedules,
+                  currentTime,
+                  lastEta,
+                );
+                if (nextEta != null) {
+                  upcomingEta.add(nextEta);
+                }
+              }
+            } else {
+              // No more ETAs available.
+              currentEta = null;
+              upcomingEta = [];
+            }
+          }
+
+          return {
+            'route': data['route'],
+            'estate': data['estate'],
+            'schedules': schedules,
+            'eta': currentEta,
+            'upcomingEta': upcomingEta,
+          };
+        }).toList();
 
         _etaNotifier.value = updatedRouteData;
       }
@@ -106,38 +141,54 @@ class _HomeState extends State<Home> {
       appBar: AppBar(title: const Text('The ReGent')),
       body: Container(
         margin: const EdgeInsets.all(16),
-        child:
-            _cachedRouteData.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : ValueListenableBuilder<List<Map<String, dynamic>>>(
-                  valueListenable: _etaNotifier,
-                  builder: (context, routeData, child) {
-                    if (routeData.isEmpty) {
-                      // Show message if no routes are found.
-                      return const Center(child: Text('No routes available'));
-                    }
+        child: _cachedRouteData.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : ValueListenableBuilder<List<Map<String, dynamic>>>(
+                valueListenable: _etaNotifier,
+                builder: (context, routeData, child) {
+                  if (routeData.isEmpty) {
+                    // Show message if no routes are found.
+                    return const Center(child: Text('No routes available'));
+                  }
 
-                    // Build list of ShuttleCard widgets from cached data.
-                    return ListView.builder(
-                      itemCount: routeData.length,
-                      itemBuilder: (context, index) {
-                        final route = routeData[index]['route'] as Routes;
-                        final eta = routeData[index]['eta'] as String;
-                        final upcomingEta =
-                            routeData[index]['upcomingEta'] as List<String>;
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: ShuttleCard(
-                            route: route.routeName,
-                            info: route.info,
-                            eta: eta,
-                            upcomingEta: upcomingEta,
+                  // Build list of ShuttleCard widgets from cached data.
+                  return ListView.builder(
+                    itemCount: routeData.length,
+                    itemBuilder: (context, index) {
+                      final data = routeData[index];
+                      final route = data['route'] as Routes?;
+                      final eta = data['eta'] as int?;
+                      final upcomingEta = data['upcomingEta'] as List<dynamic>?;
+
+                      // Handle null or malformed data gracefully.
+                      if (route == null || upcomingEta == null) {
+                        return const Padding(
+                          padding: EdgeInsets.only(bottom: 12),
+                          child: Card(
+                            child: ListTile(
+                              title: Text('Error'),
+                              subtitle: Text('Invalid route data'),
+                            ),
                           ),
                         );
-                      },
-                    );
-                  },
-                ),
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: ShuttleCard(
+                          route: route.routeName,
+                          info: route.info,
+                          eta: EtaCalculator.formatEta(eta),
+                          upcomingEta: upcomingEta
+                              .cast<int>()
+                              .map(EtaCalculator.formatEta)
+                              .toList(),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
       ),
     );
   }

@@ -1,7 +1,4 @@
 // lib/utils/eta_calculator.dart
-// Provides utilities to calculate ETAs for shuttle routes based on schedules.
-// Calculates the next ETA and upcoming ETAs in minutes, formatted as strings (e.g., "6 分鐘").
-
 import 'package:intl/intl.dart';
 import '../models/schedule.dart';
 
@@ -12,13 +9,13 @@ class EtaCalculator {
   }
 
   // Calculates the next ETA and upcoming ETAs for a route based on the current time.
-  // Returns a map with 'eta' (String, e.g., "6 分鐘") and 'upcomingEta' (List<String>).
+  // Returns a map with 'eta' (int, minutes) and 'upcomingEta' (List<int>, minutes).
   static Map<String, dynamic> calculateEtas(
     List<Schedule> schedules,
     DateTime currentTime,
   ) {
     if (schedules.isEmpty) {
-      return {'eta': 'No departures today', 'upcomingEta': []};
+      return {'eta': null, 'upcomingEta': []};
     }
 
     // Parse schedule times and calculate time differences.
@@ -48,18 +45,71 @@ class EtaCalculator {
       });
 
     if (futureDepartures.isEmpty) {
-      return {'eta': 'No more departures today', 'upcomingEta': []};
+      return {'eta': null, 'upcomingEta': []};
     }
 
-    // Get the next ETA and up to 2 upcoming ETAs.
+    // Get the next ETA and up to 2 upcoming ETAs as integers.
     final nextEtaMinutes = futureDepartures[0]['difference'] as int;
-    final eta = '$nextEtaMinutes 分鐘';
     final upcomingEta = futureDepartures
         .skip(1)
         .take(2)
-        .map((d) => '${d['difference']} 分鐘')
+        .map((d) => d['difference'] as int)
         .toList();
 
-    return {'eta': eta, 'upcomingEta': upcomingEta};
+    return {'eta': nextEtaMinutes, 'upcomingEta': upcomingEta};
+  }
+
+  // Helper function to calculate the next ETA after a given list of ETAs.
+  static int? calculateNextEta(
+    List<Schedule> schedules,
+    DateTime currentTime,
+    int lastEtaMinutes,
+  ) {
+    final timeFormat = DateFormat('HH:mm');
+    final today = DateTime(currentTime.year, currentTime.month, currentTime.day);
+
+    // Find the schedule time that corresponds to the last ETA.
+    final lastDepartureTime = schedules.firstWhere(
+      (schedule) {
+        final departureTime = timeFormat.parse(schedule.departureTime);
+        final departureDateTime = today.add(Duration(
+          hours: departureTime.hour,
+          minutes: departureTime.minute,
+        ));
+        final difference = departureDateTime.difference(currentTime).inMinutes;
+        return difference == lastEtaMinutes;
+      },
+      orElse: () => Schedule(id: 0, routeId: '', dayType: '', departureTime: ''),
+    );
+
+    if (lastDepartureTime.departureTime.isEmpty) {
+      return null;
+    }
+
+    // Find the next schedule time after the last departure.
+    final sortedSchedules = schedules
+        .map((s) => s.departureTime)
+        .toList()
+      ..sort((a, b) => timeFormat.parse(a).compareTo(timeFormat.parse(b)));
+    final lastIndex = sortedSchedules.indexOf(lastDepartureTime.departureTime);
+
+    if (lastIndex == -1 || lastIndex == sortedSchedules.length - 1) {
+      return null; // No more departures.
+    }
+
+    final nextDepartureTime = sortedSchedules[lastIndex + 1];
+    final nextDepartureDateTime = today.add(Duration(
+      hours: timeFormat.parse(nextDepartureTime).hour,
+      minutes: timeFormat.parse(nextDepartureTime).minute,
+    ));
+    return nextDepartureDateTime.difference(currentTime).inMinutes;
+  }
+
+  // Helper function to format minutes into a string (e.g., "6 分鐘").
+  static String formatEta(int? minutes) {
+    if (minutes == null || minutes <= 0) {
+      return '沒有服務';
+    }
+    return '$minutes 分鐘';
   }
 }
