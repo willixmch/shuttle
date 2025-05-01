@@ -1,6 +1,3 @@
-// lib/data/the_regent_data.dart
-// Defines the data for theRegent estate, including its routes and schedules.
-// To add a new route, append to the 'routes' list. To add a new estate, create a similar file.
 
 const theRegentData = {
   'estateId': '0001',

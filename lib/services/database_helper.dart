@@ -1,3 +1,4 @@
+import 'package:shuttle/data/the_castello_data.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/estate.dart';
@@ -73,7 +74,7 @@ class DatabaseHelper {
   // Loads data from all estate data files into the database.
   Future _insertEstateData(Database db) async {
     // List of estate data sources (add new estate files here) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    final estateDataSources = [theRegentData];
+    final estateDataSources = [theRegentData, theCastelloData];
 
     for (var estateData in estateDataSources) {
       // Insert estate.
