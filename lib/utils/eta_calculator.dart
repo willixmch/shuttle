@@ -105,11 +105,21 @@ class EtaCalculator {
     return nextDepartureDateTime.difference(currentTime).inMinutes;
   }
 
-  // Helper function to format minutes into a string (e.g., "6 分鐘").
+  // Helper function to format minutes into a string (e.g., "6 分鐘" or "2 小時 10 分鐘").
   static String formatEta(int? minutes) {
     if (minutes == null || minutes <= 0) {
       return '沒有服務';
     }
-    return '$minutes 分鐘';
+
+    if (minutes < 60) {
+      return '$minutes 分鐘';
+    }
+
+    final hours = minutes ~/ 60;
+    final remainingMinutes = minutes % 60;
+    if (remainingMinutes == 0) {
+      return '$hours 小時';
+    }
+    return '$hours 小時 $remainingMinutes 分鐘';
   }
 }

@@ -162,6 +162,7 @@ class _HomeState extends State<Home> {
 
                       // Handle null or malformed data gracefully.
                       if (route == null || upcomingEta == null) {
+                        debugPrint('Warning: Invalid route data at index $index');
                         return const Padding(
                           padding: EdgeInsets.only(bottom: 12),
                           child: Card(
@@ -173,16 +174,19 @@ class _HomeState extends State<Home> {
                         );
                       }
 
+                      // Ensure upcomingEta contains valid integers.
+                      final formattedUpcomingEta = upcomingEta
+                          .cast<int>()
+                          .map((e) => EtaCalculator.formatEta(e))
+                          .toList();
+
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: ShuttleCard(
                           route: route.routeName,
                           info: route.info,
                           eta: EtaCalculator.formatEta(eta),
-                          upcomingEta: upcomingEta
-                              .cast<int>()
-                              .map(EtaCalculator.formatEta)
-                              .toList(),
+                          upcomingEta: formattedUpcomingEta,
                         ),
                       );
                     },
