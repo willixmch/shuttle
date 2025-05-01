@@ -2,8 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shuttle/components/shuttle_card.dart';
 import 'package:shuttle/services/database_helper.dart';
-import 'package:shuttle/models/estate.dart';
-import 'package:shuttle/models/routes.dart' as model; // Alias to avoid conflicts
+import 'package:shuttle/models/routes.dart';
 import 'package:shuttle/models/schedule.dart';
 import 'package:shuttle/utils/eta_calculator.dart';
 
@@ -49,7 +48,10 @@ class _HomeState extends State<Home> {
 
     for (var route in routes) {
       final estate = await _dbHelper.getEstateById(route.estateId);
-      final schedules = await _dbHelper.getSchedulesForRoute(route.routeId, dayType);
+      final schedules = await _dbHelper.getSchedulesForRoute(
+        route.routeId,
+        dayType,
+      );
       final etaData = EtaCalculator.calculateEtas(schedules, currentTime);
 
       if (estate != null) {
@@ -77,17 +79,21 @@ class _HomeState extends State<Home> {
       if (mounted && _cachedRouteData.isNotEmpty) {
         final currentTime = DateTime.now();
         final dayType = EtaCalculator.getDayType(currentTime);
-        final updatedRouteData = _cachedRouteData.map((data) {
-          final schedules = data['schedules'] as List<Schedule>;
-          final etaData = EtaCalculator.calculateEtas(schedules, currentTime);
-          return {
-            'route': data['route'],
-            'estate': data['estate'],
-            'schedules': schedules,
-            'eta': etaData['eta'],
-            'upcomingEta': etaData['upcomingEta'],
-          };
-        }).toList();
+        final updatedRouteData =
+            _cachedRouteData.map((data) {
+              final schedules = data['schedules'] as List<Schedule>;
+              final etaData = EtaCalculator.calculateEtas(
+                schedules,
+                currentTime,
+              );
+              return {
+                'route': data['route'],
+                'estate': data['estate'],
+                'schedules': schedules,
+                'eta': etaData['eta'],
+                'upcomingEta': etaData['upcomingEta'],
+              };
+            }).toList();
 
         _etaNotifier.value = updatedRouteData;
       }
@@ -97,41 +103,41 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('The ReGent'),
-      ),
+      appBar: AppBar(title: const Text('The ReGent')),
       body: Container(
         margin: const EdgeInsets.all(16),
-        child: _cachedRouteData.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : ValueListenableBuilder<List<Map<String, dynamic>>>(
-                valueListenable: _etaNotifier,
-                builder: (context, routeData, child) {
-                  if (routeData.isEmpty) {
-                    // Show message if no routes are found.
-                    return const Center(child: Text('No routes available'));
-                  }
+        child:
+            _cachedRouteData.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : ValueListenableBuilder<List<Map<String, dynamic>>>(
+                  valueListenable: _etaNotifier,
+                  builder: (context, routeData, child) {
+                    if (routeData.isEmpty) {
+                      // Show message if no routes are found.
+                      return const Center(child: Text('No routes available'));
+                    }
 
-                  // Build list of ShuttleCard widgets from cached data.
-                  return ListView.builder(
-                    itemCount: routeData.length,
-                    itemBuilder: (context, index) {
-                      final route = routeData[index]['route'] as model.Routes;
-                      final eta = routeData[index]['eta'] as String;
-                      final upcomingEta = routeData[index]['upcomingEta'] as List<String>;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: ShuttleCard(
-                          route: route.routeName,
-                          info: route.info,
-                          eta: eta,
-                          upcomingEta: upcomingEta,
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+                    // Build list of ShuttleCard widgets from cached data.
+                    return ListView.builder(
+                      itemCount: routeData.length,
+                      itemBuilder: (context, index) {
+                        final route = routeData[index]['route'] as Routes;
+                        final eta = routeData[index]['eta'] as String;
+                        final upcomingEta =
+                            routeData[index]['upcomingEta'] as List<String>;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: ShuttleCard(
+                            route: route.routeName,
+                            info: route.info,
+                            eta: eta,
+                            upcomingEta: upcomingEta,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
       ),
     );
   }
