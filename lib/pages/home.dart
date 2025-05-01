@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:shuttle/components/home_bar.dart';
 import 'package:shuttle/components/shuttle_card.dart';
 import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/models/routes.dart';
@@ -106,7 +107,7 @@ class _HomeState extends State<Home> {
               currentEta = upcomingEta.removeAt(0);
               // Calculate a new upcoming ETA if needed.
               if (upcomingEta.length < 2 && schedules.isNotEmpty) {
-                final lastEta = upcomingEta.isNotEmpty ? upcomingEta.last : currentEta!;
+                final lastEta = upcomingEta.isNotEmpty ? upcomingEta.last : currentEta;
                 final nextEta = EtaCalculator.calculateNextEta(
                   schedules,
                   currentTime,
@@ -145,7 +146,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('The ReGent')),
+      appBar: HomeBar(),
       body: Container(
         margin: const EdgeInsets.all(16),
         child: _cachedRouteData.isEmpty

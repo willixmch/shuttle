@@ -57,14 +57,14 @@ class _ShuttleCardState extends State<ShuttleCard> {
                 Text(
                   widget.route,
                   style: typescale.titleMedium!.copyWith(
-                    color: color.onSurfaceVariant,
+                    color: color.onSurfaceVariant
                   ),
                 ),
                 // Info
                 Text(
                   widget.info,
                   style: typescale.bodyMedium!.copyWith(
-                    color: color.onSurfaceVariant,
+                    color: color.onSurfaceVariant
                   ),
                 ),
               ],
