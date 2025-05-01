@@ -75,6 +75,8 @@ class _HomeState extends State<Home> {
 
   // Starts a 60-second timer to decrement ETAs and handle expiry.
   void _startRefreshTimer() {
+    // Cancel any existing timer to prevent duplicates
+    _refreshTimer?.cancel();
     _refreshTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
       if (mounted && _cachedRouteData.isNotEmpty) {
         final currentTime = DateTime.now();
@@ -104,7 +106,7 @@ class _HomeState extends State<Home> {
               currentEta = upcomingEta.removeAt(0);
               // Calculate a new upcoming ETA if needed.
               if (upcomingEta.length < 2 && schedules.isNotEmpty) {
-                final lastEta = upcomingEta.isNotEmpty ? upcomingEta.last : currentEta;
+                final lastEta = upcomingEta.isNotEmpty ? upcomingEta.last : currentEta!;
                 final nextEta = EtaCalculator.calculateNextEta(
                   schedules,
                   currentTime,
@@ -130,7 +132,12 @@ class _HomeState extends State<Home> {
           };
         }).toList();
 
-        _etaNotifier.value = updatedRouteData;
+        if (mounted) {
+          setState(() {
+            _cachedRouteData = updatedRouteData;
+            _etaNotifier.value = updatedRouteData;
+          });
+        }
       }
     });
   }
@@ -162,7 +169,6 @@ class _HomeState extends State<Home> {
 
                       // Handle null or malformed data gracefully.
                       if (route == null || upcomingEta == null) {
-                        debugPrint('Warning: Invalid route data at index $index');
                         return const Padding(
                           padding: EdgeInsets.only(bottom: 12),
                           child: Card(
