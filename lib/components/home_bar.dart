@@ -14,29 +14,33 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
     final typescale = Theme.of(context).textTheme;
 
     return SafeArea(
-      minimum: EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        height: toolbarHeight,
-        child: InkWell(
-          onTap: () {},
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            margin: EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              spacing: 8,
-              children: [
-                Text(
-                  'The Regent',
-                  style: typescale.headlineSmall!.copyWith(
+      minimum: const EdgeInsets.symmetric(horizontal: 16),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: SizedBox(
+          height: toolbarHeight,
+          child: InkWell(
+            onTap: () {},
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 8,
+                children: [
+                  Text(
+                    'The Regent',
+                    style: typescale.headlineSmall!.copyWith(
+                      color: color.onSurfaceVariant,
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    size: 24,
                     color: color.onSurfaceVariant,
                   ),
-                ),
-                Icon(
-                  Icons.arrow_drop_down,
-                  size: 24,
-                  color: color.onSurfaceVariant,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
