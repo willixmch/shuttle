@@ -209,6 +209,7 @@ class _HomeState extends State<Home> {
   void _showEstateFilterSheet() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
         return EstateFilterSheet(
           onEstateSelected: (Estate estate) async {

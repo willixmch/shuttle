@@ -18,6 +18,7 @@ class EstateFilterSheet extends StatefulWidget {
 class _EstateFilterSheetState extends State<EstateFilterSheet> {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode(); // Add FocusNode
   List<Estate> _estates = [];
   List<Estate> _filteredEstates = [];
   bool _isLoading = true;
@@ -27,11 +28,17 @@ class _EstateFilterSheetState extends State<EstateFilterSheet> {
     super.initState();
     _loadEstates();
     _searchController.addListener(_filterEstates);
+
+    // Request focus when the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchFocusNode.requestFocus();
+    });
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose(); // Dispose FocusNode
     super.dispose();
   }
 
@@ -72,6 +79,7 @@ class _EstateFilterSheetState extends State<EstateFilterSheet> {
           // Material 3 SearchBar without shadow
           SearchBar(
             controller: _searchController,
+            focusNode: _searchFocusNode, // Attach FocusNode here
             hintText: '搜尋屋苑...',
             leading: const Icon(Icons.search),
             textStyle: WidgetStatePropertyAll(typescale.bodyLarge),
