@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
-// Stateful widget to display a shuttle route card with ETA information.
-// Toggles expansion to show upcoming ETAs when tapped.
-// Uses ValueListenableBuilder for smooth ETA updates.
-class ShuttleCard extends StatefulWidget {
+// Widget to display a shuttle route card with ETA information.
+// Expands to show upcoming ETAs based on isExpanded, controlled by parent.
+class ShuttleCard extends StatelessWidget {
   final String route;
   final String info;
-  final String eta;
-  final List<String> upcomingEta;
+  final ValueNotifier<String> eta;
+  final ValueNotifier<List<String>> upcomingEta;
+  final bool isExpanded;
+  final VoidCallback onToggle;
 
   const ShuttleCard({
     super.key,
@@ -15,14 +16,9 @@ class ShuttleCard extends StatefulWidget {
     required this.info,
     required this.eta,
     required this.upcomingEta,
+    required this.isExpanded,
+    required this.onToggle,
   });
-
-  @override
-  _ShuttleCardState createState() => _ShuttleCardState();
-}
-
-class _ShuttleCardState extends State<ShuttleCard> {
-  bool _isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -30,11 +26,7 @@ class _ShuttleCardState extends State<ShuttleCard> {
     final typescale = Theme.of(context).textTheme;
 
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _isExpanded = !_isExpanded;
-        });
-      },
+      onTap: onToggle,
       child: Container(
         // Card Styling
         width: double.infinity,
@@ -55,16 +47,16 @@ class _ShuttleCardState extends State<ShuttleCard> {
               children: [
                 // Route
                 Text(
-                  widget.route,
+                  route,
                   style: typescale.titleMedium!.copyWith(
-                    color: color.onSurfaceVariant
+                    color: color.onSurfaceVariant,
                   ),
                 ),
                 // Info
                 Text(
-                  widget.info,
+                  info,
                   style: typescale.bodyMedium!.copyWith(
-                    color: color.onSurfaceVariant
+                    color: color.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -72,10 +64,10 @@ class _ShuttleCardState extends State<ShuttleCard> {
             const SizedBox(height: 8),
             // ETA
             ValueListenableBuilder<String>(
-              valueListenable: ValueNotifier<String>(widget.eta),
-              builder: (context, eta, child) {
+              valueListenable: eta,
+              builder: (context, etaValue, child) {
                 return Text(
-                  eta,
+                  etaValue,
                   style: typescale.titleLarge!.copyWith(
                     color: color.onSurface,
                   ),
@@ -88,8 +80,8 @@ class _ShuttleCardState extends State<ShuttleCard> {
                 // Config
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
-                height: _isExpanded
-                    ? (widget.upcomingEta.length * 32.0 + 40.0)
+                height: isExpanded
+                    ? (upcomingEta.value.isEmpty ? 2 * 32.0 + 40.0 : upcomingEta.value.length * 32.0 + 40.0)
                     : 0.0,
                 // Content
                 child: SingleChildScrollView(
@@ -114,10 +106,60 @@ class _ShuttleCardState extends State<ShuttleCard> {
                       const SizedBox(height: 8),
                       // Upcoming ETA
                       ValueListenableBuilder<List<String>>(
-                        valueListenable: ValueNotifier<List<String>>(widget.upcomingEta),
-                        builder: (context, upcomingEta, child) {
+                        valueListenable: upcomingEta,
+                        builder: (context, upcomingEtaValue, child) {
+                          if (upcomingEtaValue.isEmpty) {
+                            return Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 16,
+                                      height: 34,
+                                      alignment: Alignment.center,
+                                      child: VerticalDivider(
+                                        width: 1,
+                                        color: color.outlineVariant,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 4),
+                                      child: Text(
+                                        '- 分鐘',
+                                        style: typescale.bodyLarge!.copyWith(
+                                          color: color.onSurface,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 16,
+                                      height: 34,
+                                      alignment: Alignment.center,
+                                      child: VerticalDivider(
+                                        width: 1,
+                                        color: color.outlineVariant,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 4),
+                                      child: Text(
+                                        '- 分鐘',
+                                        style: typescale.bodyLarge!.copyWith(
+                                          color: color.onSurface,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          }
                           return Column(
-                            children: upcomingEta.map((eta) => Row(
+                            children: upcomingEtaValue.map((eta) => Row(
                               children: [
                                 Container(
                                   width: 16,

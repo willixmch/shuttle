@@ -25,6 +25,7 @@ class _HomeState extends State<Home> {
   List<Map<String, dynamic>> _cachedRouteData = [];
   late ValueNotifier<List<Map<String, dynamic>>> _etaNotifier;
   Estate? _selectedEstate; // Track selected estate (non-null after init)
+  int? _expandedCardIndex; // Track index of expanded ShuttleCard (null if none)
 
   @override
   void initState() {
@@ -102,6 +103,13 @@ class _HomeState extends State<Home> {
           'schedules': schedules,
           'eta': etaData['eta'], // int? (minutes)
           'upcomingEta': etaData['upcomingEta'], // List<int>
+          'etaNotifier': ValueNotifier<String>(EtaCalculator.formatEta(etaData['eta'])),
+          'upcomingEtaNotifier': ValueNotifier<List<String>>(
+            (etaData['upcomingEta'] as List<dynamic>)
+                .cast<int>()
+                .map((e) => EtaCalculator.formatEta(e))
+                .toList(),
+          ),
         });
       }
     }
@@ -125,14 +133,20 @@ class _HomeState extends State<Home> {
           final schedules = data['schedules'] as List<Schedule>;
           int? currentEta = data['eta'] as int?;
           List<int> upcomingEta = List<int>.from(data['upcomingEta'] as List);
+          final etaNotifier = data['etaNotifier'] as ValueNotifier<String>;
+          final upcomingEtaNotifier = data['upcomingEtaNotifier'] as ValueNotifier<List<String>>;
 
           if (currentEta == null) {
+            etaNotifier.value = EtaCalculator.formatEta(null);
+            upcomingEtaNotifier.value = [];
             return {
               'route': data['route'],
               'estate': data['estate'],
               'schedules': schedules,
               'eta': null,
               'upcomingEta': <int>[],
+              'etaNotifier': etaNotifier,
+              'upcomingEtaNotifier': upcomingEtaNotifier,
             };
           }
 
@@ -164,12 +178,20 @@ class _HomeState extends State<Home> {
             }
           }
 
+          // Update notifiers
+          etaNotifier.value = EtaCalculator.formatEta(currentEta);
+          upcomingEtaNotifier.value = upcomingEta
+              .map((e) => EtaCalculator.formatEta(e))
+              .toList();
+
           return {
             'route': data['route'],
             'estate': data['estate'],
             'schedules': schedules,
             'eta': currentEta,
             'upcomingEta': upcomingEta,
+            'etaNotifier': etaNotifier,
+            'upcomingEtaNotifier': upcomingEtaNotifier,
           };
         }).toList();
 
@@ -193,6 +215,7 @@ class _HomeState extends State<Home> {
             final prefs = await SharedPreferences.getInstance();
             setState(() {
               _selectedEstate = estate; // Update selected estate
+              _expandedCardIndex = null; // Collapse all cards when estate changes
             });
             // Save the selected estate to SharedPreferences
             await prefs.setString('selectedEstateId', estate.estateId);
@@ -208,7 +231,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: HomeBar(
         onTap: _showEstateFilterSheet,
-        estateTitle: _selectedEstate?.estateTitleZh ?? 'Select Estate',
+        estateTitle: _selectedEstate?.estateTitleEn ?? 'Select Estate',
       ),
       body: Container(
         margin: const EdgeInsets.all(16),
@@ -228,11 +251,11 @@ class _HomeState extends State<Home> {
                     itemBuilder: (context, index) {
                       final data = routeData[index];
                       final route = data['route'] as Routes?;
-                      final eta = data['eta'] as int?;
-                      final upcomingEta = data['upcomingEta'] as List<dynamic>?;
+                      final etaNotifier = data['etaNotifier'] as ValueNotifier<String>;
+                      final upcomingEtaNotifier = data['upcomingEtaNotifier'] as ValueNotifier<List<String>>;
 
                       // Handle null or malformed data gracefully.
-                      if (route == null || upcomingEta == null) {
+                      if (route == null) {
                         return const Padding(
                           padding: EdgeInsets.only(bottom: 12),
                           child: Card(
@@ -244,19 +267,23 @@ class _HomeState extends State<Home> {
                         );
                       }
 
-                      // Ensure upcomingEta contains valid integers.
-                      final formattedUpcomingEta = upcomingEta
-                          .cast<int>()
-                          .map((e) => EtaCalculator.formatEta(e))
-                          .toList();
-
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: ShuttleCard(
                           route: route.routeName,
                           info: route.info,
-                          eta: EtaCalculator.formatEta(eta),
-                          upcomingEta: formattedUpcomingEta,
+                          eta: etaNotifier,
+                          upcomingEta: upcomingEtaNotifier,
+                          isExpanded: _expandedCardIndex == index,
+                          onToggle: () {
+                            setState(() {
+                              if (_expandedCardIndex == index) {
+                                _expandedCardIndex = null; // Collapse if already expanded
+                              } else {
+                                _expandedCardIndex = index; // Expand this card
+                              }
+                            });
+                          },
                         ),
                       );
                     },
