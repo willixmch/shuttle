@@ -24,7 +24,7 @@ class _HomeState extends State<Home> {
   Timer? _refreshTimer;
   List<Map<String, dynamic>> _cachedRouteData = [];
   late ValueNotifier<List<Map<String, dynamic>>> _etaNotifier;
-  Estate? _selectedEstate; // Track selected estate
+  Estate? _selectedEstate; // Track selected estate (non-null after init)
 
   @override
   void initState() {
@@ -55,7 +55,7 @@ class _HomeState extends State<Home> {
       selectedEstate = await _dbHelper.getEstateById(estateId);
     }
 
-    // If no persisted estate or invalid, default to the first estate in the list
+    // If no persisted estate or invalid, default to the first estate
     if (selectedEstate == null) {
       final estates = await _dbHelper.getAllEstates();
       if (estates.isNotEmpty) {
@@ -65,6 +65,7 @@ class _HomeState extends State<Home> {
       }
     }
 
+    // Only set state if we have a valid estate
     if (mounted && selectedEstate != null) {
       setState(() {
         _selectedEstate = selectedEstate;
@@ -82,7 +83,7 @@ class _HomeState extends State<Home> {
     final dayType = EtaCalculator.getDayType(currentTime);
 
     for (var route in routes) {
-      // Filter routes by selected estate, if any
+      // Filter routes by selected estate (non-null after init)
       if (_selectedEstate != null && route.estateId != _selectedEstate!.estateId) {
         continue;
       }
@@ -189,13 +190,13 @@ class _HomeState extends State<Home> {
       builder: (context) {
         return EstateFilterSheet(
           onEstateSelected: (Estate estate) async {
+            final prefs = await SharedPreferences.getInstance();
             setState(() {
               _selectedEstate = estate; // Update selected estate
             });
             // Save the selected estate to SharedPreferences
-            final prefs = await SharedPreferences.getInstance();
             await prefs.setString('selectedEstateId', estate.estateId);
-            await _loadInitialData(); // Refresh routes for the selected estate
+            await _loadInitialData(); // Refresh routes
           },
         );
       },
@@ -206,7 +207,8 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: HomeBar(
-        onTap: _showEstateFilterSheet, // Pass callback to HomeBar
+        onTap: _showEstateFilterSheet,
+        estateTitle: _selectedEstate?.estateTitleZh ?? 'Select Estate',
       ),
       body: Container(
         margin: const EdgeInsets.all(16),

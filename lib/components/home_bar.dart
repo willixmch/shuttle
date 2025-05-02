@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class HomeBar extends StatelessWidget implements PreferredSizeWidget {
   final double toolbarHeight;
   final VoidCallback? onTap;
+  final String estateTitle;
 
   const HomeBar({
     super.key,
-    this.toolbarHeight = kToolbarHeight, 
+    this.toolbarHeight = kToolbarHeight,
     this.onTap,
+    required this.estateTitle,
   });
 
   @override
@@ -31,7 +33,7 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
                 spacing: 8,
                 children: [
                   Text(
-                    'The Regent',
+                    estateTitle,
                     style: typescale.headlineSmall!.copyWith(
                       color: color.onSurfaceVariant,
                     ),

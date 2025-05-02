@@ -60,7 +60,10 @@ class _EstateFilterSheetState extends State<EstateFilterSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+
+    final color = Theme.of(context).colorScheme;
+    final typescale = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.all(16.0),
       height: MediaQuery.of(context).size.height * 0.8, // 80% of screen height
@@ -69,9 +72,9 @@ class _EstateFilterSheetState extends State<EstateFilterSheet> {
           // Material 3 SearchBar without shadow
           SearchBar(
             controller: _searchController,
-            hintText: 'Search estates...',
+            hintText: '搜尋屋苑...',
             leading: const Icon(Icons.search),
-            textStyle: WidgetStatePropertyAll(theme.textTheme.bodyMedium),
+            textStyle: WidgetStatePropertyAll(typescale.bodyLarge),
             padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 16.0)),
             elevation: const WidgetStatePropertyAll(0.0), // No shadow
           ),
@@ -81,21 +84,23 @@ class _EstateFilterSheetState extends State<EstateFilterSheet> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _filteredEstates.isEmpty
-                    ? const Center(child: Text('No estates found'))
+                    ? const Center(child: Text('沒有結果'))
                     : ListView.separated(
                         itemCount: _filteredEstates.length,
                         itemBuilder: (context, index) {
                           final estate = _filteredEstates[index];
                           return ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 8.0), // Even narrower
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 8.0), 
                             title: Text(
                               estate.estateTitleEn,
-                              style: theme.textTheme.bodyLarge, // Smaller font
+                              style: typescale.bodyLarge?.copyWith(
+                                color: color.onSurfaceVariant,
+                              ),
                             ),
                             subtitle: Text(
                               estate.estateTitleZh,
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontSize: 16.0, // Smaller for compactness
+                              style: typescale.titleMedium?.copyWith(
+                                color: color.onSurface,
                               ),
                             ),
                             onTap: () {
