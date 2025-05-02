@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 class HomeBar extends StatelessWidget implements PreferredSizeWidget {
   final double toolbarHeight;
+  final VoidCallback? onTap;
 
   const HomeBar({
     super.key,
-    this.toolbarHeight = kToolbarHeight, // Default to 56.0
+    this.toolbarHeight = kToolbarHeight, 
+    this.onTap,
   });
 
   @override
@@ -20,7 +22,7 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
         child: SizedBox(
           height: toolbarHeight,
           child: InkWell(
-            onTap: () {},
+            onTap: onTap,
             borderRadius: BorderRadius.circular(8),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),

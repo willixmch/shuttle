@@ -2,6 +2,8 @@
 const theCastelloData = {
   'estateId': '0002',
   'estateName': 'theCastello',
+  'estateTitleZh': '帝堡城',
+  'estateTitleEn': 'The Castello',
   'routes': [
 
     {

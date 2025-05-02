@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:shuttle/components/estate_filter_sheet.dart';
 import 'package:shuttle/components/home_bar.dart';
 import 'package:shuttle/components/shuttle_card.dart';
+import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/models/routes.dart';
 import 'package:shuttle/models/schedule.dart';
@@ -55,6 +57,7 @@ class _HomeState extends State<Home> {
       );
       final etaData = EtaCalculator.calculateEtas(schedules, currentTime);
 
+      // Step 4 will add filtering logic here
       if (estate != null) {
         routeData.add({
           'route': route,
@@ -143,10 +146,26 @@ class _HomeState extends State<Home> {
     });
   }
 
+  // Shows the bottom sheet for estate filtering.
+  void _showEstateFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return EstateFilterSheet(
+          onEstateSelected: (Estate estate) {
+            // Placeholder: Will handle estate selection in Step 4
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: HomeBar(),
+      appBar: HomeBar(
+        onTap: _showEstateFilterSheet, // Pass callback to HomeBar
+      ),
       body: Container(
         margin: const EdgeInsets.all(16),
         child: _cachedRouteData.isEmpty

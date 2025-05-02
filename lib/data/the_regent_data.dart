@@ -2,6 +2,8 @@
 const theRegentData = {
   'estateId': '0001',
   'estateName': 'theRegent',
+  'estateTitleZh': '天鑽',
+  'estateTitleEn': 'The Regent',
   'routes': [
 
     {

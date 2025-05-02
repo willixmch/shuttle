@@ -6,12 +6,20 @@ class Estate {
   // Unique identifier for the estate (e.g., '0001').
   final String estateId;
 
-  // Name of the estate (e.g., 'theRegent').
+  // Name of the estate (e.g., 'theRegent'), kept for database compatibility.
   final String estateName;
+
+  // Chinese title of the estate (e.g., '天鑽').
+  final String estateTitleZh;
+
+  // English title of the estate (e.g., 'The Regent').
+  final String estateTitleEn;
 
   const Estate({
     required this.estateId,
     required this.estateName,
+    required this.estateTitleZh,
+    required this.estateTitleEn,
   });
 
   // Converts an Estate object to a map for database insertion.
@@ -19,6 +27,8 @@ class Estate {
     return {
       'estateId': estateId,
       'estateName': estateName,
+      'estateTitleZh': estateTitleZh,
+      'estateTitleEn': estateTitleEn,
     };
   }
 
@@ -27,12 +37,14 @@ class Estate {
     return Estate(
       estateId: map['estateId'] as String,
       estateName: map['estateName'] as String,
+      estateTitleZh: map['estateTitleZh'] as String,
+      estateTitleEn: map['estateTitleEn'] as String,
     );
   }
 
   // String representation for debugging.
   @override
   String toString() {
-    return 'Estate{estateId: $estateId, estateName: $estateName}';
+    return 'Estate{estateId: $estateId, estateName: $estateName, estateTitleZh: $estateTitleZh, estateTitleEn: $estateTitleEn}';
   }
 }

@@ -41,7 +41,9 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE estates (
         estateId TEXT PRIMARY KEY,
-        estateName TEXT NOT NULL
+        estateName TEXT NOT NULL,
+        estateTitleZh TEXT NOT NULL,
+        estateTitleEn TEXT NOT NULL
       )
     ''');
 
@@ -73,7 +75,7 @@ class DatabaseHelper {
 
   // Loads data from all estate data files into the database.
   Future _insertEstateData(Database db) async {
-    // List of estate data sources (add new estate files here) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // List of estate data sources (add new estate files here)
     final estateDataSources = [theRegentData, theCastelloData];
 
     for (var estateData in estateDataSources) {
@@ -83,6 +85,8 @@ class DatabaseHelper {
         {
           'estateId': estateData['estateId'],
           'estateName': estateData['estateName'],
+          'estateTitleZh': estateData['estateTitleZh'],
+          'estateTitleEn': estateData['estateTitleEn'],
         },
         conflictAlgorithm: ConflictAlgorithm.ignore,
       );
@@ -137,6 +141,13 @@ class DatabaseHelper {
         }
       }
     }
+  }
+
+  // Fetches all estates from the database.
+  Future<List<Estate>> getAllEstates() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('estates');
+    return List.generate(maps.length, (i) => Estate.fromMap(maps[i]));
   }
 
   // Fetches all routes from the database, including estate information.
