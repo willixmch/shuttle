@@ -231,7 +231,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: HomeBar(
         onTap: _showEstateFilterSheet,
-        estateTitle: _selectedEstate?.estateTitleEn ?? 'Select Estate',
+        estateTitle: _selectedEstate?.estateTitleZh ?? 'Select Estate',
       ),
       body: Container(
         margin: const EdgeInsets.all(16),
@@ -242,7 +242,7 @@ class _HomeState extends State<Home> {
                 builder: (context, routeData, child) {
                   if (routeData.isEmpty) {
                     // Show message if no routes are found.
-                    return const Center(child: Text('No routes available'));
+                    return const Center(child: Text('沒有路線'));
                   }
 
                   // Build list of ShuttleCard widgets from cached data.
