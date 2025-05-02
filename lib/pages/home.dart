@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shuttle/components/estate_filter_sheet.dart';
 import 'package:shuttle/components/home_bar.dart';
 import 'package:shuttle/components/shuttle_card.dart';
@@ -23,14 +24,15 @@ class _HomeState extends State<Home> {
   Timer? _refreshTimer;
   List<Map<String, dynamic>> _cachedRouteData = [];
   late ValueNotifier<List<Map<String, dynamic>>> _etaNotifier;
+  Estate? _selectedEstate; // Track selected estate
 
   @override
   void initState() {
     super.initState();
     // Initialize the ValueNotifier for ETA updates.
     _etaNotifier = ValueNotifier<List<Map<String, dynamic>>>([]);
-    // Load initial data and start the refresh timer.
-    _loadInitialData();
+    // Load persisted estate and initial data, then start the refresh timer.
+    _loadPersistedEstate();
     _startRefreshTimer();
   }
 
@@ -42,7 +44,37 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
-  // Loads initial route and schedule data from the database.
+  // Loads the persisted estate from SharedPreferences or defaults to the first estate.
+  Future<void> _loadPersistedEstate() async {
+    final prefs = await SharedPreferences.getInstance();
+    Estate? selectedEstate;
+
+    // Try to load persisted estate
+    final estateId = prefs.getString('selectedEstateId');
+    if (estateId != null) {
+      selectedEstate = await _dbHelper.getEstateById(estateId);
+    }
+
+    // If no persisted estate or invalid, default to the first estate in the list
+    if (selectedEstate == null) {
+      final estates = await _dbHelper.getAllEstates();
+      if (estates.isNotEmpty) {
+        selectedEstate = estates.first;
+        // Persist the default estate
+        await prefs.setString('selectedEstateId', selectedEstate.estateId);
+      }
+    }
+
+    if (mounted && selectedEstate != null) {
+      setState(() {
+        _selectedEstate = selectedEstate;
+      });
+    }
+
+    await _loadInitialData();
+  }
+
+  // Loads initial route and schedule data from the database, filtered by selected estate.
   Future<void> _loadInitialData() async {
     final routes = await _dbHelper.getAllRoutes();
     final List<Map<String, dynamic>> routeData = [];
@@ -50,6 +82,11 @@ class _HomeState extends State<Home> {
     final dayType = EtaCalculator.getDayType(currentTime);
 
     for (var route in routes) {
+      // Filter routes by selected estate, if any
+      if (_selectedEstate != null && route.estateId != _selectedEstate!.estateId) {
+        continue;
+      }
+
       final estate = await _dbHelper.getEstateById(route.estateId);
       final schedules = await _dbHelper.getSchedulesForRoute(
         route.routeId,
@@ -57,7 +94,6 @@ class _HomeState extends State<Home> {
       );
       final etaData = EtaCalculator.calculateEtas(schedules, currentTime);
 
-      // Step 4 will add filtering logic here
       if (estate != null) {
         routeData.add({
           'route': route,
@@ -152,8 +188,14 @@ class _HomeState extends State<Home> {
       context: context,
       builder: (context) {
         return EstateFilterSheet(
-          onEstateSelected: (Estate estate) {
-            // Placeholder: Will handle estate selection in Step 4
+          onEstateSelected: (Estate estate) async {
+            setState(() {
+              _selectedEstate = estate; // Update selected estate
+            });
+            // Save the selected estate to SharedPreferences
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('selectedEstateId', estate.estateId);
+            await _loadInitialData(); // Refresh routes for the selected estate
           },
         );
       },
