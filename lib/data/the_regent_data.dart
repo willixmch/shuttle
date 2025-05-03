@@ -37,6 +37,13 @@ const theRegentData = {
           '23:00'
         ],
       },
+      'stops': [
+        {
+          'stopId': '0003',
+          'stopNameZh': '天鑽屋苑',
+          'etaOffset': 0,
+        },
+      ],
     },
 
     {
@@ -69,6 +76,13 @@ const theRegentData = {
           '22:35', '22:45', '23:00', '23:15'
         ],
       },
+      'stops': [
+        {
+          'stopId': '0003',
+          'stopNameZh': '天鑽屋苑',
+          'etaOffset': 0,
+        },
+      ],
     },
 
     {
@@ -81,6 +95,13 @@ const theRegentData = {
         ],
         'weekend': [],
       },
+      'stops': [
+        {
+          'stopId': '0003',
+          'stopNameZh': '天鑽屋苑',
+          'etaOffset': 0,
+        },
+      ],
     },
 
     {
@@ -97,6 +118,13 @@ const theRegentData = {
           '20:30', '21:30', '22:30',
         ],
       },
+      'stops': [
+        {
+          'stopId': '0003',
+          'stopNameZh': '天鑽屋苑',
+          'etaOffset': 0,
+        },
+      ],
     },
     
     // To add a new route for theRegent, append here, e.g.:

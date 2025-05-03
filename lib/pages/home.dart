@@ -121,12 +121,14 @@ class _HomeState extends State<Home> {
     for (var route in routes) {
       // Filter routes by selected estate
       if (_selectedEstate != null && route.estateId != _selectedEstate!.estateId) {
+        print('Skipping route ${route.routeId}: estateId mismatch (${route.estateId} != ${_selectedEstate!.estateId})');
         continue;
       }
 
       // Check if the route includes the selected stop (skip if using default stop)
       final stops = await _dbHelper.getStopsForRoute(route.routeId);
       if (_selectedStop != null && !stops.any((stop) => stop.stopId == _selectedStop!.stopId)) {
+        print('Skipping route ${route.routeId}: no matching stop ${_selectedStop!.stopId}');
         continue;
       }
 
@@ -155,6 +157,7 @@ class _HomeState extends State<Home> {
       }
     }
 
+    print('Loaded routes for display: ${routeData.map((e) => e['route'].routeId)}'); // Debugging
     if (mounted) {
       setState(() {
         _cachedRouteData = routeData;

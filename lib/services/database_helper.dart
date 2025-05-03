@@ -1,197 +1,201 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import '../data/the_castello_data.dart';
+import '../data/the_regent_data.dart';
 import '../models/estate.dart';
 import '../models/routes.dart';
 import '../models/schedule.dart';
 import '../models/stop.dart';
-import '../data/the_regent_data.dart';
-import '../data/the_castello_data.dart';
 
-// Manages SQLite database for shuttle bus data (singleton)
 class DatabaseHelper {
-  static final DatabaseHelper instance = DatabaseHelper._init(); // Singleton instance
-  static Database? _database; // Database instance
+  static final DatabaseHelper instance = DatabaseHelper._init();
+  static Database? _database;
 
-  DatabaseHelper._init(); // Private constructor
+  DatabaseHelper._init();
 
-  // Gets database, initializes if null
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDB('shuttle.db');
     return _database!;
   }
 
-  // Sets up database file
-  Future<Database> _initDB(String fileName) async {
+  Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, fileName);
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    final path = join(dbPath, filePath);
+    return await openDatabase(path, version: 2, onCreate: _createDB, onUpgrade: _onUpgrade);
   }
 
-  // Creates tables and inserts initial data
   Future _createDB(Database db, int version) async {
-    // Estates table
     await db.execute('''
-      CREATE TABLE estates (
-        estateId TEXT PRIMARY KEY,
-        estateName TEXT NOT NULL,
-        estateTitleZh TEXT NOT NULL,
-        estateTitleEn TEXT NOT NULL
-      )
+    CREATE TABLE estates (
+      estateId TEXT PRIMARY KEY,
+      estateName TEXT,
+      estateTitleZh TEXT,
+      estateTitleEn TEXT
+    )
     ''');
 
-    // Routes table, linked to estates
     await db.execute('''
-      CREATE TABLE routes (
-        routeId TEXT PRIMARY KEY,
-        routeName TEXT NOT NULL,
-        estateId TEXT NOT NULL,
-        info TEXT NOT NULL,
-        FOREIGN KEY (estateId) REFERENCES estates (estateId)
-      )
+    CREATE TABLE routes (
+      routeId TEXT PRIMARY KEY,
+      estateId TEXT,
+      routeName TEXT,
+      info TEXT,
+      FOREIGN KEY (estateId) REFERENCES estates (estateId)
+    )
     ''');
 
-    // Schedules table, linked to routes
     await db.execute('''
-      CREATE TABLE schedules (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        routeId TEXT NOT NULL,
-        dayType TEXT NOT NULL,
-        departureTime TEXT NOT NULL,
-        FOREIGN KEY (routeId) REFERENCES routes (routeId)
-      )
+    CREATE TABLE schedules (
+      scheduleId INTEGER PRIMARY KEY AUTOINCREMENT,
+      routeId TEXT,
+      dayType TEXT,
+      departureTime TEXT,
+      FOREIGN KEY (routeId) REFERENCES routes (routeId)
+    )
     ''');
 
-    // Stops table, linked to routes
     await db.execute('''
-      CREATE TABLE stops (
-        stopId TEXT PRIMARY KEY,
-        stopNameZh TEXT NOT NULL,
-        routeId TEXT NOT NULL,
-        etaOffset INTEGER NOT NULL,
-        FOREIGN KEY (routeId) REFERENCES routes (routeId)
-      )
+    CREATE TABLE stops (
+      stopId TEXT,
+      routeId TEXT,
+      stopNameZh TEXT,
+      etaOffset INTEGER,
+      PRIMARY KEY (stopId, routeId),
+      FOREIGN KEY (routeId) REFERENCES routes (routeId)
+    )
     ''');
 
-    await _insertEstateData(db); // Insert initial data
+    await _insertEstateData(db, theCastelloData);
+    await _insertEstateData(db, theRegentData);
   }
 
-  // Inserts data from estate files
-  Future _insertEstateData(Database db) async {
-    final estateDataSources = [theRegentData, theCastelloData]; // Estate data sources
-    for (var estateData in estateDataSources) {
-      // Insert estate
-      await db.insert('estates', {
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('DROP TABLE stops');
+      await db.execute('''
+      CREATE TABLE stops (
+        stopId TEXT,
+        routeId TEXT,
+        stopNameZh TEXT,
+        etaOffset INTEGER,
+        PRIMARY KEY (stopId, routeId),
+        FOREIGN KEY (routeId) REFERENCES routes (routeId)
+      )
+      ''');
+      await _insertEstateData(db, theCastelloData);
+      await _insertEstateData(db, theRegentData);
+    }
+  }
+
+  Future<void> _insertEstateData(Database db, Map<String, dynamic> estateData) async {
+    await db.insert(
+      'estates',
+      {
         'estateId': estateData['estateId'],
         'estateName': estateData['estateName'],
         'estateTitleZh': estateData['estateTitleZh'],
         'estateTitleEn': estateData['estateTitleEn'],
-      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
 
-      // Insert routes, if any
-      final routes = estateData['routes'] as List<dynamic>?;
-      if (routes != null) {
-        for (var route in routes) {
-          await db.insert('routes', {
-            'routeId': route['routeId'],
-            'routeName': route['routeName'],
-            'estateId': estateData['estateId'],
-            'info': route['info'],
-          }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    for (var route in estateData['routes']) {
+      await db.insert(
+        'routes',
+        {
+          'routeId': route['routeId'],
+          'estateId': estateData['estateId'],
+          'routeName': route['routeName'],
+          'info': route['info'],
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
 
-          // Insert workday schedules
-          final workdaySchedules = route['schedules']['workday'] as List<dynamic>?;
-          if (workdaySchedules != null) {
-            for (var time in workdaySchedules) {
-              await db.insert('schedules', {
+      if (route['schedules'] != null) {
+        for (var dayType in ['workday', 'weekend']) {
+          for (var time in route['schedules'][dayType] ?? []) {
+            await db.insert(
+              'schedules',
+              {
                 'routeId': route['routeId'],
-                'dayType': 'workday',
+                'dayType': dayType,
                 'departureTime': time,
-              }, conflictAlgorithm: ConflictAlgorithm.ignore);
-            }
+              },
+              conflictAlgorithm: ConflictAlgorithm.ignore,
+            );
           }
+        }
+      }
 
-          // Insert weekend schedules
-          final weekendSchedules = route['schedules']['weekend'] as List<dynamic>?;
-          if (weekendSchedules != null) {
-            for (var time in weekendSchedules) {
-              await db.insert('schedules', {
-                'routeId': route['routeId'],
-                'dayType': 'weekend',
-                'departureTime': time,
-              }, conflictAlgorithm: ConflictAlgorithm.ignore);
-            }
-          }
-
-          // Insert stops, if any
-          final stops = route['stops'] as List<dynamic>?;
-          if (stops != null) {
-            for (var stop in stops) {
-              await db.insert('stops', {
-                'stopId': stop['stopId'],
-                'stopNameZh': stop['stopNameZh'],
-                'routeId': route['routeId'],
-                'etaOffset': stop['etaOffset'],
-              }, conflictAlgorithm: ConflictAlgorithm.ignore);
-            }
-          }
+      if (route['stops'] != null) {
+        for (var stop in route['stops']) {
+          await db.insert(
+            'stops',
+            {
+              'stopId': stop['stopId'],
+              'routeId': route['routeId'],
+              'stopNameZh': stop['stopNameZh'],
+              'etaOffset': stop['etaOffset'],
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
         }
       }
     }
   }
 
-  // Gets all estates
   Future<List<Estate>> getAllEstates() async {
     final db = await database;
-    final maps = await db.query('estates');
-    return List.generate(maps.length, (i) => Estate.fromMap(maps[i]));
+    final result = await db.query('estates');
+    return result.map((e) => Estate.fromMap(e)).toList();
   }
 
-  // Gets all routes
-  Future<List<Routes>> getAllRoutes() async {
-    final db = await database;
-    final maps = await db.query('routes');
-    return List.generate(maps.length, (i) => Routes.fromMap(maps[i]));
-  }
-
-  // Gets schedules for a route and day type
-  Future<List<Schedule>> getSchedulesForRoute(String routeId, String dayType) async {
-    final db = await database;
-    final maps = await db.query('schedules',
-        where: 'routeId = ? AND dayType = ?', whereArgs: [routeId, dayType]);
-    return List.generate(maps.length, (i) => Schedule.fromMap(maps[i]));
-  }
-
-  // Gets estate by ID
   Future<Estate?> getEstateById(String estateId) async {
     final db = await database;
-    final maps = await db.query('estates',
-        where: 'estateId = ?', whereArgs: [estateId]);
-    return maps.isNotEmpty ? Estate.fromMap(maps.first) : null;
+    final result = await db.query(
+      'estates',
+      where: 'estateId = ?',
+      whereArgs: [estateId],
+    );
+    return result.isNotEmpty ? Estate.fromMap(result.first) : null;
   }
 
-  // Gets stops for a route
+  Future<List<Routes>> getAllRoutes() async {
+    final db = await database;
+    final result = await db.query('routes');
+    return result.map((e) => Routes.fromMap(e)).toList();
+  }
+
+  Future<List<Schedule>> getSchedulesForRoute(String routeId, String dayType) async {
+    final db = await database;
+    final result = await db.query(
+      'schedules',
+      where: 'routeId = ? AND dayType = ?',
+      whereArgs: [routeId, dayType],
+    );
+    return result.map((e) => Schedule.fromMap(e)).toList();
+  }
+
   Future<List<Stop>> getStopsForRoute(String routeId) async {
     final db = await database;
-    final maps = await db.query('stops',
-        where: 'routeId = ?', whereArgs: [routeId]);
-    return List.generate(maps.length, (i) => Stop.fromMap(maps[i]));
+    final result = await db.query(
+      'stops',
+      where: 'routeId = ?',
+      whereArgs: [routeId],
+    );
+    return result.map((e) => Stop.fromMap(e)).toList();
   }
 
-  // Gets all stops for an estate
   Future<List<Stop>> getStopsForEstate(String estateId) async {
     final db = await database;
-    final maps = await db.rawQuery('''
-      SELECT stops.* FROM stops
-      JOIN routes ON stops.routeId = routes.routeId
-      WHERE routes.estateId = ?
+    final result = await db.rawQuery('''
+      SELECT DISTINCT s.stopId, MIN(s.routeId) AS routeId, s.stopNameZh, s.etaOffset
+      FROM stops s
+      JOIN routes r ON s.routeId = r.routeId
+      WHERE r.estateId = ?
+      GROUP BY s.stopId, s.stopNameZh, s.etaOffset
     ''', [estateId]);
-    return List.generate(maps.length, (i) => Stop.fromMap(maps[i]));
-  }
-
-  // Closes database
-  Future close() async {
-    final db = await database;
-    db.close();
+    return result.map((e) => Stop.fromMap(e)).toList();
   }
 }
