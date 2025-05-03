@@ -170,6 +170,25 @@ class DatabaseHelper {
     return maps.isNotEmpty ? Estate.fromMap(maps.first) : null;
   }
 
+  // Gets stops for a route
+  Future<List<Stop>> getStopsForRoute(String routeId) async {
+    final db = await database;
+    final maps = await db.query('stops',
+        where: 'routeId = ?', whereArgs: [routeId]);
+    return List.generate(maps.length, (i) => Stop.fromMap(maps[i]));
+  }
+
+  // Gets all stops for an estate
+  Future<List<Stop>> getStopsForEstate(String estateId) async {
+    final db = await database;
+    final maps = await db.rawQuery('''
+      SELECT stops.* FROM stops
+      JOIN routes ON stops.routeId = routes.routeId
+      WHERE routes.estateId = ?
+    ''', [estateId]);
+    return List.generate(maps.length, (i) => Stop.fromMap(maps[i]));
+  }
+
   // Closes database
   Future close() async {
     final db = await database;
