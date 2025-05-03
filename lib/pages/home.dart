@@ -231,7 +231,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: HomeBar(
-        onTap: _showEstateFilterSheet,
+        estateOnTap: _showEstateFilterSheet,
         estateTitle: _selectedEstate?.estateTitleZh ?? 'Select Estate',
       ),
       body: Container(

@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:shuttle/models/estate.dart';
-import 'package:shuttle/services/database_helper.dart';
+import 'package:flutter/material.dart'; // Flutter UI components
+import 'package:shuttle/models/estate.dart'; // Estate model
+import 'package:shuttle/services/database_helper.dart'; // Database helper
 
-// A bottom sheet widget for filtering estates with a search bar and estate list.
+// Bottom sheet for filtering estates with search and list
 class EstateFilterSheet extends StatefulWidget {
-  final ValueChanged<Estate> onEstateSelected;
+  final ValueChanged<Estate> onEstateSelected; // Callback for selected estate
 
   const EstateFilterSheet({
     super.key,
@@ -16,20 +16,19 @@ class EstateFilterSheet extends StatefulWidget {
 }
 
 class _EstateFilterSheetState extends State<EstateFilterSheet> {
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
-  final TextEditingController _searchController = TextEditingController();
-  final FocusNode _searchFocusNode = FocusNode(); // Add FocusNode
-  List<Estate> _estates = [];
-  List<Estate> _filteredEstates = [];
-  bool _isLoading = true;
+  final DatabaseHelper _dbHelper = DatabaseHelper.instance; // Database helper instance
+  final TextEditingController _searchController = TextEditingController(); // Search bar input controller
+  final FocusNode _searchFocusNode = FocusNode(); // Auto search bar focus
+  List<Estate> _estates = []; // Full estate list
+  List<Estate> _filteredEstates = []; // Filtered estate list
+  bool _isLoading = true; // Loading state
 
   @override
   void initState() {
     super.initState();
-    _loadEstates();
-    _searchController.addListener(_filterEstates);
-
-    // Request focus when the widget is built
+    _loadEstates(); // Fetch estates
+    _searchController.addListener(_filterEstates); // Listen for search input
+    // Auto-focus search bar after widget builds
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _searchFocusNode.requestFocus();
     });
@@ -37,12 +36,12 @@ class _EstateFilterSheetState extends State<EstateFilterSheet> {
 
   @override
   void dispose() {
-    _searchController.dispose();
-    _searchFocusNode.dispose(); // Dispose FocusNode
+    _searchController.dispose(); // Clean up search controller
+    _searchFocusNode.dispose(); // Clean up focus node
     super.dispose();
   }
 
-  // Loads all estates from the database.
+  // Fetch all estates from database
   Future<void> _loadEstates() async {
     final estates = await _dbHelper.getAllEstates();
     if (mounted) {
@@ -54,7 +53,7 @@ class _EstateFilterSheetState extends State<EstateFilterSheet> {
     }
   }
 
-  // Filters estates based on the search query (searches both English and Chinese titles).
+  // Filter estates by search query (English/Chinese titles)
   void _filterEstates() {
     final query = _searchController.text.toLowerCase();
     setState(() {
@@ -67,57 +66,52 @@ class _EstateFilterSheetState extends State<EstateFilterSheet> {
 
   @override
   Widget build(BuildContext context) {
-
-    final color = Theme.of(context).colorScheme;
+    final color = Theme.of(context).colorScheme; 
     final typescale = Theme.of(context).textTheme;
 
     return Container(
-      padding: const EdgeInsets.all(16.0),
-      height: MediaQuery.of(context).size.height * 0.8, // 80% of screen height
+      padding: const EdgeInsets.all(16.0), // Padding for content
+      height: MediaQuery.of(context).size.height * 0.8, // 80% screen height
       child: Column(
         children: [
-          // Material 3 SearchBar without shadow
+          // Search bar for filtering estates
           SearchBar(
-            controller: _searchController,
-            focusNode: _searchFocusNode, // Attach FocusNode here
-            hintText: '搜尋屋苑...',
-            leading: const Icon(Icons.search),
-            textStyle: WidgetStatePropertyAll(typescale.bodyLarge),
-            padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 16.0)),
+            controller: _searchController, // Connects to input
+            focusNode: _searchFocusNode, // Manages focus
+            hintText: '搜尋屋苑...', // Placeholder text
+            leading: const Icon(Icons.search), // Search icon
+            textStyle: WidgetStatePropertyAll(typescale.bodyLarge), // Text style
+            padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 16.0)), // Inner padding
             elevation: const WidgetStatePropertyAll(0.0), // No shadow
           ),
-          const SizedBox(height: 16.0),
-          // Estate list or loading indicator
+          const SizedBox(height: 16.0), // Space below search bar
+          // List of estates or loading/no results
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator()) // Show loading
                 : _filteredEstates.isEmpty
-                    ? const Center(child: Text('沒有結果'))
+                    ? const Center(child: Text('沒有結果')) // Show no results
                     : ListView.separated(
-                        itemCount: _filteredEstates.length,
+                        itemCount: _filteredEstates.length, // Number of estates
                         itemBuilder: (context, index) {
                           final estate = _filteredEstates[index];
                           return ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 8.0), 
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 8.0), // Item padding
                             title: Text(
-                              estate.estateTitleEn,
-                              style: typescale.bodyLarge?.copyWith(
-                                color: color.onSurfaceVariant,
-                              ),
+                              estate.estateTitleEn, // English title
+                              style: typescale.bodyLarge?.copyWith(color: color.onSurfaceVariant),
                             ),
                             subtitle: Text(
-                              estate.estateTitleZh,
-                              style: typescale.titleMedium?.copyWith(
-                                color: color.onSurface,
-                              ),
+                              estate.estateTitleZh, // Chinese title
+                              style: typescale.titleMedium?.copyWith(color: color.onSurface),
                             ),
                             onTap: () {
-                              widget.onEstateSelected(estate);
-                              Navigator.pop(context); // Close bottom sheet
+                              widget.onEstateSelected(estate); // Call callback
+                              Navigator.pop(context); // Close sheet
                             },
                           );
                         },
-                        separatorBuilder: (context, index) => const Divider(height: 1,), // Add divider between items
+                        separatorBuilder: (context, index) => const Divider(height: 1), // Divider between items
                       ),
           ),
         ],
