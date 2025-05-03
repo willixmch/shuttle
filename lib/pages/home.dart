@@ -94,7 +94,7 @@ class _HomeState extends State<Home> {
         route.routeId,
         dayType,
       );
-      final etaData = EtaCalculator.calculateEtas(schedules, currentTime);
+      final etaData = EtaCalculator.calculateEtas(schedules, currentTime, null);
 
       if (estate != null) {
         routeData.add({
@@ -166,6 +166,7 @@ class _HomeState extends State<Home> {
                   schedules,
                   currentTime,
                   lastEta,
+                  null,
                 );
                 if (nextEta != null) {
                   upcomingEta.add(nextEta);

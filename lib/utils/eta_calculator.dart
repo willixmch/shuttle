@@ -1,6 +1,7 @@
 // lib/utils/eta_calculator.dart
 import 'package:intl/intl.dart';
 import '../models/schedule.dart';
+import '../models/stop.dart';
 
 class EtaCalculator {
   // Determines the day type (workday or weekend) based on the given date.
@@ -8,15 +9,19 @@ class EtaCalculator {
     return date.weekday >= 1 && date.weekday <= 5 ? 'workday' : 'weekend';
   }
 
-  // Calculates the next ETA and upcoming ETAs for a route based on the current time.
+  // Calculates the next ETA and upcoming ETAs for a route based on the current time and stop offset.
   // Returns a map with 'eta' (int, minutes) and 'upcomingEta' (List<int>, minutes).
   static Map<String, dynamic> calculateEtas(
     List<Schedule> schedules,
     DateTime currentTime,
+    Stop? stop,
   ) {
     if (schedules.isEmpty) {
       return {'eta': null, 'upcomingEta': []};
     }
+
+    // Use 0 as default etaOffset if stop is null
+    final etaOffset = stop?.etaOffset ?? 0;
 
     // Parse schedule times and calculate time differences.
     final timeFormat = DateFormat('HH:mm');
@@ -27,7 +32,7 @@ class EtaCalculator {
         hours: departureTime.hour,
         minutes: departureTime.minute,
       ));
-      final difference = departureDateTime.difference(currentTime).inMinutes;
+      final difference = departureDateTime.difference(currentTime).inMinutes + etaOffset;
       return {'time': schedule.departureTime, 'difference': difference};
     }).toList();
 
@@ -64,9 +69,16 @@ class EtaCalculator {
     List<Schedule> schedules,
     DateTime currentTime,
     int lastEtaMinutes,
+    Stop? stop,
   ) {
     final timeFormat = DateFormat('HH:mm');
     final today = DateTime(currentTime.year, currentTime.month, currentTime.day);
+
+    // Use 0 as default etaOffset if stop is null
+    final etaOffset = stop?.etaOffset ?? 0;
+
+    // Adjust last ETA to account for stop offset
+    final adjustedLastEta = lastEtaMinutes - etaOffset;
 
     // Find the schedule time that corresponds to the last ETA.
     final lastDepartureTime = schedules.firstWhere(
@@ -77,7 +89,7 @@ class EtaCalculator {
           minutes: departureTime.minute,
         ));
         final difference = departureDateTime.difference(currentTime).inMinutes;
-        return difference == lastEtaMinutes;
+        return difference == adjustedLastEta;
       },
       orElse: () => Schedule(id: 0, routeId: '', dayType: '', departureTime: ''),
     );
@@ -102,7 +114,7 @@ class EtaCalculator {
       hours: timeFormat.parse(nextDepartureTime).hour,
       minutes: timeFormat.parse(nextDepartureTime).minute,
     ));
-    return nextDepartureDateTime.difference(currentTime).inMinutes;
+    return nextDepartureDateTime.difference(currentTime).inMinutes + etaOffset;
   }
 
   // Helper function to format minutes into a string (e.g., "現時開出", "6 分鐘", or "2 小時 10 分鐘").
