@@ -5,6 +5,7 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback? estateOnTap;
   final VoidCallback? locationOnTap;
   final String estateTitle;
+  final String stopTitle;
 
   const HomeBar({
     super.key,
@@ -12,6 +13,7 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
     this.estateOnTap,
     this.locationOnTap,
     required this.estateTitle,
+    required this.stopTitle,
   });
 
   @override
@@ -66,7 +68,7 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
                       color: color.primary,
                     ),
                     Text(
-                      '沙田市中心(第一期)',
+                      stopTitle,
                       style: typescale.labelLarge!.copyWith(
                         color: color.onSurface,
                       ),
@@ -79,8 +81,7 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
                   ],
                 ),
               ),
-              
-            )
+            ),
           ],
         ),
       ),

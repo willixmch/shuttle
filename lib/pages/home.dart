@@ -279,7 +279,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  // Handles stop selection (to be used in Step 6)
+  // Handles stop selection
   void _onStopSelected(Stop stop) async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -296,6 +296,31 @@ class _HomeState extends State<Home> {
       appBar: HomeBar(
         estateOnTap: _showEstateFilterSheet,
         estateTitle: _selectedEstate?.estateTitleZh ?? 'Select Estate',
+        locationOnTap: () async {
+          final stops = await _dbHelper.getStopsForEstate(_selectedEstate?.estateId ?? '');
+          if (stops.isNotEmpty) {
+            showModalBottomSheet(
+              context: context,
+              builder: (context) {
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: stops.length,
+                  itemBuilder: (context, index) {
+                    final stop = stops[index];
+                    return ListTile(
+                      title: Text(stop.stopNameZh),
+                      onTap: () {
+                        _onStopSelected(stop);
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
+                );
+              },
+            );
+          }
+        },
+        stopTitle: _selectedStop?.stopNameZh ?? 'Select Stop',
       ),
       body: Container(
         margin: const EdgeInsets.all(16),
@@ -304,6 +329,11 @@ class _HomeState extends State<Home> {
             : ValueListenableBuilder<List<Map<String, dynamic>>>(
                 valueListenable: _etaNotifier,
                 builder: (context, routeData, child) {
+                  // Show a message if no routes are available
+                  if (routeData.isEmpty) {
+                    return const Center(child: Text('沒有可用的路線'));
+                  }
+
                   // Build list of ShuttleCard widgets from cached data.
                   return ListView.builder(
                     itemCount: routeData.length,
