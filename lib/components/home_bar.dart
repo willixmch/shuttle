@@ -56,30 +56,27 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
               height: toolbarHeight,
               child: GestureDetector(
                 onTap: locationOnTap,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 4,
-                    children: [
-                      Icon(
-                        Icons.location_on,
-                        size: 20,
-                        color: color.primary,
-                      ),
-                      Text(
-                        '沙田市中心(第一期)',
-                        style: typescale.labelLarge!.copyWith(
-                          color: color.onSurface,
-                        ),
-                      ),
-                      Icon(
-                        Icons.arrow_drop_down_rounded,
-                        size: 20,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 4,
+                  children: [
+                    Icon(
+                      Icons.location_on,
+                      size: 20,
+                      color: color.primary,
+                    ),
+                    Text(
+                      '沙田市中心(第一期)',
+                      style: typescale.labelLarge!.copyWith(
                         color: color.onSurface,
                       ),
-                    ],
-                  ),
+                    ),
+                    Icon(
+                      Icons.arrow_drop_down_rounded,
+                      size: 20,
+                      color: color.onSurface,
+                    ),
+                  ],
                 ),
               ),
               

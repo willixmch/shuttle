@@ -3,7 +3,7 @@ import 'package:path/path.dart';
 import '../models/estate.dart';
 import '../models/routes.dart';
 import '../models/schedule.dart';
-
+import '../models/stop.dart';
 import '../data/the_regent_data.dart';
 import '../data/the_castello_data.dart';
 
@@ -58,6 +58,17 @@ class DatabaseHelper {
         routeId TEXT NOT NULL,
         dayType TEXT NOT NULL,
         departureTime TEXT NOT NULL,
+        FOREIGN KEY (routeId) REFERENCES routes (routeId)
+      )
+    ''');
+
+    // Stops table, linked to routes
+    await db.execute('''
+      CREATE TABLE stops (
+        stopId TEXT PRIMARY KEY,
+        stopNameZh TEXT NOT NULL,
+        routeId TEXT NOT NULL,
+        etaOffset INTEGER NOT NULL,
         FOREIGN KEY (routeId) REFERENCES routes (routeId)
       )
     ''');
