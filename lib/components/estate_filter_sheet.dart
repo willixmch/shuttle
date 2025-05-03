@@ -70,7 +70,7 @@ class _EstateFilterSheetState extends State<EstateFilterSheet> {
     final typescale = Theme.of(context).textTheme;
 
     return Container(
-      padding: const EdgeInsets.all(16.0), // Padding for content
+      padding: const EdgeInsets.symmetric(horizontal: 16), // Padding for content
       height: MediaQuery.of(context).size.height * 0.8, // 80% screen height
       child: Column(
         children: [

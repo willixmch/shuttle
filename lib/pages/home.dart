@@ -4,10 +4,10 @@ import 'package:shuttle/components/estate_filter_sheet.dart';
 import 'package:shuttle/components/home_bar.dart';
 import 'package:shuttle/components/shuttle_card.dart';
 import 'package:shuttle/models/estate.dart';
-import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/models/routes.dart';
 import 'package:shuttle/models/schedule.dart';
 import 'package:shuttle/models/stop.dart';
+import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/utils/eta_calculator.dart';
 import 'package:shuttle/utils/persistence_data.dart';
 import 'package:shuttle/utils/eta_refresh_timer.dart';
@@ -22,8 +22,8 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
-  final PersistenceData _persistenceService = PersistenceData();
-  late final EtaRefreshTimer _etaRefreshService;
+  final PersistenceData _persistenceData = PersistenceData();
+  late final EtaRefreshTimer _etaRefreshTimer;
   List<Map<String, dynamic>> _cachedRouteData = [];
   late ValueNotifier<List<Map<String, dynamic>>> _etaNotifier;
   Estate? _selectedEstate;
@@ -34,7 +34,7 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     _etaNotifier = ValueNotifier<List<Map<String, dynamic>>>([]);
-    _etaRefreshService = EtaRefreshTimer(
+    _etaRefreshTimer = EtaRefreshTimer(
       onUpdate: (updatedRouteData) {
         if (mounted) {
           setState(() {
@@ -49,7 +49,7 @@ class _HomeState extends State<Home> {
 
   @override
   void dispose() {
-    _etaRefreshService.dispose();
+    _etaRefreshTimer.dispose();
     _etaNotifier.dispose();
     super.dispose();
   }
@@ -57,7 +57,7 @@ class _HomeState extends State<Home> {
   // Loads initial data, including persisted estate/stop and route data.
   Future<void> _loadInitialData() async {
     // Load persisted estate and stop
-    final persistedData = await _persistenceService.loadPersistedData();
+    final persistedData = await _persistenceData.loadPersistedData();
     if (mounted && persistedData['estate'] != null) {
       setState(() {
         _selectedEstate = persistedData['estate'];
@@ -81,13 +81,11 @@ class _HomeState extends State<Home> {
 
     for (var route in routes) {
       if (_selectedEstate != null && route.estateId != _selectedEstate!.estateId) {
-        print('Skipping route ${route.routeId}: estateId mismatch');
         continue;
       }
 
       final stops = await _dbHelper.getStopsForRoute(route.routeId);
       if (_selectedStop != null && !stops.any((stop) => stop.stopId == _selectedStop!.stopId)) {
-        print('Skipping route ${route.routeId}: no matching stop');
         continue;
       }
 
@@ -116,31 +114,32 @@ class _HomeState extends State<Home> {
       }
     }
 
-    print('Loaded routes: ${routeData.map((e) => e['route'].routeId)}');
     if (mounted) {
       setState(() {
         _cachedRouteData = routeData;
         _etaNotifier.value = routeData;
       });
-      _etaRefreshService.startRefreshTimer(routeData, effectiveStop);
+      _etaRefreshTimer.startRefreshTimer(routeData, effectiveStop);
     }
   }
 
   // Shows the bottom sheet for estate filtering.
   void _showEstateFilterSheet() {
     showModalBottomSheet(
+      showDragHandle: true,
+      enableDrag: true,
       context: context,
       isScrollControlled: true,
       builder: (context) {
         return EstateFilterSheet(
           onEstateSelected: (Estate estate) async {
-            await _persistenceService.saveEstate(estate);
+            await _persistenceData.saveEstate(estate);
             setState(() {
               _selectedEstate = estate;
               _selectedStop = null;
               _expandedCardIndex = null;
             });
-            await _persistenceService.clearStop();
+            await _persistenceData.clearStop();
             await _loadInitialData();
           },
         );
@@ -150,7 +149,7 @@ class _HomeState extends State<Home> {
 
   // Handles stop selection
   void _onStopSelected(Stop stop) async {
-    await _persistenceService.saveStop(stop);
+    await _persistenceData.saveStop(stop);
     setState(() {
       _selectedStop = stop;
       _expandedCardIndex = null;
