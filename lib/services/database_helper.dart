@@ -122,6 +122,19 @@ class DatabaseHelper {
               }, conflictAlgorithm: ConflictAlgorithm.ignore);
             }
           }
+
+          // Insert stops, if any
+          final stops = route['stops'] as List<dynamic>?;
+          if (stops != null) {
+            for (var stop in stops) {
+              await db.insert('stops', {
+                'stopId': stop['stopId'],
+                'stopNameZh': stop['stopNameZh'],
+                'routeId': route['routeId'],
+                'etaOffset': stop['etaOffset'],
+              }, conflictAlgorithm: ConflictAlgorithm.ignore);
+            }
+          }
         }
       }
     }

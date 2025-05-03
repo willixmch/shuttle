@@ -1,11 +1,9 @@
-
 const theCastelloData = {
   'estateId': '0002',
   'estateName': 'theCastello',
   'estateTitleZh': '帝堡城',
   'estateTitleEn': 'The Castello',
   'routes': [
-
     {
       'routeId': '0005',
       'routeName': 'NR829',
@@ -33,7 +31,18 @@ const theCastelloData = {
           '22:15', '22:30',
         ],
       },
+      'stops': [
+        {
+          'stopId': '0001',
+          'stopNameZh': '帝堡城',
+          'etaOffset': 0,
+        },
+        {
+          'stopId': '0002',
+          'stopNameZh': '沙田新城市廣場(第一期)',
+          'etaOffset': 13,
+        },
+      ],
     },
-
   ],
 };
