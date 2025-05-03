@@ -6,7 +6,7 @@ const theCastelloData = {
   'routes': [
     {
       'routeId': '0005',
-      'routeName': 'NR829',
+      'routeName': '沙田新城市廣場循環線',
       'info': '',
       'schedules': {
         'workday': [
@@ -34,7 +34,7 @@ const theCastelloData = {
       'stops': [
         {
           'stopId': '0001',
-          'stopNameZh': '帝堡城',
+          'stopNameZh': '帝堡城通道',
           'etaOffset': 0,
         },
         {
