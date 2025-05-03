@@ -1,31 +1,36 @@
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
-import '../data/the_castello_data.dart';
-import '../data/the_regent_data.dart';
-import '../models/estate.dart';
-import '../models/routes.dart';
-import '../models/schedule.dart';
-import '../models/stop.dart';
+import 'package:sqflite/sqflite.dart'; // SQLite database plugin
+import 'package:path/path.dart'; // Path utilities
+import '../data/the_castello_data.dart'; // Castello estate data
+import '../data/the_regent_data.dart'; // Regent estate data
+import '../models/estate.dart'; // Estate model
+import '../models/routes.dart'; // Route model
+import '../models/schedule.dart'; // Schedule model
+import '../models/stop.dart'; // Stop model
 
+// Manages SQLite database for shuttle bus data (singleton)
 class DatabaseHelper {
-  static final DatabaseHelper instance = DatabaseHelper._init();
-  static Database? _database;
+  static final DatabaseHelper instance = DatabaseHelper._init(); // Singleton instance
+  static Database? _database; // Database instance
 
-  DatabaseHelper._init();
+  DatabaseHelper._init(); // Private constructor
 
+  // Gets database, initializes if null
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDB('shuttle.db');
     return _database!;
   }
 
+  // Sets up database file with version 2
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
-    return await openDatabase(path, version: 2, onCreate: _createDB, onUpgrade: _onUpgrade);
+    return await openDatabase(path, version: 1, onCreate: _createDB, onUpgrade: _onUpgrade);
   }
 
+  // Creates tables for estates, routes, schedules, and stops
   Future _createDB(Database db, int version) async {
+    // Estates table
     await db.execute('''
     CREATE TABLE estates (
       estateId TEXT PRIMARY KEY,
@@ -35,6 +40,7 @@ class DatabaseHelper {
     )
     ''');
 
+    // Routes table, linked to estates
     await db.execute('''
     CREATE TABLE routes (
       routeId TEXT PRIMARY KEY,
@@ -45,6 +51,7 @@ class DatabaseHelper {
     )
     ''');
 
+    // Schedules table, linked to routes
     await db.execute('''
     CREATE TABLE schedules (
       scheduleId INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -55,6 +62,7 @@ class DatabaseHelper {
     )
     ''');
 
+    // Stops table, linked to routes with ETA offset
     await db.execute('''
     CREATE TABLE stops (
       stopId TEXT,
@@ -66,13 +74,15 @@ class DatabaseHelper {
     )
     ''');
 
+    // Insert initial data
     await _insertEstateData(db, theCastelloData);
     await _insertEstateData(db, theRegentData);
   }
 
+  // Upgrades database schema for version 2 (adds stops table)
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      await db.execute('DROP TABLE stops');
+      await db.execute('DROP TABLE stops'); // Remove old stops table if exists
       await db.execute('''
       CREATE TABLE stops (
         stopId TEXT,
@@ -83,12 +93,15 @@ class DatabaseHelper {
         FOREIGN KEY (routeId) REFERENCES routes (routeId)
       )
       ''');
+      // Re-insert data for stops
       await _insertEstateData(db, theCastelloData);
       await _insertEstateData(db, theRegentData);
     }
   }
 
+  // Inserts estate, route, schedule, and stop data
   Future<void> _insertEstateData(Database db, Map<String, dynamic> estateData) async {
+    // Insert estate
     await db.insert(
       'estates',
       {
@@ -100,6 +113,7 @@ class DatabaseHelper {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
 
+    // Insert routes
     for (var route in estateData['routes']) {
       await db.insert(
         'routes',
@@ -112,6 +126,7 @@ class DatabaseHelper {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
+      // Insert schedules for workday/weekend
       if (route['schedules'] != null) {
         for (var dayType in ['workday', 'weekend']) {
           for (var time in route['schedules'][dayType] ?? []) {
@@ -128,6 +143,7 @@ class DatabaseHelper {
         }
       }
 
+      // Insert stops with ETA offset
       if (route['stops'] != null) {
         for (var stop in route['stops']) {
           await db.insert(
@@ -145,12 +161,14 @@ class DatabaseHelper {
     }
   }
 
+  // Fetches all estates
   Future<List<Estate>> getAllEstates() async {
     final db = await database;
     final result = await db.query('estates');
     return result.map((e) => Estate.fromMap(e)).toList();
   }
 
+  // Fetches estate by ID
   Future<Estate?> getEstateById(String estateId) async {
     final db = await database;
     final result = await db.query(
@@ -161,12 +179,14 @@ class DatabaseHelper {
     return result.isNotEmpty ? Estate.fromMap(result.first) : null;
   }
 
+  // Fetches all routes
   Future<List<Routes>> getAllRoutes() async {
     final db = await database;
     final result = await db.query('routes');
     return result.map((e) => Routes.fromMap(e)).toList();
   }
 
+  // Fetches schedules for a route and day type
   Future<List<Schedule>> getSchedulesForRoute(String routeId, String dayType) async {
     final db = await database;
     final result = await db.query(
@@ -177,6 +197,7 @@ class DatabaseHelper {
     return result.map((e) => Schedule.fromMap(e)).toList();
   }
 
+  // Fetches stops for a route
   Future<List<Stop>> getStopsForRoute(String routeId) async {
     final db = await database;
     final result = await db.query(
@@ -187,6 +208,7 @@ class DatabaseHelper {
     return result.map((e) => Stop.fromMap(e)).toList();
   }
 
+  // Fetches unique stops for an estate
   Future<List<Stop>> getStopsForEstate(String estateId) async {
     final db = await database;
     final result = await db.rawQuery('''

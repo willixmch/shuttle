@@ -28,6 +28,7 @@ class ShuttleCard extends StatelessWidget {
     return GestureDetector(
       onTap: onToggle,
       child: Container(
+
         // Card Styling
         width: double.infinity,
         padding: const EdgeInsets.all(12),
@@ -37,6 +38,7 @@ class ShuttleCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
         ),
+
         // Content
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
