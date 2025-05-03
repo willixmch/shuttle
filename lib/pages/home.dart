@@ -8,6 +8,7 @@ import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/models/routes.dart';
 import 'package:shuttle/models/schedule.dart';
+import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/utils/eta_calculator.dart';
 
 // Stateful widget to display the home page with a list of shuttle routes.
@@ -25,6 +26,7 @@ class _HomeState extends State<Home> {
   List<Map<String, dynamic>> _cachedRouteData = [];
   late ValueNotifier<List<Map<String, dynamic>>> _etaNotifier;
   Estate? _selectedEstate; // Track selected estate (non-null after init)
+  Stop? _selectedStop; // Track selected stop (may be null if no stops)
   int? _expandedCardIndex; // Track index of expanded ShuttleCard (null if none)
 
   @override
@@ -32,8 +34,8 @@ class _HomeState extends State<Home> {
     super.initState();
     // Initialize the ValueNotifier for ETA updates.
     _etaNotifier = ValueNotifier<List<Map<String, dynamic>>>([]);
-    // Load persisted estate and initial data, then start the refresh timer.
-    _loadPersistedEstate();
+    // Load persisted estate and stop, then start the refresh timer.
+    _loadPersistedData();
     _startRefreshTimer();
   }
 
@@ -45,10 +47,11 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
-  // Loads the persisted estate from SharedPreferences or defaults to the first estate.
-  Future<void> _loadPersistedEstate() async {
+  // Loads the persisted estate and stop from SharedPreferences or defaults to the first available.
+  Future<void> _loadPersistedData() async {
     final prefs = await SharedPreferences.getInstance();
     Estate? selectedEstate;
+    Stop? selectedStop;
 
     // Try to load persisted estate
     final estateId = prefs.getString('selectedEstateId');
@@ -61,8 +64,30 @@ class _HomeState extends State<Home> {
       final estates = await _dbHelper.getAllEstates();
       if (estates.isNotEmpty) {
         selectedEstate = estates.first;
-        // Persist the default estate
         await prefs.setString('selectedEstateId', selectedEstate.estateId);
+      }
+    }
+
+    // Try to load persisted stop
+    if (selectedEstate != null) {
+      final stopId = prefs.getString('selectedStopId');
+      final stops = await _dbHelper.getStopsForEstate(selectedEstate.estateId);
+      if (stopId != null && stops.isNotEmpty) {
+        selectedStop = stops.firstWhere(
+          (stop) => stop.stopId == stopId,
+          orElse: () => stops.first, // Default to first stop if persisted stopId is invalid
+        );
+      } else if (stops.isNotEmpty) {
+        // Default to the first stop if no persisted stopId
+        selectedStop = stops.first;
+      }
+
+      // Persist the selected stop
+      if (selectedStop != null) {
+        await prefs.setString('selectedStopId', selectedStop.stopId);
+      } else {
+        // Clear persisted stopId if no stops are available
+        await prefs.remove('selectedStopId');
       }
     }
 
@@ -70,22 +95,38 @@ class _HomeState extends State<Home> {
     if (mounted && selectedEstate != null) {
       setState(() {
         _selectedEstate = selectedEstate;
+        _selectedStop = selectedStop; // May be null if no stops available
       });
     }
 
     await _loadInitialData();
   }
 
-  // Loads initial route and schedule data from the database, filtered by selected estate.
+  // Loads initial route and schedule data from the database, filtered by selected estate and stop.
   Future<void> _loadInitialData() async {
     final routes = await _dbHelper.getAllRoutes();
     final List<Map<String, dynamic>> routeData = [];
     final currentTime = DateTime.now();
     final dayType = EtaCalculator.getDayType(currentTime);
 
+    // Use a default stop if _selectedStop is null
+    final defaultStop = Stop(
+      stopId: 'default',
+      stopNameZh: 'Default Stop',
+      routeId: '',
+      etaOffset: 0,
+    );
+    final effectiveStop = _selectedStop ?? defaultStop;
+
     for (var route in routes) {
-      // Filter routes by selected estate (non-null after init)
+      // Filter routes by selected estate
       if (_selectedEstate != null && route.estateId != _selectedEstate!.estateId) {
+        continue;
+      }
+
+      // Check if the route includes the selected stop (skip if using default stop)
+      final stops = await _dbHelper.getStopsForRoute(route.routeId);
+      if (_selectedStop != null && !stops.any((stop) => stop.stopId == _selectedStop!.stopId)) {
         continue;
       }
 
@@ -94,7 +135,7 @@ class _HomeState extends State<Home> {
         route.routeId,
         dayType,
       );
-      final etaData = EtaCalculator.calculateEtas(schedules, currentTime, null);
+      final etaData = EtaCalculator.calculateEtas(schedules, currentTime, effectiveStop);
 
       if (estate != null) {
         routeData.add({
@@ -129,6 +170,15 @@ class _HomeState extends State<Home> {
     _refreshTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
       if (mounted && _cachedRouteData.isNotEmpty) {
         final currentTime = DateTime.now();
+        // Use a default stop if _selectedStop is null
+        final defaultStop = Stop(
+          stopId: 'default',
+          stopNameZh: 'Default Stop',
+          routeId: '',
+          etaOffset: 0,
+        );
+        final effectiveStop = _selectedStop ?? defaultStop;
+
         final updatedRouteData = _cachedRouteData.map((data) {
           final schedules = data['schedules'] as List<Schedule>;
           int? currentEta = data['eta'] as int?;
@@ -166,7 +216,7 @@ class _HomeState extends State<Home> {
                   schedules,
                   currentTime,
                   lastEta,
-                  null,
+                  effectiveStop,
                 );
                 if (nextEta != null) {
                   upcomingEta.add(nextEta);
@@ -216,16 +266,28 @@ class _HomeState extends State<Home> {
           onEstateSelected: (Estate estate) async {
             final prefs = await SharedPreferences.getInstance();
             setState(() {
-              _selectedEstate = estate; // Update selected estate
-              _expandedCardIndex = null; // Collapse all cards when estate changes
+              _selectedEstate = estate;
+              _selectedStop = null; // Reset stop when estate changes
+              _expandedCardIndex = null; // Collapse all cards
             });
-            // Save the selected estate to SharedPreferences
             await prefs.setString('selectedEstateId', estate.estateId);
-            await _loadInitialData(); // Refresh routes
+            await prefs.remove('selectedStopId'); // Clear persisted stop
+            await _loadPersistedData(); // Refresh data
           },
         );
       },
     );
+  }
+
+  // Handles stop selection (to be used in Step 6)
+  void _onStopSelected(Stop stop) async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _selectedStop = stop;
+      _expandedCardIndex = null; // Collapse all cards
+    });
+    await prefs.setString('selectedStopId', stop.stopId);
+    await _loadInitialData(); // Refresh routes
   }
 
   @override
@@ -242,11 +304,6 @@ class _HomeState extends State<Home> {
             : ValueListenableBuilder<List<Map<String, dynamic>>>(
                 valueListenable: _etaNotifier,
                 builder: (context, routeData, child) {
-                  if (routeData.isEmpty) {
-                    // Show message if no routes are found.
-                    return const Center(child: Text('沒有路線'));
-                  }
-
                   // Build list of ShuttleCard widgets from cached data.
                   return ListView.builder(
                     itemCount: routeData.length,
