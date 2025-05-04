@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart'; // For location services and distance calculation
+import 'package:geolocator/geolocator.dart';
 import 'package:shuttle/components/estate_filter_sheet.dart';
 import 'package:shuttle/components/home_bar.dart';
 import 'package:shuttle/components/shuttle_card.dart';
 import 'package:shuttle/components/stop_filter_sheet.dart';
 import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/models/routes.dart';
-import 'package:shuttle/models/schedule.dart';
 import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/utils/eta_calculator.dart';
