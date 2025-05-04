@@ -8,13 +8,22 @@ import 'package:shuttle/utils/eta_calculator.dart';
 class EtaRefreshTimer {
   Timer? _refreshTimer;
   final Function(List<Map<String, dynamic>>) onUpdate;
+  final List<Map<String, dynamic>> Function() getRouteData; // Callback to get latest routeData
+  final Stop Function() getEffectiveStop; // Callback to get latest effectiveStop
 
-  EtaRefreshTimer({required this.onUpdate});
+  EtaRefreshTimer({
+    required this.onUpdate,
+    required this.getRouteData,
+    required this.getEffectiveStop,
+  });
 
   // Starts a 60-second timer to decrement ETAs and handle expiry.
-  void startRefreshTimer(List<Map<String, dynamic>> routeData, Stop effectiveStop) {
+  void startRefreshTimer() {
     _refreshTimer?.cancel();
     _refreshTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
+      final routeData = getRouteData();
+      final effectiveStop = getEffectiveStop();
+
       if (routeData.isNotEmpty) {
         final currentTime = DateTime.now();
         final updatedRouteData = routeData.map((data) {

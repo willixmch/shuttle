@@ -48,6 +48,16 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           });
         }
       },
+      getRouteData: () => _cachedRouteData, // Provide current routeData
+      getEffectiveStop: () {
+        final defaultStop = Stop(
+          stopId: 'default',
+          stopNameZh: 'Default Stop',
+          routeId: '',
+          etaOffset: 0,
+        );
+        return _selectedStop ?? defaultStop;
+      },
     );
     _loadInitialData();
   }
@@ -149,7 +159,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     if (await _checkLocationPermissions()) {
       try {
         _userPosition = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
+          desiredAccuracy: LocationAccuracy.medium,
         );
       } catch (e) {
         _userPosition = null; // Handle location retrieval failure
@@ -169,14 +179,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     final currentTime = DateTime.now();
     final dayType = EtaCalculator.getDayType(currentTime);
 
-    final defaultStop = Stop(
-      stopId: 'default',
-      stopNameZh: 'Default Stop',
-      routeId: '',
-      etaOffset: 0,
-    );
-    final effectiveStop = _selectedStop ?? defaultStop;
-
     for (var route in routes) {
       if (_selectedEstate != null && route.estateId != _selectedEstate!.estateId) {
         continue;
@@ -192,7 +194,12 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         route.routeId,
         dayType,
       );
-      final etaData = EtaCalculator.calculateEtas(schedules, currentTime, effectiveStop);
+      final etaData = EtaCalculator.calculateEtas(schedules, currentTime, _selectedStop ?? Stop(
+        stopId: 'default',
+        stopNameZh: 'Default Stop',
+        routeId: '',
+        etaOffset: 0,
+      ));
 
       if (estate != null) {
         routeData.add({
@@ -217,7 +224,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         _cachedRouteData = routeData;
         _etaNotifier.value = routeData;
       });
-      _etaRefreshTimer.startRefreshTimer(routeData, effectiveStop);
+      _etaRefreshTimer.startRefreshTimer(); // Start timer with latest data
     }
   }
 
