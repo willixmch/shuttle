@@ -16,7 +16,6 @@ class EstateFilterSheet extends StatefulWidget {
 }
 
 class _EstateFilterSheetState extends State<EstateFilterSheet> {
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance; // Database helper instance
   final TextEditingController _searchController = TextEditingController(); // Search bar input controller
   final FocusNode _searchFocusNode = FocusNode(); // Auto search bar focus
   List<Estate> _estates = []; // Full estate list
@@ -43,7 +42,7 @@ class _EstateFilterSheetState extends State<EstateFilterSheet> {
 
   // Fetch all estates from database
   Future<void> _loadEstates() async {
-    final estates = await _dbHelper.getAllEstates();
+    final estates = await DatabaseHelper.instance.getAllEstates();
     if (mounted) {
       setState(() {
         _estates = estates;

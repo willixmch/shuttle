@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shuttle/components/estate_filter_sheet.dart';
 import 'package:shuttle/components/home_bar.dart';
 import 'package:shuttle/components/shuttle_card.dart';
+import 'package:shuttle/components/stop_filter_sheet.dart';
 import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/models/routes.dart';
 import 'package:shuttle/models/schedule.dart';
@@ -147,14 +148,27 @@ class _HomeState extends State<Home> {
     );
   }
 
-  // Handles stop selection
-  void _onStopSelected(Stop stop) async {
-    await _persistenceData.saveStop(stop);
-    setState(() {
-      _selectedStop = stop;
-      _expandedCardIndex = null;
-    });
-    await _loadInitialData();
+  // Shows the bottom sheet for stop filtering.
+  void _showStopFilterSheet() {
+    showModalBottomSheet(
+      showDragHandle: true,
+      enableDrag: true,
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return StopFilterSheet(
+          estateId: _selectedEstate?.estateId ?? '',
+          onStopSelected: (Stop stop) async {
+            await _persistenceData.saveStop(stop);
+            setState(() {
+              _selectedStop = stop;
+              _expandedCardIndex = null;
+            });
+            await _loadInitialData();
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -162,32 +176,9 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: HomeBar(
         estateOnTap: _showEstateFilterSheet,
-        estateTitle: _selectedEstate?.estateTitleZh ?? 'Select Estate',
-        locationOnTap: () async {
-          final stops = await _dbHelper.getStopsForEstate(_selectedEstate?.estateId ?? '');
-          if (stops.isNotEmpty) {
-            showModalBottomSheet(
-              context: context,
-              builder: (context) {
-                return ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: stops.length,
-                  itemBuilder: (context, index) {
-                    final stop = stops[index];
-                    return ListTile(
-                      title: Text(stop.stopNameZh),
-                      onTap: () {
-                        _onStopSelected(stop);
-                        Navigator.pop(context);
-                      },
-                    );
-                  },
-                );
-              },
-            );
-          }
-        },
-        stopTitle: _selectedStop?.stopNameZh ?? 'Select Stop',
+        estateTitle: _selectedEstate?.estateTitleZh ?? '-',
+        locationOnTap: _showStopFilterSheet,
+        stopTitle: _selectedStop?.stopNameZh ?? '-',
       ),
       body: Container(
         margin: const EdgeInsets.all(16),
