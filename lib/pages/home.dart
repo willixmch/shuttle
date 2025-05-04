@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart'; // Added for location services
 import 'package:shuttle/components/estate_filter_sheet.dart';
 import 'package:shuttle/components/home_bar.dart';
 import 'package:shuttle/components/shuttle_card.dart';
@@ -21,7 +22,7 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with WidgetsBindingObserver {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   final PersistenceData _persistenceData = PersistenceData();
   late final EtaRefreshTimer _etaRefreshTimer;
@@ -30,10 +31,13 @@ class _HomeState extends State<Home> {
   Estate? _selectedEstate;
   Stop? _selectedStop;
   int? _expandedCardIndex;
+  Position? _userPosition; // Store user's current location
+  DateTime? _backgroundTime; // Track when app goes to background
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this); // Add lifecycle observer
     _etaNotifier = ValueNotifier<List<Map<String, dynamic>>>([]);
     _etaRefreshTimer = EtaRefreshTimer(
       onUpdate: (updatedRouteData) {
@@ -50,20 +54,73 @@ class _HomeState extends State<Home> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // Remove lifecycle observer
     _etaRefreshTimer.dispose();
     _etaNotifier.dispose();
     super.dispose();
   }
 
-  // Loads initial data, including persisted estate/stop and route data.
+  // Handle app lifecycle changes
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      _backgroundTime = DateTime.now(); // Record time when app goes to background
+    } else if (state == AppLifecycleState.resumed) {
+      if (_backgroundTime != null) {
+        final duration = DateTime.now().difference(_backgroundTime!);
+        if (duration.inMinutes >= 30) {
+          // Refresh closest stop after 30 minutes in background
+          _selectedStop = null; // Reset manual selection
+          _loadInitialData();
+        }
+      }
+      _backgroundTime = null; // Clear background time
+    }
+  }
+
+  // Checks if location services are enabled and permissions are granted
+  Future<bool> _checkLocationPermissions() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return false; // Location services disabled
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return false; // Permission denied
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return false; // Permission permanently denied
+    }
+
+    return true; // Permissions granted
+  }
+
+  // Loads initial data, including persisted estate and route data
   Future<void> _loadInitialData() async {
-    // Load persisted estate and stop
+    // Load persisted estate (stop persistence removed)
     final persistedData = await _persistenceData.loadPersistedData();
     if (mounted && persistedData['estate'] != null) {
       setState(() {
         _selectedEstate = persistedData['estate'];
-        _selectedStop = persistedData['stop'];
       });
+    }
+
+    // Get user's location
+    if (await _checkLocationPermissions()) {
+      try {
+        _userPosition = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+      } catch (e) {
+        _userPosition = null; // Handle location retrieval failure
+      }
+    } else {
+      _userPosition = null; // No permissions or services
     }
 
     // Load route and schedule data
@@ -124,7 +181,7 @@ class _HomeState extends State<Home> {
     }
   }
 
-  // Shows the bottom sheet for estate filtering.
+  // Shows the bottom sheet for estate filtering
   void _showEstateFilterSheet() {
     showModalBottomSheet(
       showDragHandle: true,
@@ -140,7 +197,6 @@ class _HomeState extends State<Home> {
               _selectedStop = null;
               _expandedCardIndex = null;
             });
-            await _persistenceData.clearStop();
             await _loadInitialData();
           },
         );
@@ -148,7 +204,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  // Shows the bottom sheet for stop filtering.
+  // Shows the bottom sheet for stop filtering
   void _showStopFilterSheet() {
     showModalBottomSheet(
       showDragHandle: true,
@@ -159,7 +215,6 @@ class _HomeState extends State<Home> {
         return StopFilterSheet(
           estateId: _selectedEstate?.estateId ?? '',
           onStopSelected: (Stop stop) async {
-            await _persistenceData.saveStop(stop);
             setState(() {
               _selectedStop = stop;
               _expandedCardIndex = null;

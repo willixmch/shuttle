@@ -15,11 +15,19 @@ class Stop {
   // ETA offset in minutes from the origin stop (e.g., 0 for origin, 5 for next stop).
   final int etaOffset;
 
+  // Latitude of the stop location (e.g., 22.383994).
+  final double? latitude;
+
+  // Longitude of the stop location (e.g., 114.214314).
+  final double? longitude;
+
   const Stop({
     required this.stopId,
     required this.stopNameZh,
     required this.routeId,
     required this.etaOffset,
+    this.latitude,
+    this.longitude,
   });
 
   // Converts a Stop object to a map for database insertion.
@@ -29,6 +37,8 @@ class Stop {
       'stopNameZh': stopNameZh,
       'routeId': routeId,
       'etaOffset': etaOffset,
+      'latitude': latitude,
+      'longitude': longitude,
     };
   }
 
@@ -39,19 +49,21 @@ class Stop {
     final routeId = map['routeId'];
     final etaOffset = map['etaOffset'];
     if (stopId == null || stopNameZh == null || routeId == null || etaOffset == null) {
-      throw Exception('Invalid stop data: one or more fields are null in map: $map');
+      throw Exception('Invalid stop data: one or more required fields are null in map: $map');
     }
     return Stop(
       stopId: stopId as String,
       stopNameZh: stopNameZh as String,
       routeId: routeId as String,
       etaOffset: etaOffset as int,
+      latitude: map['latitude'] as double?,
+      longitude: map['longitude'] as double?,
     );
   }
 
   // String representation for debugging.
   @override
   String toString() {
-    return 'Stop{stopId: $stopId, stopNameZh: $stopNameZh, routeId: $routeId, etaOffset: $etaOffset}';
+    return 'Stop{stopId: $stopId, stopNameZh: $stopNameZh, routeId: $routeId, etaOffset: $etaOffset, latitude: $latitude, longitude: $longitude}';
   }
 }

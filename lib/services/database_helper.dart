@@ -25,7 +25,7 @@ class DatabaseHelper {
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
-    return await openDatabase(path, version: 1, onCreate: _createDB, onUpgrade: _onUpgrade);
+    return await openDatabase(path, version: 2, onCreate: _createDB, onUpgrade: _onUpgrade);
   }
 
   // Creates tables for estates, routes, schedules, and stops
@@ -62,13 +62,15 @@ class DatabaseHelper {
     )
     ''');
 
-    // Stops table, linked to routes with ETA offset
+    // Stops table, linked to routes with ETA offset and coordinates
     await db.execute('''
     CREATE TABLE stops (
       stopId TEXT,
       routeId TEXT,
       stopNameZh TEXT,
       etaOffset INTEGER,
+      latitude REAL,
+      longitude REAL,
       PRIMARY KEY (stopId, routeId),
       FOREIGN KEY (routeId) REFERENCES routes (routeId)
     )
@@ -79,21 +81,24 @@ class DatabaseHelper {
     await _insertEstateData(db, theRegentData);
   }
 
-  // Upgrades database schema for version 2 (adds stops table)
+  // Upgrades database schema for version 2 (adds latitude, longitude to stops)
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      await db.execute('DROP TABLE stops'); // Remove old stops table if exists
+      // Drop and recreate stops table with new schema
+      await db.execute('DROP TABLE IF EXISTS stops');
       await db.execute('''
       CREATE TABLE stops (
         stopId TEXT,
         routeId TEXT,
         stopNameZh TEXT,
         etaOffset INTEGER,
+        latitude REAL,
+        longitude REAL,
         PRIMARY KEY (stopId, routeId),
         FOREIGN KEY (routeId) REFERENCES routes (routeId)
       )
       ''');
-      // Re-insert data for stops
+      // Re-insert data with coordinates
       await _insertEstateData(db, theCastelloData);
       await _insertEstateData(db, theRegentData);
     }
@@ -143,7 +148,7 @@ class DatabaseHelper {
         }
       }
 
-      // Insert stops with ETA offset
+      // Insert stops with ETA offset and coordinates
       if (route['stops'] != null) {
         for (var stop in route['stops']) {
           await db.insert(
@@ -153,6 +158,8 @@ class DatabaseHelper {
               'routeId': route['routeId'],
               'stopNameZh': stop['stopNameZh'],
               'etaOffset': stop['etaOffset'],
+              'latitude': stop['latitude'],
+              'longitude': stop['longitude'],
             },
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
@@ -212,11 +219,11 @@ class DatabaseHelper {
   Future<List<Stop>> getStopsForEstate(String estateId) async {
     final db = await database;
     final result = await db.rawQuery('''
-      SELECT DISTINCT s.stopId, MIN(s.routeId) AS routeId, s.stopNameZh, s.etaOffset
+      SELECT DISTINCT s.stopId, MIN(s.routeId) AS routeId, s.stopNameZh, s.etaOffset, s.latitude, s.longitude
       FROM stops s
       JOIN routes r ON s.routeId = r.routeId
       WHERE r.estateId = ?
-      GROUP BY s.stopId, s.stopNameZh, s.etaOffset
+      GROUP BY s.stopId, s.stopNameZh, s.etaOffset, s.latitude, s.longitude
     ''', [estateId]);
     return result.map((e) => Stop.fromMap(e)).toList();
   }
