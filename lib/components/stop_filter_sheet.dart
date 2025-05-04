@@ -14,40 +14,50 @@ class StopFilterSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      // Loads stops asynchronously
-      child: FutureBuilder<List<Stop>>(
-        future: DatabaseHelper.instance.getStopsForEstate(estateId),
-        builder: (context, snapshot) {
-          // Shows loading indicator while fetching data
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          // Handles errors or empty stop list
-          if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('沒有可用的停靠站'));
-          }
+    final color = Theme.of(context).colorScheme;
+    final typescale = Theme.of(context).textTheme;
 
-          final stops = snapshot.data!;
-          // Displays scrollable list of stops
-          return ListView.builder(
-            shrinkWrap: true,
-            itemCount: stops.length,
-            itemBuilder: (context, index) {
-              final stop = stops[index];
-              // Each stop is a tappable tile
-              return ListTile(
-                title: Text(stop.stopNameZh),
-                onTap: () {
-                  // Triggers callback and closes sheet
-                  onStopSelected(stop);
-                  Navigator.pop(context);
-                },
-              );
-            },
-          );
-        },
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      height: MediaQuery.of(context).size.height * 0.8,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 28,
+            child: Text('車站', style: typescale.labelLarge?.copyWith(color: color.onSurfaceVariant))),
+          Expanded(
+            child: FutureBuilder<List<Stop>>(
+              future: DatabaseHelper.instance.getStopsForEstate(estateId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('沒有可用的停靠站'));
+                }
+
+                final stops = snapshot.data!;
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: stops.length,
+                  itemBuilder: (context, index) {
+                    final stop = stops[index];
+                    // Each stop is a tappable tile
+                    return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+                      title: Text(stop.stopNameZh, style: typescale.titleMedium?.copyWith(color: color.onSurface)),
+                      onTap: () {
+                        onStopSelected(stop);
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
