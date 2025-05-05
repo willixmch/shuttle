@@ -34,7 +34,6 @@ class DatabaseHelper {
     await db.execute('''
     CREATE TABLE estates (
       estateId TEXT PRIMARY KEY,
-      estateName TEXT,
       estateTitleZh TEXT,
       estateTitleEn TEXT
     )
@@ -88,7 +87,6 @@ class DatabaseHelper {
       'estates',
       {
         'estateId': estateData['estateId'],
-        'estateName': estateData['estateName'],
         'estateTitleZh': estateData['estateTitleZh'],
         'estateTitleEn': estateData['estateTitleEn'],
       },

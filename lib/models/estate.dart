@@ -6,9 +6,6 @@ class Estate {
   // Unique identifier for the estate (e.g., '0001').
   final String estateId;
 
-  // Name of the estate (e.g., 'theRegent'), kept for database compatibility.
-  final String estateName;
-
   // Chinese title of the estate (e.g., '天鑽').
   final String estateTitleZh;
 
@@ -17,7 +14,6 @@ class Estate {
 
   const Estate({
     required this.estateId,
-    required this.estateName,
     required this.estateTitleZh,
     required this.estateTitleEn,
   });
@@ -26,7 +22,6 @@ class Estate {
   Map<String, dynamic> toMap() {
     return {
       'estateId': estateId,
-      'estateName': estateName,
       'estateTitleZh': estateTitleZh,
       'estateTitleEn': estateTitleEn,
     };
@@ -36,7 +31,6 @@ class Estate {
   factory Estate.fromMap(Map<String, dynamic> map) {
     return Estate(
       estateId: map['estateId'] as String,
-      estateName: map['estateName'] as String,
       estateTitleZh: map['estateTitleZh'] as String,
       estateTitleEn: map['estateTitleEn'] as String,
     );
@@ -45,6 +39,6 @@ class Estate {
   // String representation for debugging.
   @override
   String toString() {
-    return 'Estate{estateId: $estateId, estateName: $estateName, estateTitleZh: $estateTitleZh, estateTitleEn: $estateTitleEn}';
+    return 'Estate{estateId: $estateId, estateTitleZh: $estateTitleZh, estateTitleEn: $estateTitleEn}';
   }
 }
