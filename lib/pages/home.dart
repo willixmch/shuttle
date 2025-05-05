@@ -13,7 +13,6 @@ import 'package:shuttle/utils/eta_calculator.dart';
 import 'package:shuttle/utils/persistence_data.dart';
 import 'package:shuttle/utils/eta_refresh_timer.dart';
 
-// Stateful widget to display the home page with a list of shuttle routes.
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -30,8 +29,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   Estate? _selectedEstate;
   Stop? _selectedStop;
   int? _expandedCardIndex;
-  Position? _userPosition; // Store user's current location
-  DateTime? _backgroundTime; // Track when app goes to background
+  Position? _userPosition;
+  DateTime? _backgroundTime;
 
   @override
   void initState() {
@@ -146,11 +145,11 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   // Loads initial data, including persisted estate and route data
   Future<void> _loadInitialData() async {
-    // Load persisted estate
+    // Load persisted estate from storage
     final persistedData = await _persistenceData.loadPersistedData();
     if (mounted && persistedData['estate'] != null) {
       setState(() {
-        _selectedEstate = persistedData['estate'];
+        _selectedEstate = persistedData['estate']; // Set the persisted estate as selected
       });
     }
 
@@ -158,7 +157,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     if (await _checkLocationPermissions()) {
       try {
         _userPosition = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.medium,
+          desiredAccuracy: LocationAccuracy.medium, // Request location with medium accuracy
         );
       } catch (e) {
         _userPosition = null; // Handle location retrieval failure
@@ -169,30 +168,36 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
     // Select closest stop if no manual selection
     if (_selectedStop == null && _selectedEstate != null) {
-      _selectedStop = await _findClosestStop();
+      _selectedStop = await _findClosestStop(); // Automatically select the nearest stop based on user location
     }
 
     // Load route and schedule data
-    final routes = await _dbHelper.getAllRoutes();
-    final List<Map<String, dynamic>> routeData = [];
-    final currentTime = DateTime.now();
-    final dayType = EtaCalculator.getDayType(currentTime);
+    final routes = await _dbHelper.getAllRoutes(); // Fetch all available routes from the database
+    final List<Map<String, dynamic>> routeData = []; // Initialize list to store route-related data
+    final currentTime = DateTime.now(); // Get current timestamp for ETA calculations
+    final dayType = EtaCalculator.getDayType(currentTime); // Determine the type of day (e.g., weekday, weekend) for scheduling
 
     for (var route in routes) {
+      // Skip routes that don't match the selected estate
       if (_selectedEstate != null && route.estateId != _selectedEstate!.estateId) {
         continue;
       }
 
+      // Fetch stops associated with the current route
       final stops = await _dbHelper.getStopsForRoute(route.routeId);
+      // Skip routes that don't include the selected stop
       if (_selectedStop != null && !stops.any((stop) => stop.stopId == _selectedStop!.stopId)) {
         continue;
       }
 
+      // Retrieve estate details for the route
       final estate = await _dbHelper.getEstateById(route.estateId);
+      // Fetch schedules for the route based on the day type
       final schedules = await _dbHelper.getSchedulesForRoute(
         route.routeId,
         dayType,
       );
+      // Calculate ETA and upcoming ETAs for the selected stop
       final etaData = EtaCalculator.calculateEtas(schedules, currentTime, _selectedStop ?? Stop(
         stopId: 'default',
         stopNameZh: 'Default Stop',
@@ -200,30 +205,32 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         etaOffset: 0,
       ));
 
+      // Only include routes with valid estate data
       if (estate != null) {
         routeData.add({
-          'route': route,
-          'estate': estate,
-          'schedules': schedules,
-          'eta': etaData['eta'],
-          'upcomingEta': etaData['upcomingEta'],
-          'etaNotifier': ValueNotifier<String>(EtaCalculator.formatEta(etaData['eta'])),
+          'route': route, // Store route details
+          'estate': estate, // Store associated estate
+          'schedules': schedules, // Store route schedules
+          'eta': etaData['eta'], // Store calculated ETA
+          'upcomingEta': etaData['upcomingEta'], // Store upcoming ETA times
+          'etaNotifier': ValueNotifier<String>(EtaCalculator.formatEta(etaData['eta'])), // Notifier for real-time ETA updates
           'upcomingEtaNotifier': ValueNotifier<List<String>>(
             (etaData['upcomingEta'] as List<dynamic>)
                 .cast<int>()
                 .map((e) => EtaCalculator.formatEta(e))
-                .toList(),
+                .toList(), // Notifier for formatted upcoming ETA times
           ),
         });
       }
     }
 
+    // Update state if the widget is still mounted
     if (mounted) {
       setState(() {
-        _cachedRouteData = routeData;
-        _etaNotifier.value = routeData;
+        _cachedRouteData = routeData; // Cache the processed route data
+        _etaNotifier.value = routeData; // Update ETA notifier with new data
       });
-      _etaRefreshTimer.startRefreshTimer(); // Start timer with latest data
+      _etaRefreshTimer.startRefreshTimer(); // Start timer to periodically refresh ETA data
     }
   }
 
