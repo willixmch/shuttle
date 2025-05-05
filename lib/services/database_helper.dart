@@ -21,11 +21,11 @@ class DatabaseHelper {
     return _database!;
   }
 
-  // Sets up database file with version 2
+  // Sets up database file with version 1
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
-    return await openDatabase(path, version: 2, onCreate: _createDB, onUpgrade: _onUpgrade);
+    return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
   // Creates tables for estates, routes, schedules, and stops
@@ -79,29 +79,6 @@ class DatabaseHelper {
     // Insert initial data
     await _insertEstateData(db, theCastelloData);
     await _insertEstateData(db, theRegentData);
-  }
-
-  // Upgrades database schema for version 2 (adds latitude, longitude to stops)
-  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      // Drop and recreate stops table with new schema
-      await db.execute('DROP TABLE IF EXISTS stops');
-      await db.execute('''
-      CREATE TABLE stops (
-        stopId TEXT,
-        routeId TEXT,
-        stopNameZh TEXT,
-        etaOffset INTEGER,
-        latitude REAL,
-        longitude REAL,
-        PRIMARY KEY (stopId, routeId),
-        FOREIGN KEY (routeId) REFERENCES routes (routeId)
-      )
-      ''');
-      // Re-insert data with coordinates
-      await _insertEstateData(db, theCastelloData);
-      await _insertEstateData(db, theRegentData);
-    }
   }
 
   // Inserts estate, route, schedule, and stop data
