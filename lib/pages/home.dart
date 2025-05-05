@@ -86,10 +86,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   // Loads initial data, including persisted estate and route data
   Future<void> _loadInitialData() async {
     // Load persisted estate from storage
-    final persistedEstate = await _persistenceEstate.loadPersistenceEstate();
-    if (mounted && persistedEstate['estate'] != null) {
+    final persistenceEstate = await _persistenceEstate.loadPersistenceEstate();
+    if (mounted && persistenceEstate['estate'] != null) {
       setState(() {
-        _selectedEstate = persistedEstate['estate']; // Set the persisted estate as selected
+        _selectedEstate = persistenceEstate['estate']; // Set the persisted estate as selected
       });
     }
 
