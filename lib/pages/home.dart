@@ -11,7 +11,7 @@ import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/services/location_service.dart';
 import 'package:shuttle/services/route_query.dart';
-import 'package:shuttle/utils/selected_estate.dart';
+import 'package:shuttle/utils/persistence_estate.dart';
 import 'package:shuttle/utils/eta_refresh_timer.dart';
 
 class Home extends StatefulWidget {
