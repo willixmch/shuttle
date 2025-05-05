@@ -9,6 +9,7 @@ import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/models/routes.dart';
 import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/services/database_helper.dart';
+import 'package:shuttle/services/location_service.dart';
 import 'package:shuttle/utils/eta_calculator.dart';
 import 'package:shuttle/utils/persistence_data.dart';
 import 'package:shuttle/utils/eta_refresh_timer.dart';
@@ -23,6 +24,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with WidgetsBindingObserver {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   final PersistenceData _persistenceData = PersistenceData();
+  final LocationService _locationService = LocationService();
   late final EtaRefreshTimer _etaRefreshTimer;
   List<Map<String, dynamic>> _cachedRouteData = [];
   late ValueNotifier<List<Map<String, dynamic>>> _etaNotifier;
@@ -86,63 +88,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     }
   }
 
-  // Checks if location services are enabled and permissions are granted
-  Future<bool> _checkLocationPermissions() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return false; // Location services disabled
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return false; // Permission denied
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return false; // Permission permanently denied
-    }
-
-    return true; // Permissions granted
-  }
-
-  // Finds the closest stop based on user's location
-  Future<Stop?> _findClosestStop() async {
-    if (_userPosition == null || _selectedEstate == null) {
-      return null; // No location or estate selected
-    }
-
-    final stops = await _dbHelper.getStopsForEstate(_selectedEstate!.estateId);
-    if (stops.isEmpty) {
-      return null; // No stops available
-    }
-
-    Stop? closestStop;
-    double minDistance = double.infinity;
-
-    for (var stop in stops) {
-      if (stop.latitude == null || stop.longitude == null) {
-        continue; // Skip stops without coordinates
-      }
-
-      final distance = Geolocator.distanceBetween(
-        _userPosition!.latitude,
-        _userPosition!.longitude,
-        stop.latitude!,
-        stop.longitude!,
-      );
-
-      if (distance < minDistance) {
-        minDistance = distance;
-        closestStop = stop;
-      }
-    }
-
-    return closestStop;
-  }
-
   // Loads initial data, including persisted estate and route data
   Future<void> _loadInitialData() async {
     // Load persisted estate from storage
@@ -154,21 +99,15 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     }
 
     // Get user's location
-    if (await _checkLocationPermissions()) {
-      try {
-        _userPosition = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.medium, // Request location with medium accuracy
-        );
-      } catch (e) {
-        _userPosition = null; // Handle location retrieval failure
-      }
-    } else {
-      _userPosition = null; // No permissions or services
-    }
+    _userPosition = await _locationService.getCurrentPosition();
 
     // Select closest stop if no manual selection
-    if (_selectedStop == null && _selectedEstate != null) {
-      _selectedStop = await _findClosestStop(); // Automatically select the nearest stop based on user location
+    if (_selectedStop == null && _selectedEstate != null && _userPosition != null) {
+      _selectedStop = await _locationService.findClosestStop(
+        _userPosition!,
+        _selectedEstate!.estateId,
+        _dbHelper,
+      );
     }
 
     // Load route and schedule data
