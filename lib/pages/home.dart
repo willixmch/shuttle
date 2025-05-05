@@ -10,7 +10,7 @@ import 'package:shuttle/models/routes.dart';
 import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/services/location_service.dart';
-import 'package:shuttle/utils/eta_calculator.dart';
+import 'package:shuttle/services/route_query.dart';
 import 'package:shuttle/utils/persistence_data.dart';
 import 'package:shuttle/utils/eta_refresh_timer.dart';
 
@@ -25,6 +25,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   final PersistenceData _persistenceData = PersistenceData();
   final LocationService _locationService = LocationService();
+  final RouteQuery _routeQuery;
   late final EtaRefreshTimer _etaRefreshTimer;
   List<Map<String, dynamic>> _cachedRouteData = [];
   late ValueNotifier<List<Map<String, dynamic>>> _etaNotifier;
@@ -33,6 +34,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   int? _expandedCardIndex;
   Position? _userPosition;
   DateTime? _backgroundTime;
+
+  _HomeState() : _routeQuery = RouteQuery(DatabaseHelper.instance);
 
   @override
   void initState() {
@@ -48,16 +51,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           });
         }
       },
-      getRouteData: () => _cachedRouteData, // Provide current routeData
-      getEffectiveStop: () {
-        final defaultStop = Stop(
-          stopId: 'default',
-          stopNameZh: 'Default Stop',
-          routeId: '',
-          etaOffset: 0,
-        );
-        return _selectedStop ?? defaultStop;
-      },
+      getRouteData: () => _cachedRouteData,
+      getEffectiveStop: () => _selectedStop,
     );
     _loadInitialData();
   }
@@ -101,67 +96,28 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     // Get user's location
     _userPosition = await _locationService.getCurrentPosition();
 
-    // Select closest stop if no manual selection
-    if (_selectedStop == null && _selectedEstate != null && _userPosition != null) {
-      _selectedStop = await _locationService.findClosestStop(
-        _userPosition!,
-        _selectedEstate!.estateId,
-        _dbHelper,
-      );
-    }
-
-    // Load route and schedule data
-    final routes = await _dbHelper.getAllRoutes(); // Fetch all available routes from the database
-    final List<Map<String, dynamic>> routeData = []; // Initialize list to store route-related data
-    final currentTime = DateTime.now(); // Get current timestamp for ETA calculations
-    final dayType = EtaCalculator.getDayType(currentTime); // Determine the type of day (e.g., weekday, weekend) for scheduling
-
-    for (var route in routes) {
-      // Skip routes that don't match the selected estate
-      if (_selectedEstate != null && route.estateId != _selectedEstate!.estateId) {
-        continue;
+    // Select closest stop or first stop if no manual selection
+    if (_selectedStop == null) {
+      if (_userPosition != null) {
+        _selectedStop = await _locationService.findClosestStop(
+          _userPosition!,
+          _selectedEstate!.estateId,
+          _dbHelper,
+        );
       }
-
-      // Fetch stops associated with the current route
-      final stops = await _dbHelper.getStopsForRoute(route.routeId);
-      // Skip routes that don't include the selected stop
-      if (_selectedStop != null && !stops.any((stop) => stop.stopId == _selectedStop!.stopId)) {
-        continue;
-      }
-
-      // Retrieve estate details for the route
-      final estate = await _dbHelper.getEstateById(route.estateId);
-      // Fetch schedules for the route based on the day type
-      final schedules = await _dbHelper.getSchedulesForRoute(
-        route.routeId,
-        dayType,
-      );
-      // Calculate ETA and upcoming ETAs for the selected stop
-      final etaData = EtaCalculator.calculateEtas(schedules, currentTime, _selectedStop ?? Stop(
-        stopId: 'default',
-        stopNameZh: 'Default Stop',
-        routeId: '',
-        etaOffset: 0,
-      ));
-
-      // Only include routes with valid estate data
-      if (estate != null) {
-        routeData.add({
-          'route': route, // Store route details
-          'estate': estate, // Store associated estate
-          'schedules': schedules, // Store route schedules
-          'eta': etaData['eta'], // Store calculated ETA
-          'upcomingEta': etaData['upcomingEta'], // Store upcoming ETA times
-          'etaNotifier': ValueNotifier<String>(EtaCalculator.formatEta(etaData['eta'])), // Notifier for real-time ETA updates
-          'upcomingEtaNotifier': ValueNotifier<List<String>>(
-            (etaData['upcomingEta'] as List<dynamic>)
-                .cast<int>()
-                .map((e) => EtaCalculator.formatEta(e))
-                .toList(), // Notifier for formatted upcoming ETA times
-          ),
-        });
+      if (_selectedStop == null) {
+        final stops = await _dbHelper.getStopsForEstate(_selectedEstate!.estateId);
+        if (stops.isNotEmpty) {
+          _selectedStop = stops.first;
+        }
       }
     }
+
+    // Load route data
+    final routeData = await _routeQuery.loadRouteData(
+      selectedEstate: _selectedEstate,
+      selectedStop: _selectedStop,
+    );
 
     // Update state if the widget is still mounted
     if (mounted) {

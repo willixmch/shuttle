@@ -9,7 +9,7 @@ class EtaRefreshTimer {
   Timer? _refreshTimer;
   final Function(List<Map<String, dynamic>>) onUpdate;
   final List<Map<String, dynamic>> Function() getRouteData; // Callback to get latest routeData
-  final Stop Function() getEffectiveStop; // Callback to get latest effectiveStop
+  final Stop? Function() getEffectiveStop; // Callback to get latest effectiveStop
 
   EtaRefreshTimer({
     required this.onUpdate,
@@ -33,7 +33,8 @@ class EtaRefreshTimer {
           final etaNotifier = data['etaNotifier'] as ValueNotifier<String>;
           final upcomingEtaNotifier = data['upcomingEtaNotifier'] as ValueNotifier<List<String>>;
 
-          if (currentEta == null) {
+          // If no stop or no ETA, clear ETAs
+          if (effectiveStop == null || currentEta == null) {
             etaNotifier.value = EtaCalculator.formatEta(null);
             upcomingEtaNotifier.value = [];
             return {
@@ -47,9 +48,11 @@ class EtaRefreshTimer {
             };
           }
 
+          // Decrement ETAs
           currentEta = currentEta - 1;
           upcomingEta = upcomingEta.map((eta) => eta - 1).toList();
 
+          // Handle expired ETA
           if (currentEta <= -1) {
             if (upcomingEta.isNotEmpty) {
               currentEta = upcomingEta.removeAt(0);
