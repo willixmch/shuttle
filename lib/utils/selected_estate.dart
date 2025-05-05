@@ -2,12 +2,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/services/database_helper.dart';
 
-// Service to handle persistence of selected estate using SharedPreferences.
-class PersistenceData {
+// Service to handle selected estate using SharedPreferences.
+class PersistenceEstate {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   // Loads persisted estate, defaulting to first available if none or invalid.
-  Future<Map<String, dynamic>> loadPersistedData() async {
+  Future<Map<String, dynamic>> loadPersistenceEstate() async {
     final prefs = await SharedPreferences.getInstance();
     Estate? selectedEstate;
 

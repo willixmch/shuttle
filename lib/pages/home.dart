@@ -11,7 +11,7 @@ import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/services/location_service.dart';
 import 'package:shuttle/services/route_query.dart';
-import 'package:shuttle/utils/persistence_data.dart';
+import 'package:shuttle/utils/selected_estate.dart';
 import 'package:shuttle/utils/eta_refresh_timer.dart';
 
 class Home extends StatefulWidget {
@@ -23,7 +23,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> with WidgetsBindingObserver {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
-  final PersistenceData _persistenceData = PersistenceData();
+  final PersistenceEstate _persistenceEstate = PersistenceEstate();
   final LocationService _locationService = LocationService();
   final RouteQuery _routeQuery;
   late final EtaRefreshTimer _etaRefreshTimer;
@@ -86,10 +86,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   // Loads initial data, including persisted estate and route data
   Future<void> _loadInitialData() async {
     // Load persisted estate from storage
-    final persistedData = await _persistenceData.loadPersistedData();
-    if (mounted && persistedData['estate'] != null) {
+    final persistedEstate = await _persistenceEstate.loadPersistenceEstate();
+    if (mounted && persistedEstate['estate'] != null) {
       setState(() {
-        _selectedEstate = persistedData['estate']; // Set the persisted estate as selected
+        _selectedEstate = persistedEstate['estate']; // Set the persisted estate as selected
       });
     }
 
@@ -139,7 +139,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       builder: (context) {
         return EstateFilterSheet(
           onEstateSelected: (Estate estate) async {
-            await _persistenceData.saveEstate(estate);
+            await _persistenceEstate.saveEstate(estate);
             setState(() {
               _selectedEstate = estate;
               _selectedStop = null;
