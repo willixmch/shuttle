@@ -1,4 +1,3 @@
-
 const theRegentData = {
   'estateId': '1',
   'estateTitleZh': '天鑽',

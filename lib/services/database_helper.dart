@@ -1,11 +1,12 @@
-import 'package:sqflite/sqflite.dart'; // SQLite database plugin
-import 'package:path/path.dart'; // Path utilities
-import '../data/the_castello_data.dart'; // Castello estate data
-import '../data/the_regent_data.dart'; // Regent estate data
-import '../models/estate.dart'; // Estate model
-import '../models/routes.dart'; // Route model
-import '../models/schedule.dart'; // Schedule model
-import '../models/stop.dart'; // Stop model
+import 'package:shuttle/data/kwong_yuen_estate_data.dart';
+import '../data/the_castello_data.dart';
+import '../data/the_regent_data.dart'; 
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import '../models/estate.dart';
+import '../models/routes.dart';
+import '../models/schedule.dart';
+import '../models/stop.dart';
 
 // Manages SQLite database for shuttle bus data (singleton)
 class DatabaseHelper {
@@ -78,6 +79,7 @@ class DatabaseHelper {
     // Insert initial data
     await _insertEstateData(db, theCastelloData);
     await _insertEstateData(db, theRegentData);
+    await _insertEstateData(db, kwongYuenEstateData);
   }
 
   // Inserts estate, route, schedule, and stop data

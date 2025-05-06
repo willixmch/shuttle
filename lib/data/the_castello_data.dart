@@ -1,10 +1,10 @@
 const theCastelloData = {
-  'estateId': '0002',
+  'estateId': '2',
   'estateTitleZh': '帝堡城',
   'estateTitleEn': 'The Castello',
   'routes': [
     {
-      'routeId': '3',
+      'routeId': 'NR829-A',
       'routeName': '沙田新城市廣場循環線',
       'info': '',
       'schedules': {
@@ -32,14 +32,14 @@ const theCastelloData = {
       },
       'stops': [
         {
-          'stopId': '0001',
+          'stopId': 'NR829-1',
           'stopNameZh': '帝堡城通道',
           'etaOffset': 0,
           'latitude': 22.383994,
           'longitude': 114.214314,
         },
         {
-          'stopId': '0002',
+          'stopId': 'NR829-2',
           'stopNameZh': '沙田新城市廣場(第一期)',
           'etaOffset': 13,
           'latitude': 22.382102,
