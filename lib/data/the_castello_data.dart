@@ -4,7 +4,7 @@ const theCastelloData = {
   'estateTitleEn': 'The Castello',
   'routes': [
     {
-      'routeId': '0005',
+      'routeId': '3',
       'routeName': '沙田新城市廣場循環線',
       'info': '',
       'schedules': {

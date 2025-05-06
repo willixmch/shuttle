@@ -4,7 +4,6 @@ const theRegentData = {
   'estateTitleZh': '天鑽',
   'estateTitleEn': 'The Regent',
   'routes': [
-
     {
       'routeId': 'NR538-A',
       'routeName': 'A 線',
