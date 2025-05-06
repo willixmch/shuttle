@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class HomeBar extends StatelessWidget implements PreferredSizeWidget {
   final double toolbarHeight;
@@ -62,10 +63,13 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
                   mainAxisSize: MainAxisSize.min,
                   spacing: 4,
                   children: [
-                    Icon(
-                      Icons.location_on,
-                      size: 20,
-                      color: color.primary,
+                    Lottie.asset(
+                      'lib/assets/pulsing_pin.json',
+                      width: 28,          
+                      height: 28,
+                      fit: BoxFit.contain,
+                      repeat: true,
+                      reverse: false,
                     ),
                     Text(
                       stopTitle,
