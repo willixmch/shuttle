@@ -1,12 +1,12 @@
 
 const theRegentData = {
-  'estateId': '0001',
+  'estateId': '1',
   'estateTitleZh': '天鑽',
   'estateTitleEn': 'The Regent',
   'routes': [
 
     {
-      'routeId': '0001',
+      'routeId': 'NR538-A',
       'routeName': 'A 線',
       'info': '由天鑽第2座開出',
       'schedules': {
@@ -38,17 +38,31 @@ const theRegentData = {
       },
       'stops': [
         {
-          'stopId': '0003',
+          'stopId': 'NR538-1',
           'stopNameZh': '天鑽屋苑',
           'etaOffset': 0,
           'latitude': 22.438345, 
           'longitude': 114.167447,
         },
+        {
+          'stopId': 'NR538-2',
+          'stopNameZh': '運頭塘公共運輸交匯處',
+          'etaOffset': 4,
+          'latitude': 22.442094,
+          'longitude': 114.166659,
+        },
+        {
+          'stopId': 'NR538-3',
+          'stopNameZh': '新達廣場巴士站',
+          'etaOffset': 6,
+          'latitude': 22.443354, 
+          'longitude': 114.169140,
+        },
       ],
     },
 
     {
-      'routeId': '0002',
+      'routeId': 'NR538-B',
       'routeName': 'B 線',
       'info': '由天鑽第18座開出',
       'schedules': {
@@ -79,17 +93,31 @@ const theRegentData = {
       },
       'stops': [
         {
-          'stopId': '0003',
+          'stopId': 'NR538-1',
           'stopNameZh': '天鑽屋苑',
           'etaOffset': 0,
           'latitude': 22.438345, 
           'longitude': 114.167447,
         },
+        {
+          'stopId': 'NR538-2',
+          'stopNameZh': '運頭塘公共運輸交匯處',
+          'etaOffset': 4,
+          'latitude': 22.442094,
+          'longitude': 114.166659,
+        },
+        {
+          'stopId': 'NR538-3',
+          'stopNameZh': '新達廣場巴士站',
+          'etaOffset': 6,
+          'latitude': 22.443354, 
+          'longitude': 114.169140,
+        },
       ],
     },
 
     {
-      'routeId': '0003',
+      'routeId': 'NR538-C',
       'routeName': 'C 線',
       'info': '由天鑽(第 9 座)開出',
       'schedules': {
@@ -100,17 +128,31 @@ const theRegentData = {
       },
       'stops': [
         {
-          'stopId': '0003',
+          'stopId': 'NR538-1',
           'stopNameZh': '天鑽屋苑',
           'etaOffset': 0,
           'latitude': 22.438345, 
           'longitude': 114.167447,
         },
+        {
+          'stopId': 'NR538-2',
+          'stopNameZh': '運頭塘公共運輸交匯處',
+          'etaOffset': 4,
+          'latitude': 22.442094,
+          'longitude': 114.166659,
+        },
+        {
+          'stopId': 'NR538-3',
+          'stopNameZh': '新達廣場巴士站',
+          'etaOffset': 6,
+          'latitude': 22.443354, 
+          'longitude': 114.169140,
+        },
       ],
     },
 
     {
-      'routeId': '0004',
+      'routeId': 'NR538-D',
       'routeName': '特別班次',
       'info': '由天鑽開出',
       'schedules': {
@@ -125,24 +167,34 @@ const theRegentData = {
       },
       'stops': [
         {
-          'stopId': '0003',
+          'stopId': 'NR538-1',
           'stopNameZh': '天鑽屋苑',
           'etaOffset': 0,
           'latitude': 22.438345, 
           'longitude': 114.167447,
         },
+        {
+          'stopId': 'NR538-4',
+          'stopNameZh': '廣福道近美德大廈',
+          'etaOffset': 6,
+          'latitude': 22.449220,
+          'longitude': 114.165825,
+        },
+        {
+          'stopId': 'NR538-5',
+          'stopNameZh': '運頭街大埔綜合大樓對面',
+          'etaOffset': 11,
+          'latitude': 22.446006, 
+          'longitude': 114.167183,
+        },
+        {
+          'stopId': 'NR538-3',
+          'stopNameZh': '新達廣場巴士站',
+          'etaOffset': 12,
+          'latitude': 22.443354, 
+          'longitude': 114.169140,
+        },
       ],
     },
-    
-    // To add a new route for theRegent, append here, e.g.:
-    // {
-    //   'routeId': '0002',
-    //   'routeName': 'B 線',
-    //   'info': '由天鑽第18座開出',
-    //   'schedules': {
-    //     'workday': ['08:00', '08:15', ...],
-    //     'weekend': ['09:00', '09:15', ...],
-    //   },
-    // },
   ],
 };

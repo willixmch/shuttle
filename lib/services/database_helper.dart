@@ -194,11 +194,11 @@ class DatabaseHelper {
   Future<List<Stop>> getStopsForEstate(String estateId) async {
     final db = await database;
     final result = await db.rawQuery('''
-      SELECT DISTINCT s.stopId, MIN(s.routeId) AS routeId, s.stopNameZh, s.etaOffset, s.latitude, s.longitude
+      SELECT DISTINCT s.stopId, MIN(s.routeId) AS routeId, s.stopNameZh, MIN(s.etaOffset) AS etaOffset, s.latitude, s.longitude
       FROM stops s
       JOIN routes r ON s.routeId = r.routeId
       WHERE r.estateId = ?
-      GROUP BY s.stopId, s.stopNameZh, s.etaOffset, s.latitude, s.longitude
+      GROUP BY s.stopId, s.stopNameZh, s.latitude, s.longitude
     ''', [estateId]);
     return result.map((e) => Stop.fromMap(e)).toList();
   }

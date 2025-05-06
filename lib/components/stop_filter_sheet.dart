@@ -17,7 +17,7 @@ class StopFilterSheet extends StatelessWidget {
     final color = Theme.of(context).colorScheme;
     final typescale = Theme.of(context).textTheme;
 
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height * 0.8,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
