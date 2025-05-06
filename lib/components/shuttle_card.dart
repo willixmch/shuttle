@@ -114,6 +114,7 @@ class ShuttleCard extends StatelessWidget {
                             return Column(
                               children: [
                                 Row(
+                                  spacing: 4,
                                   children: [
                                     Container(
                                       width: 16,
@@ -136,6 +137,7 @@ class ShuttleCard extends StatelessWidget {
                                   ],
                                 ),
                                 Row(
+                                  spacing: 4,
                                   children: [
                                     Container(
                                       width: 16,
@@ -162,6 +164,7 @@ class ShuttleCard extends StatelessWidget {
                           }
                           return Column(
                             children: upcomingEtaValue.map((eta) => Row(
+                              spacing: 4,
                               children: [
                                 Container(
                                   width: 16,
