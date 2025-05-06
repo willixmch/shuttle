@@ -18,14 +18,14 @@ class StopFilterSheet extends StatelessWidget {
     final typescale = Theme.of(context).textTheme;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
       height: MediaQuery.of(context).size.height * 0.8,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: 28,
-            child: Text('車站', style: typescale.labelLarge?.copyWith(color: color.onSurfaceVariant))),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
+            child: Text('車站', style: typescale.labelLarge?.copyWith(color: color.onSurfaceVariant)),
+          ),
           Expanded(
             child: FutureBuilder<List<Stop>>(
               future: DatabaseHelper.instance.getStopsForEstate(estateId),
@@ -45,7 +45,7 @@ class StopFilterSheet extends StatelessWidget {
                     final stop = stops[index];
                     // Each stop is a tappable tile
                     return ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
                       title: Text(stop.stopNameZh, style: typescale.titleMedium?.copyWith(color: color.onSurface)),
                       onTap: () {
                         onStopSelected(stop);
