@@ -114,7 +114,7 @@ class DatabaseHelper {
 
       // Insert schedules for workday/weekend
       if (route['schedules'] != null) {
-        for (var dayType in ['workday', 'weekend']) {
+        for (var dayType in ['workday', 'saturday', 'sunday', 'public_holiday']) {
           for (var time in route['schedules'][dayType] ?? []) {
             await db.insert(
               'schedules',

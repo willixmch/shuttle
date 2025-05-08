@@ -9,6 +9,7 @@ import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/models/routes.dart';
 import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/services/database_helper.dart';
+import 'package:shuttle/services/day_type_checker.dart';
 import 'package:shuttle/services/location_service.dart';
 import 'package:shuttle/services/route_query.dart';
 import 'package:shuttle/utils/persistence_estate.dart';
@@ -41,6 +42,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this); // Add lifecycle observer
+    DayTypeChecker.initialize();
     _etaNotifier = ValueNotifier<List<Map<String, dynamic>>>([]);
     _etaRefreshTimer = EtaRefreshTimer(
       onUpdate: (updatedRouteData) {

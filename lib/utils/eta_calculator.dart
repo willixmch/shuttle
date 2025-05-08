@@ -1,12 +1,13 @@
 // lib/utils/eta_calculator.dart
 import 'package:intl/intl.dart';
+import 'package:shuttle/services/day_type_checker.dart';
 import '../models/schedule.dart';
 import '../models/stop.dart';
 
 class EtaCalculator {
   // Determines the day type (workday or weekend) based on the given date.
   static String getDayType(DateTime date) {
-    return date.weekday >= 1 && date.weekday <= 5 ? 'workday' : 'weekend';
+    return DayTypeChecker.getDayType(date);
   }
 
   // Calculates the next ETA and upcoming ETAs for a route based on the current time and stop offset.

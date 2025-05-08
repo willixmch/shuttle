@@ -11,7 +11,9 @@ const kwongYuenEstateData = {
         'workday': [
           '07:05', '07:30', '07:50', '08:05', '08:25', '08:45'
         ],
-        'weekend': [],
+        'saturday': [],
+        'sunday': [],
+        'public_holiday': [],
       },
       'stops': [
         {
@@ -23,7 +25,6 @@ const kwongYuenEstateData = {
         },
       ],
     },
-
     {
       'routeId': 'NR83-B',
       'routeName': '往沙田廣源邨',
@@ -32,7 +33,9 @@ const kwongYuenEstateData = {
         'workday': [
           '17:45', '18:05', '18:25', '18:45'
         ],
-        'weekend': [],
+        'saturday': [],
+        'sunday': [],
+        'public_holiday': [],
       },
       'stops': [
         {

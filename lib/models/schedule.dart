@@ -9,7 +9,7 @@ class Schedule {
   // ID of the route this schedule belongs to (e.g., '0001').
   final String routeId;
 
-  // Type of day (e.g., 'workday' or 'weekend').
+  // Type of day (e.g., 'workday' or 'sunday').
   final String dayType;
 
   // Departure time (e.g., '06:30').
