@@ -1,6 +1,8 @@
-import 'package:shuttle/data/kwong_yuen_estate_data.dart';
-import '../data/the_castello_data.dart';
-import '../data/the_regent_data.dart'; 
+import 'package:shuttle/data/kwong_yuen_estate.dart';
+import 'package:shuttle/data/lakeview_garden.dart';
+import 'package:shuttle/data/royal_ascot.dart';
+import '../data/the_castello.dart';
+import '../data/the_regent.dart'; 
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/estate.dart';
@@ -80,6 +82,8 @@ class DatabaseHelper {
     await _insertEstateData(db, theCastelloData);
     await _insertEstateData(db, theRegentData);
     await _insertEstateData(db, kwongYuenEstateData);
+    await _insertEstateData(db, royalAscotData);
+    await _insertEstateData(db, lakeviewGardenData);
   }
 
   // Inserts estate, route, schedule, and stop data

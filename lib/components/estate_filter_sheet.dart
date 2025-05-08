@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart'; // Flutter UI components
-import 'package:shuttle/models/estate.dart'; // Estate model
-import 'package:shuttle/services/database_helper.dart'; // Database helper
+import 'package:flutter/material.dart'; 
+import 'package:shuttle/models/estate.dart'; 
+import 'package:shuttle/services/database_helper.dart'; 
 
 // Bottom sheet for filtering estates with search and list
 class EstateFilterSheet extends StatefulWidget {
