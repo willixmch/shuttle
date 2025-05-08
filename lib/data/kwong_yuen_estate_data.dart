@@ -1,5 +1,5 @@
 const kwongYuenEstateData = {
-  'estateId': '3',
+  'estateId': 'NR83',
   'estateTitleZh': '廣源邨',
   'estateTitleEn': 'Kwong Yuen Estate',
   'routes': [
