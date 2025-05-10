@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:shuttle/components/estate_filter_sheet.dart';
 import 'package:shuttle/components/home_bar.dart';
-import 'package:shuttle/components/shuttle_card.dart';
+import 'package:shuttle/components/sliding_schedule_panel.dart';
 import 'package:shuttle/components/stop_filter_sheet.dart';
 import 'package:shuttle/models/estate.dart';
-import 'package:shuttle/models/routes.dart';
 import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/services/day_type_checker.dart';
@@ -14,6 +15,7 @@ import 'package:shuttle/services/location_service.dart';
 import 'package:shuttle/services/route_query.dart';
 import 'package:shuttle/utils/persistence_estate.dart';
 import 'package:shuttle/utils/eta_refresh_timer.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -36,12 +38,18 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   Position? _userPosition;
   DateTime? _backgroundTime;
 
+  final PanelController _panelController = PanelController();
+  double _minHeightFraction = 0.2; 
+  double _maxHeightFraction = 1.0;
+  double _overlapAmount = 20.0;
+  bool _isDraggingPanel = false;  // Flag to toggle map gestures
+
   _HomeState() : _routeQuery = RouteQuery(DatabaseHelper.instance);
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this); // Add lifecycle observer
+    WidgetsBinding.instance.addObserver(this);
     DayTypeChecker.initialize();
     _etaNotifier = ValueNotifier<List<Map<String, dynamic>>>([]);
     _etaRefreshTimer = EtaRefreshTimer(
@@ -56,58 +64,56 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       getRouteData: () => _cachedRouteData,
       getEffectiveStop: () => _selectedStop,
     );
+    // Ensure panel starts fully expanded
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _panelController.open();
+    });
     _loadInitialData();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // Remove lifecycle observer
+    WidgetsBinding.instance.removeObserver(this);
     _etaRefreshTimer.dispose();
     _etaNotifier.dispose();
     super.dispose();
   }
 
-  // Handle app lifecycle changes
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      _backgroundTime = DateTime.now(); // Record time when app goes to background
+      _backgroundTime = DateTime.now();
     } else if (state == AppLifecycleState.resumed) {
       if (_backgroundTime != null) {
         final duration = DateTime.now().difference(_backgroundTime!);
         if (duration.inMinutes >= 30) {
-          // Refresh closest stop after 30 minutes in background
-          _selectedStop = null; // Reset manual selection
+          _selectedStop = null;
           _loadInitialData();
         }
       }
-      _backgroundTime = null; // Clear background time
+      _backgroundTime = null;
     }
   }
 
-  // Loads initial data, including persisted estate and route data
   Future<void> _loadInitialData() async {
-    // Load persisted estate from storage
     final persistenceEstate = await _persistenceEstate.loadPersistenceEstate();
     if (mounted && persistenceEstate['estate'] != null) {
       setState(() {
-        _selectedEstate = persistenceEstate['estate']; // Set the persisted estate as selected
+        _selectedEstate = persistenceEstate['estate'];
       });
     }
 
-    // Get user's location
     _userPosition = await _locationService.getCurrentPosition();
 
-    // Select closest stop or first stop if no manual selection
     if (_selectedStop == null) {
-      if (_userPosition != null) {
+      if (_userPosition != null && _selectedEstate != null) {
         _selectedStop = await _locationService.findClosestStop(
           _userPosition!,
           _selectedEstate!.estateId,
           _dbHelper,
         );
       }
-      if (_selectedStop == null) {
+      if (_selectedStop == null && _selectedEstate != null) {
         final stops = await _dbHelper.getStopsForEstate(_selectedEstate!.estateId);
         if (stops.isNotEmpty) {
           _selectedStop = stops.first;
@@ -115,23 +121,20 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       }
     }
 
-    // Load route data
     final routeData = await _routeQuery.loadRouteData(
       selectedEstate: _selectedEstate,
       selectedStop: _selectedStop,
     );
 
-    // Update state if the widget is still mounted
     if (mounted) {
       setState(() {
-        _cachedRouteData = routeData; // Cache the processed route data
-        _etaNotifier.value = routeData; // Update ETA notifier with new data
+        _cachedRouteData = routeData;
+        _etaNotifier.value = routeData;
       });
-      _etaRefreshTimer.startRefreshTimer(); // Start timer to periodically refresh ETA data
+      _etaRefreshTimer.startRefreshTimer();
     }
   }
 
-  // Shows the bottom sheet for estate filtering
   void _showEstateFilterSheet() {
     showModalBottomSheet(
       showDragHandle: true,
@@ -154,7 +157,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     );
   }
 
-  // Shows the bottom sheet for stop filtering
   void _showStopFilterSheet() {
     showModalBottomSheet(
       showDragHandle: true,
@@ -178,67 +180,79 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    // Calculate panel heights
+    final double screenHeight = MediaQuery.of(context).size.height -
+        kToolbarHeight -
+        MediaQuery.of(context).padding.top;
+    final double minHeight = screenHeight * _minHeightFraction;
+    final double maxHeight = screenHeight * _maxHeightFraction + _overlapAmount;
+
+    debugPrint("minHeight: $minHeight, maxHeight: $maxHeight");
+
     return Scaffold(
-      appBar: HomeBar(
-        estateOnTap: _showEstateFilterSheet,
-        estateTitle: _selectedEstate?.estateTitleZh ?? '-',
-        locationOnTap: _showStopFilterSheet,
-        stopTitle: _selectedStop?.stopNameZh ?? '-',
-      ),
-      body: Container(
-        margin: const EdgeInsets.all(16),
-        child: _cachedRouteData.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : ValueListenableBuilder<List<Map<String, dynamic>>>(
-                valueListenable: _etaNotifier,
-                builder: (context, routeData, child) {
-                  if (routeData.isEmpty) {
-                    return const Center(child: Text('沒有可用的路線'));
+      body: Stack(
+        children: [
+          // Map and Panel
+          SlidingUpPanel(
+            controller: _panelController,
+            minHeight: minHeight,
+            maxHeight: maxHeight,
+            snapPoint: null, // No intermediate snap points
+            panelBuilder: (scrollController) => SlidingSchedulePanel(
+              scrollController: scrollController,
+              overlapAmount: _overlapAmount,
+              routeData: _cachedRouteData,
+              etaNotifier: _etaNotifier,
+              expandedCardIndex: _expandedCardIndex,
+              onToggleCard: (index) {
+                setState(() {
+                  if (_expandedCardIndex == index) {
+                    _expandedCardIndex = null;
+                  } else {
+                    _expandedCardIndex = index;
                   }
-
-                  return ListView.builder(
-                    itemCount: routeData.length,
-                    itemBuilder: (context, index) {
-                      final data = routeData[index];
-                      final route = data['route'] as Routes?;
-                      final etaNotifier = data['etaNotifier'] as ValueNotifier<String>;
-                      final upcomingEtaNotifier = data['upcomingEtaNotifier'] as ValueNotifier<List<String>>;
-
-                      if (route == null) {
-                        return const Padding(
-                          padding: EdgeInsets.only(bottom: 12),
-                          child: Card(
-                            child: ListTile(
-                              title: Text('Error'),
-                              subtitle: Text('Invalid route data'),
-                            ),
-                          ),
-                        );
-                      }
-
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: ShuttleCard(
-                          route: route.routeName,
-                          info: route.info,
-                          eta: etaNotifier,
-                          upcomingEta: upcomingEtaNotifier,
-                          isExpanded: _expandedCardIndex == index,
-                          onToggle: () {
-                            setState(() {
-                              if (_expandedCardIndex == index) {
-                                _expandedCardIndex = null;
-                              } else {
-                                _expandedCardIndex = index;
-                              }
-                            });
-                          },
-                        ),
-                      );
-                    },
-                  );
-                },
+                });
+              },
+            ),
+            body: FlutterMap(
+              options: MapOptions(
+                initialCenter: LatLng(37.7749, -122.4194), // San Francisco
+                initialZoom: 12.0,
+                interactionOptions: _isDraggingPanel
+                    ? InteractionOptions(flags: InteractiveFlag.none)
+                    : InteractionOptions(flags: InteractiveFlag.all),
               ),
+              children: [
+                TileLayer(
+                  urlTemplate:
+                      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  subdomains: ['a', 'b', 'c'],
+                ),
+              ],
+            ),
+            onPanelSlide: (position) {
+              setState(() {
+                _isDraggingPanel = position > 0.0 && position < 1.0;
+              });
+            },
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          // HomeBar positioned on top
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: HomeBar(
+              estateOnTap: _showEstateFilterSheet,
+              estateTitle: _selectedEstate?.estateTitleZh ?? '-',
+              locationOnTap: _showStopFilterSheet,
+              stopTitle: _selectedStop?.stopNameZh ?? '-',
+            ),
+          ),
+        ],
       ),
     );
   }
