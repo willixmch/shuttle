@@ -25,7 +25,7 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
     return Container(
       color: color.surface,
       child: SafeArea(
-        minimum: const EdgeInsets.symmetric(horizontal: 16),
+        minimum: const EdgeInsets.fromLTRB(16, 0, 16, 24),
         child: Align(
           alignment: Alignment.centerLeft,
           child: Row(
