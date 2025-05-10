@@ -1,6 +1,6 @@
 // lib/utils/eta_calculator.dart
 import 'package:intl/intl.dart';
-import 'package:shuttle/services/day_type_checker.dart';
+import 'package:shuttle/utils/day_type_checker.dart';
 import '../models/schedule.dart';
 import '../models/stop.dart';
 

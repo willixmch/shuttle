@@ -1,19 +1,18 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:shuttle/components/estate_filter_sheet.dart';
 import 'package:shuttle/components/home_bar.dart';
 import 'package:shuttle/components/sliding_schedule_panel.dart';
 import 'package:shuttle/components/stop_filter_sheet.dart';
 import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/models/stop.dart';
+import 'package:shuttle/pages/leaflet_map.dart';
 import 'package:shuttle/services/database_helper.dart';
-import 'package:shuttle/services/day_type_checker.dart';
+import 'package:shuttle/utils/day_type_checker.dart';
 import 'package:shuttle/services/location_service.dart';
 import 'package:shuttle/services/route_query.dart';
-import 'package:shuttle/utils/persistence_estate.dart';
+import 'package:shuttle/services/persistence_estate.dart';
 import 'package:shuttle/utils/eta_refresh_timer.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
@@ -39,16 +38,19 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   DateTime? _backgroundTime;
 
   final PanelController _panelController = PanelController();
-  double _minHeightFraction = 0.2; 
-  double _maxHeightFraction = 1.0;
-  double _overlapAmount = 20.0;
-  bool _isDraggingPanel = false;  // Flag to toggle map gestures
+  final double _minHeightFraction = 0.2; 
+  final double _maxHeightFraction = 1.0;
+  final double _overlapAmount = 20.0;
+  bool _isDraggingPanel = false;
 
   _HomeState() : _routeQuery = RouteQuery(DatabaseHelper.instance);
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _panelController.open();
+    });
     WidgetsBinding.instance.addObserver(this);
     DayTypeChecker.initialize();
     _etaNotifier = ValueNotifier<List<Map<String, dynamic>>>([]);
@@ -64,10 +66,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       getRouteData: () => _cachedRouteData,
       getEffectiveStop: () => _selectedStop,
     );
-    // Ensure panel starts fully expanded
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _panelController.open();
-    });
     _loadInitialData();
   }
 
@@ -180,10 +178,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate panel heights
-    final double screenHeight = MediaQuery.of(context).size.height -
-        kToolbarHeight -
-        MediaQuery.of(context).padding.top;
+    final double screenHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
     final double minHeight = screenHeight * _minHeightFraction;
     final double maxHeight = screenHeight * _maxHeightFraction + _overlapAmount;
 
@@ -192,12 +187,11 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     return Scaffold(
       body: Stack(
         children: [
-          // Map and Panel
           SlidingUpPanel(
             controller: _panelController,
             minHeight: minHeight,
             maxHeight: maxHeight,
-            snapPoint: null, // No intermediate snap points
+            snapPoint: null,
             panelBuilder: (scrollController) => SlidingSchedulePanel(
               scrollController: scrollController,
               overlapAmount: _overlapAmount,
@@ -214,21 +208,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                 });
               },
             ),
-            body: FlutterMap(
-              options: MapOptions(
-                initialCenter: LatLng(37.7749, -122.4194), // San Francisco
-                initialZoom: 12.0,
-                interactionOptions: _isDraggingPanel
-                    ? InteractionOptions(flags: InteractiveFlag.none)
-                    : InteractionOptions(flags: InteractiveFlag.all),
-              ),
-              children: [
-                TileLayer(
-                  urlTemplate:
-                      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  subdomains: ['a', 'b', 'c'],
-                ),
-              ],
+            body: LeafletMap(
+              isDraggingPanel: _isDraggingPanel,
+              userPosition: _userPosition,
             ),
             onPanelSlide: (position) {
               setState(() {
@@ -236,11 +218,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               });
             },
             borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+              topLeft: Radius.circular(28),
+              topRight: Radius.circular(28),
             ),
           ),
-          // HomeBar positioned on top
           Positioned(
             top: 0,
             left: 0,

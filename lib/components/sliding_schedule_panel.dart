@@ -28,8 +28,8 @@ class SlidingSchedulePanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.surface,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+          topLeft: Radius.circular(28),
+          topRight: Radius.circular(28),
         ),
         boxShadow: const [
           BoxShadow(
