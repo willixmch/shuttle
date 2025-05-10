@@ -31,13 +31,6 @@ class SlidingSchedulePanel extends StatelessWidget {
           topLeft: Radius.circular(28),
           topRight: Radius.circular(28),
         ),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 10.0,
-            offset: Offset(0, -2),
-          ),
-        ],
       ),
       child: Column(
         children: [

@@ -26,7 +26,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   LatLng? _currentLocation;
   static const double _userZoomLevel = 17.0;
   bool _isMapCentered = true; // Tracks if map is centered on user
-  final double _fabBottomFraction = 0.24;
+  final double _fabBottomPadding = 0.24;
 
   @override
   void initState() {
@@ -117,9 +117,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height -
-        kToolbarHeight -
-        MediaQuery.of(context).padding.top;
+    final double screenHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
 
     return Stack(
       children: [
@@ -159,7 +157,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         // FAB for recentering with fade animation
         Positioned(
           right: 16.0,
-          bottom: screenHeight * _fabBottomFraction,
+          bottom: screenHeight * _fabBottomPadding,
           child: AnimatedOpacity(
             opacity: !_isMapCentered && _currentLocation != null ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 200),
