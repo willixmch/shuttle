@@ -9,12 +9,14 @@ import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/models/stop.dart';
 import 'dart:ui' as ui;
+import 'dart:typed_data';
 
 class LeafletMap extends StatefulWidget {
   final bool isDraggingPanel;
   final Position? userPosition;
   final Estate? selectedEstate;
   final Stop? selectedStop;
+  final Function(Stop)? onStopSelected;
 
   const LeafletMap({
     super.key,
@@ -22,6 +24,7 @@ class LeafletMap extends StatefulWidget {
     this.userPosition,
     this.selectedEstate,
     this.selectedStop,
+    this.onStopSelected,
   });
 
   @override
@@ -36,7 +39,9 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   bool _isMapCentered = true;
   final double _fabBottomPadding = 0.24;
   List<Stop> _estateStops = [];
+  List<Marker> _cachedMarkers = [];
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  static final Map<Color, Uint8List> _iconCache = {};
 
   @override
   void initState() {
@@ -76,11 +81,20 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
       if (mounted) {
         setState(() {
           _estateStops = stops;
+          _cachedMarkers = []; // Trigger marker rebuild
         });
+        // Build markers after state update to ensure context is valid
+        final markers = await _buildStopMarkers();
+        if (mounted) {
+          setState(() {
+            _cachedMarkers = markers;
+          });
+        }
       }
     } else {
       setState(() {
         _estateStops = [];
+        _cachedMarkers = [];
       });
     }
   }
@@ -148,15 +162,33 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
 
   // Creates a marker icon from a Material Icon
   Future<Marker> _buildMarker(Stop stop, bool isSelected) async {
-    final icon = Icons.flag;
+    final icon = Icons.pin_drop;
     final color = isSelected
         ? Theme.of(context).colorScheme.primary
         : Theme.of(context).colorScheme.onSurfaceVariant;
-    const size = 48.0;
+    const size = 40.0;
+
+    // Check icon cache
+    if (_iconCache.containsKey(color)) {
+      return Marker(
+        point: LatLng(stop.latitude, stop.longitude),
+        width: size,
+        height: size,
+        child: GestureDetector(
+          onTap: () {
+            if (widget.onStopSelected != null) {
+              widget.onStopSelected!(stop);
+            }
+          },
+          child: Image.memory(_iconCache[color]!),
+        ),
+      );
+    }
 
     // Render icon to bitmap
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
     final iconData = IconData(icon.codePoint, fontFamily: icon.fontFamily);
     final iconPainter = TextPainter(
       text: TextSpan(
@@ -174,13 +206,24 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     final picture = recorder.endRecording();
     final image = await picture.toImage(size.toInt(), size.toInt());
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-    final uint8List = bytes!.buffer.asUint8List();
+    if (bytes == null) throw Exception('Failed to render marker icon');
+    final uint8List = bytes.buffer.asUint8List();
+
+    // Cache the icon
+    _iconCache[color] = uint8List;
 
     return Marker(
       point: LatLng(stop.latitude, stop.longitude),
       width: size,
       height: size,
-      child: Image.memory(uint8List),
+      child: GestureDetector(
+        onTap: () {
+          if (widget.onStopSelected != null) {
+            widget.onStopSelected!(stop);
+          }
+        },
+        child: Image.memory(uint8List),
+      ),
     );
   }
 
@@ -234,15 +277,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                 markerSize: Size(20, 20),
               ),
             ),
-            FutureBuilder<List<Marker>>(
-              future: _buildStopMarkers(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return MarkerLayer(markers: snapshot.data!);
-                }
-                return const SizedBox.shrink();
-              },
-            ),
+            MarkerLayer(markers: _cachedMarkers),
           ],
         ),
         Positioned(

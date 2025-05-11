@@ -38,7 +38,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   DateTime? _backgroundTime;
 
   final PanelController _panelController = PanelController();
-  final double _minHeightFraction = 0.2; 
+  final double _minHeightFraction = 0.2;
   final double _maxHeightFraction = 1.0;
   final double _overlapAmount = 20.0;
   bool _isDraggingPanel = false;
@@ -112,7 +112,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         );
       }
       if (_selectedStop == null && _selectedEstate != null) {
-        final stops = await _dbHelper.getStopsForEstate(_selectedEstate!.estateId);
+        final stops = await _dbHelper.getStopsForEstate(
+          _selectedEstate!.estateId,
+        );
         if (stops.isNotEmpty) {
           _selectedStop = stops.first;
         }
@@ -149,6 +151,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               _expandedCardIndex = null;
             });
             await _loadInitialData();
+            await _panelController.open();
           },
         );
       },
@@ -178,7 +181,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
+    final double screenHeight =
+        MediaQuery.of(context).size.height -
+        kToolbarHeight -
+        MediaQuery.of(context).padding.top;
     final double minHeight = screenHeight * _minHeightFraction;
     final double maxHeight = screenHeight * _maxHeightFraction + _overlapAmount;
 
@@ -192,34 +198,46 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
             minHeight: minHeight,
             maxHeight: maxHeight,
             snapPoint: null,
-            panelBuilder: (scrollController) => SlidingSchedulePanel(
-              scrollController: scrollController,
-              overlapAmount: _overlapAmount,
-              routeData: _cachedRouteData,
-              etaNotifier: _etaNotifier,
-              expandedCardIndex: _expandedCardIndex,
-              onToggleCard: (index) {
-                setState(() {
-                  if (_expandedCardIndex == index) {
-                    _expandedCardIndex = null;
-                  } else {
-                    _expandedCardIndex = index;
-                  }
-                });
-              },
-            ),
+            panelBuilder:
+                (scrollController) => SlidingSchedulePanel(
+                  scrollController: scrollController,
+                  overlapAmount: _overlapAmount,
+                  routeData: _cachedRouteData,
+                  etaNotifier: _etaNotifier,
+                  expandedCardIndex: _expandedCardIndex,
+                  onToggleCard: (index) {
+                    setState(() {
+                      if (_expandedCardIndex == index) {
+                        _expandedCardIndex = null;
+                      } else {
+                        _expandedCardIndex = index;
+                      }
+                    });
+                  },
+                ),
             body: LeafletMap(
               isDraggingPanel: _isDraggingPanel,
               userPosition: _userPosition,
               selectedEstate: _selectedEstate,
               selectedStop: _selectedStop,
+              onStopSelected: (Stop stop) async {
+                if (_selectedStop?.stopId != stop.stopId ||
+                    _selectedStop?.routeId != stop.routeId) {
+                  setState(() {
+                    _selectedStop = stop;
+                    _expandedCardIndex = null;
+                  });
+                  await _loadInitialData();
+                  await _panelController.open();
+                }
+              },
             ),
             onPanelSlide: (position) {
               setState(() {
                 _isDraggingPanel = position > 0.0 && position < 1.0;
               });
             },
-            borderRadius: BorderRadius.only(
+            borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(28),
               topRight: Radius.circular(28),
             ),
