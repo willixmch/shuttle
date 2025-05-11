@@ -16,18 +16,18 @@ class Stop {
   final int etaOffset;
 
   // Latitude of the stop location (e.g., 22.383994).
-  final double? latitude;
+  final double latitude;
 
   // Longitude of the stop location (e.g., 114.214314).
-  final double? longitude;
+  final double longitude;
 
   const Stop({
     required this.stopId,
     required this.stopNameZh,
     required this.routeId,
     required this.etaOffset,
-    this.latitude,
-    this.longitude,
+    required this.latitude,
+    required this.longitude,
   });
 
   // Converts a Stop object to a map for database insertion.
@@ -56,8 +56,8 @@ class Stop {
       stopNameZh: stopNameZh as String,
       routeId: routeId as String,
       etaOffset: etaOffset as int,
-      latitude: map['latitude'] as double?,
-      longitude: map['longitude'] as double?,
+      latitude: map['latitude'] as double,
+      longitude: map['longitude'] as double,
     );
   }
 

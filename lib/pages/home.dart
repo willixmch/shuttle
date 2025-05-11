@@ -211,6 +211,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
             body: LeafletMap(
               isDraggingPanel: _isDraggingPanel,
               userPosition: _userPosition,
+              selectedEstate: _selectedEstate,
+              selectedStop: _selectedStop,
             ),
             onPanelSlide: (position) {
               setState(() {

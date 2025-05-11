@@ -5,15 +5,23 @@ import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shuttle/services/location_service.dart';
+import 'package:shuttle/services/database_helper.dart';
+import 'package:shuttle/models/estate.dart';
+import 'package:shuttle/models/stop.dart';
+import 'dart:ui' as ui;
 
 class LeafletMap extends StatefulWidget {
   final bool isDraggingPanel;
   final Position? userPosition;
+  final Estate? selectedEstate;
+  final Stop? selectedStop;
 
   const LeafletMap({
     super.key,
     required this.isDraggingPanel,
     this.userPosition,
+    this.selectedEstate,
+    this.selectedStop,
   });
 
   @override
@@ -25,8 +33,10 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   Stream<Position>? _positionStream;
   LatLng? _currentLocation;
   static const double _userZoomLevel = 17.0;
-  bool _isMapCentered = true; // Tracks if map is centered on user
+  bool _isMapCentered = true;
   final double _fabBottomPadding = 0.24;
+  List<Stop> _estateStops = [];
+  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   @override
   void initState() {
@@ -36,7 +46,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
       vsync: this,
     );
     _startLocationUpdates();
-    // Listen to map movements to detect when map is no longer centered
+    _loadEstateStops();
     _mapController.mapController.mapEventStream.listen((event) {
       if (event is MapEventMove || event is MapEventMoveEnd) {
         _checkIfMapCentered();
@@ -45,10 +55,34 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   }
 
   @override
+  void didUpdateWidget(LeafletMap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedEstate != widget.selectedEstate ||
+        oldWidget.selectedStop != widget.selectedStop) {
+      _loadEstateStops();
+    }
+  }
+
+  @override
   void dispose() {
     _positionStream?.drain();
     _mapController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadEstateStops() async {
+    if (widget.selectedEstate != null) {
+      final stops = await _dbHelper.getStopsForEstate(widget.selectedEstate!.estateId);
+      if (mounted) {
+        setState(() {
+          _estateStops = stops;
+        });
+      }
+    } else {
+      setState(() {
+        _estateStops = [];
+      });
+    }
   }
 
   void _startLocationUpdates() async {
@@ -66,7 +100,6 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
             _currentLocation = LatLng(position.latitude, position.longitude);
           });
 
-          // Center map on user location when first detected
           if (_currentLocation != null && _isMapCentered) {
             _mapController.animateTo(
               dest: _currentLocation!,
@@ -81,7 +114,6 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     }
   }
 
-  // Check if the map's center is close to the user's current location
   void _checkIfMapCentered() {
     if (_currentLocation == null) {
       setState(() {
@@ -91,7 +123,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     }
 
     final mapCenter = _mapController.mapController.camera.center;
-    const double threshold = 0.0001; // Small threshold for lat/lng difference
+    const double threshold = 0.0001;
     final isCentered = (mapCenter.latitude - _currentLocation!.latitude).abs() < threshold &&
         (mapCenter.longitude - _currentLocation!.longitude).abs() < threshold;
 
@@ -100,19 +132,69 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     });
   }
 
-  // Recenter map to user's current location with smooth animation
   void _recenterMap() {
     if (_currentLocation != null) {
       _mapController.animateTo(
         dest: _currentLocation!,
         zoom: _userZoomLevel,
         rotation: 0,
-        duration: const Duration(milliseconds: 1000), // 1-second animation
+        duration: const Duration(milliseconds: 1000),
       );
       setState(() {
         _isMapCentered = true;
       });
     }
+  }
+
+  // Creates a marker icon from a Material Icon
+  Future<Marker> _buildMarker(Stop stop, bool isSelected) async {
+    final icon = Icons.flag;
+    final color = isSelected
+        ? Theme.of(context).colorScheme.primary
+        : Theme.of(context).colorScheme.onSurfaceVariant;
+    const size = 48.0;
+
+    // Render icon to bitmap
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final iconData = IconData(icon.codePoint, fontFamily: icon.fontFamily);
+    final iconPainter = TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(iconData.codePoint),
+        style: TextStyle(
+          fontFamily: iconData.fontFamily,
+          fontSize: size,
+          color: color,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    iconPainter.layout();
+    iconPainter.paint(canvas, Offset.zero);
+    final picture = recorder.endRecording();
+    final image = await picture.toImage(size.toInt(), size.toInt());
+    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+    final uint8List = bytes!.buffer.asUint8List();
+
+    return Marker(
+      point: LatLng(stop.latitude, stop.longitude),
+      width: size,
+      height: size,
+      child: Image.memory(uint8List),
+    );
+  }
+
+  // Builds list of markers for all stops
+  Future<List<Marker>> _buildStopMarkers() async {
+    List<Marker> markers = [];
+    for (var stop in _estateStops) {
+      final isSelected = widget.selectedStop != null &&
+          stop.stopId == widget.selectedStop!.stopId &&
+          stop.routeId == widget.selectedStop!.routeId;
+      final marker = await _buildMarker(stop, isSelected);
+      markers.add(marker);
+    }
+    return markers;
   }
 
   @override
@@ -126,7 +208,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
           options: MapOptions(
             initialCenter: widget.userPosition != null
                 ? LatLng(widget.userPosition!.latitude, widget.userPosition!.longitude)
-                : LatLng(37.7749, -122.4194), // Fallback Location
+                : LatLng(37.7749, -122.4194),
             initialZoom: widget.userPosition != null ? _userZoomLevel : 12.0,
             maxZoom: 19.0,
             minZoom: 3.0,
@@ -152,9 +234,17 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                 markerSize: Size(20, 20),
               ),
             ),
+            FutureBuilder<List<Marker>>(
+              future: _buildStopMarkers(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return MarkerLayer(markers: snapshot.data!);
+                }
+                return const SizedBox.shrink();
+              },
+            ),
           ],
         ),
-        // FAB for recentering with fade animation
         Positioned(
           right: 16.0,
           bottom: screenHeight * _fabBottomPadding,
