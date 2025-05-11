@@ -28,7 +28,6 @@ class LocationService {
     if (await checkLocationPermissions()) {
       try {
         return await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
         );
       } catch (e) {
         return null; // Handle location retrieval failure
@@ -47,15 +46,11 @@ class LocationService {
     double minDistance = double.infinity;
 
     for (var stop in stops) {
-      if (stop.latitude == null || stop.longitude == null) {
-        continue; // Skip stops without coordinates
-      }
-
       final distance = Geolocator.distanceBetween(
         userPosition.latitude,
         userPosition.longitude,
-        stop.latitude!,
-        stop.longitude!,
+        stop.latitude,
+        stop.longitude,
       );
 
       if (distance < minDistance) {

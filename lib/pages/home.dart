@@ -181,14 +181,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight =
-        MediaQuery.of(context).size.height -
-        kToolbarHeight -
-        MediaQuery.of(context).padding.top;
+    final double screenHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
     final double minHeight = screenHeight * _minHeightFraction;
     final double maxHeight = screenHeight * _maxHeightFraction + _overlapAmount;
-
-    debugPrint("minHeight: $minHeight, maxHeight: $maxHeight");
 
     return Scaffold(
       body: Stack(

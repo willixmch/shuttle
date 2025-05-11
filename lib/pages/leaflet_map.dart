@@ -11,6 +11,41 @@ import 'package:shuttle/models/stop.dart';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 
+// Custom marker widget that dynamically adjusts rotation
+class CustomMarkerWidget extends StatefulWidget {
+  final Uint8List iconBytes;
+  final VoidCallback? onTap;
+  final ValueNotifier<double> rotationNotifier;
+
+  const CustomMarkerWidget({
+    super.key,
+    required this.iconBytes,
+    this.onTap,
+    required this.rotationNotifier,
+  });
+
+  @override
+  _CustomMarkerWidgetState createState() => _CustomMarkerWidgetState();
+}
+
+class _CustomMarkerWidgetState extends State<CustomMarkerWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<double>(
+      valueListenable: widget.rotationNotifier,
+      builder: (context, rotation, child) {
+        return GestureDetector(
+          onTap: widget.onTap,
+          child: Transform.rotate(
+            angle: -rotation * (pi / 180), // Inverse rotation in radians
+            child: Image.memory(widget.iconBytes),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class LeafletMap extends StatefulWidget {
   final bool isDraggingPanel;
   final Position? userPosition;
@@ -35,13 +70,14 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   late final AnimatedMapController _mapController;
   Stream<Position>? _positionStream;
   LatLng? _currentLocation;
-  static const double _userZoomLevel = 17.0;
+  static const double _userZoomLevel = 18.0;
   bool _isMapCentered = true;
   final double _fabBottomPadding = 0.24;
   List<Stop> _estateStops = [];
   List<Marker> _cachedMarkers = [];
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   static final Map<Color, Uint8List> _iconCache = {};
+  late final ValueNotifier<double> _rotationNotifier;
 
   @override
   void initState() {
@@ -50,11 +86,15 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
       mapController: MapController(),
       vsync: this,
     );
+    _rotationNotifier = ValueNotifier<double>(0.0);
     _startLocationUpdates();
     _loadEstateStops();
     _mapController.mapController.mapEventStream.listen((event) {
       if (event is MapEventMove || event is MapEventMoveEnd) {
         _checkIfMapCentered();
+      }
+      if (event is MapEventRotate || event is MapEventRotateEnd) {
+        _rotationNotifier.value = _mapController.mapController.camera.rotation;
       }
     });
   }
@@ -71,6 +111,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   @override
   void dispose() {
     _positionStream?.drain();
+    _rotationNotifier.dispose();
     _mapController.dispose();
     super.dispose();
   }
@@ -160,7 +201,6 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     }
   }
 
-  // Creates a marker icon from a Material Icon
   Future<Marker> _buildMarker(Stop stop, bool isSelected) async {
     final icon = Icons.pin_drop;
     final color = isSelected
@@ -174,13 +214,15 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         point: LatLng(stop.latitude, stop.longitude),
         width: size,
         height: size,
-        child: GestureDetector(
+        rotate: false,
+        child: CustomMarkerWidget(
+          iconBytes: _iconCache[color]!,
           onTap: () {
             if (widget.onStopSelected != null) {
               widget.onStopSelected!(stop);
             }
           },
-          child: Image.memory(_iconCache[color]!),
+          rotationNotifier: _rotationNotifier,
         ),
       );
     }
@@ -188,7 +230,6 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     // Render icon to bitmap
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
-    final textPainter = TextPainter(textDirection: TextDirection.ltr);
     final iconData = IconData(icon.codePoint, fontFamily: icon.fontFamily);
     final iconPainter = TextPainter(
       text: TextSpan(
@@ -216,18 +257,19 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
       point: LatLng(stop.latitude, stop.longitude),
       width: size,
       height: size,
-      child: GestureDetector(
+      rotate: false,
+      child: CustomMarkerWidget(
+        iconBytes: uint8List,
         onTap: () {
           if (widget.onStopSelected != null) {
             widget.onStopSelected!(stop);
           }
         },
-        child: Image.memory(uint8List),
+        rotationNotifier: _rotationNotifier,
       ),
     );
   }
 
-  // Builds list of markers for all stops
   Future<List<Marker>> _buildStopMarkers() async {
     List<Marker> markers = [];
     for (var stop in _estateStops) {
@@ -253,7 +295,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                 ? LatLng(widget.userPosition!.latitude, widget.userPosition!.longitude)
                 : LatLng(37.7749, -122.4194),
             initialZoom: widget.userPosition != null ? _userZoomLevel : 12.0,
-            maxZoom: 19.0,
+            maxZoom: 20.0,
             minZoom: 3.0,
             interactionOptions: widget.isDraggingPanel
                 ? const InteractionOptions(flags: InteractiveFlag.none)
@@ -261,9 +303,10 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
           ),
           children: [
             TileLayer(
-              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-              subdomains: const ['a', 'b', 'c'],
-              maxZoom: 19,
+              urlTemplate: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+              subdomains: const ['abcd'],
+              maxZoom: 20,
+              retinaMode: RetinaMode.isHighDensity(context),
             ),
             CurrentLocationLayer(
               positionStream: _positionStream?.map(
@@ -286,14 +329,9 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
           child: AnimatedOpacity(
             opacity: !_isMapCentered && _currentLocation != null ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 200),
-            child: FloatingActionButton(
+            child: FloatingActionButton.small(
               onPressed: _recenterMap,
-              mini: true,
-              backgroundColor: Colors.white,
-              child: const Icon(
-                Icons.near_me,
-                color: Color.fromRGBO(44, 149, 225, 1),
-              ),
+              child: const Icon(Icons.near_me),
             ),
           ),
         ),

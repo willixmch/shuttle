@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shuttle/theme/theme.dart';
+import 'package:shuttle/theme/util.dart';
 import 'package:shuttle/pages/home.dart';
 
 void main() {
@@ -10,13 +12,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = View.of(context).platformDispatcher.platformBrightness;
+
+    TextTheme textTheme = createTextTheme(context, "Poppins", "Poppins");
+    MaterialTheme theme = MaterialTheme(textTheme);
+    
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        textTheme: const TextTheme(),
-        ),
+      theme: brightness == Brightness.light ? theme.light() : theme.dark(),
       home: Home(),
     );
   }
