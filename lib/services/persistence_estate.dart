@@ -7,7 +7,7 @@ class PersistenceEstate {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   // Loads persisted estate, defaulting to first available if none or invalid.
-  Future<Map<String, dynamic>> loadPersistenceEstate() async {
+  Future<Map<String, dynamic>> estateQuery() async {
     final prefs = await SharedPreferences.getInstance();
     Estate? selectedEstate;
 

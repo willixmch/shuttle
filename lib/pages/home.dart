@@ -25,7 +25,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
-  final PersistenceEstate _persistenceEstate = PersistenceEstate();
+  final PersistenceEstate _persistneceEstate = PersistenceEstate();
   final LocationService _locationService = LocationService();
   final RouteQuery _routeQuery;
   late final EtaRefreshTimer _etaRefreshTimer;
@@ -75,7 +75,7 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _loadSchedule() async {
-    final persistenceEstate = await _persistenceEstate.loadPersistenceEstate();
+    final persistenceEstate = await _persistneceEstate.estateQuery();
     if (mounted && persistenceEstate['estate'] != null) {
       setState(() {
         _selectedEstate = persistenceEstate['estate'];
@@ -125,7 +125,7 @@ class _HomeState extends State<Home> {
       builder: (context) {
         return EstateFilterSheet(
           onEstateSelected: (Estate estate) async {
-            await _persistenceEstate.saveEstate(estate);
+            await _persistneceEstate.saveEstate(estate);
             setState(() {
               _selectedEstate = estate;
               _selectedStop = null;
