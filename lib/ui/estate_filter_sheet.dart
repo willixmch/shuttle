@@ -12,10 +12,10 @@ class EstateFilterSheet extends StatefulWidget {
   });
 
   @override
-  _EstateFilterSheetState createState() => _EstateFilterSheetState();
+  EstateFilterSheetState createState() => EstateFilterSheetState();
 }
 
-class _EstateFilterSheetState extends State<EstateFilterSheet> {
+class EstateFilterSheetState extends State<EstateFilterSheet> {
   final TextEditingController _searchController = TextEditingController(); // Search bar input controller
   final FocusNode _searchFocusNode = FocusNode(); // Auto search bar focus
   List<Estate> _estates = []; // Full estate list

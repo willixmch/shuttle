@@ -15,10 +15,10 @@ class StopMarker extends StatefulWidget {
   });
 
   @override
-  _StopMarkerState createState() => _StopMarkerState();
+  StopMarkerState createState() => StopMarkerState();
 }
 
-class _StopMarkerState extends State<StopMarker> {
+class StopMarkerState extends State<StopMarker> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<double>(

@@ -20,10 +20,10 @@ class Home extends StatefulWidget {
   const Home({super.key});
 
   @override
-  _HomeState createState() => _HomeState();
+  HomeState createState() => HomeState();
 }
 
-class _HomeState extends State<Home> {
+class HomeState extends State<Home> {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   final PersistenceEstate _persistneceEstate = PersistenceEstate();
   final LocationService _locationService = LocationService();
@@ -42,7 +42,7 @@ class _HomeState extends State<Home> {
   final double _overlapAmount = 20.0;
   bool _isDraggingPanel = false;
 
-  _HomeState() : _routeQuery = RouteQuery(DatabaseHelper.instance);
+  HomeState() : _routeQuery = RouteQuery(DatabaseHelper.instance);
 
   @override
   void initState() {

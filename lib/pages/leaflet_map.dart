@@ -29,10 +29,10 @@ class LeafletMap extends StatefulWidget {
   });
 
   @override
-  _LeafletMapState createState() => _LeafletMapState();
+  LeafletMapState createState() => LeafletMapState();
 }
 
-class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
+class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   late final AnimatedMapController _mapController;
   Stream<Position>? _positionStream;
   LatLng? _currentLocation;
