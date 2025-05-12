@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
@@ -12,12 +13,12 @@ import 'dart:ui' as ui;
 import 'dart:typed_data';
 
 // Custom marker widget that dynamically adjusts rotation
-class CustomMarkerWidget extends StatefulWidget {
+class StopMarker extends StatefulWidget {
   final Uint8List iconBytes;
   final VoidCallback? onTap;
   final ValueNotifier<double> rotationNotifier;
 
-  const CustomMarkerWidget({
+  const StopMarker({
     super.key,
     required this.iconBytes,
     this.onTap,
@@ -25,10 +26,10 @@ class CustomMarkerWidget extends StatefulWidget {
   });
 
   @override
-  _CustomMarkerWidgetState createState() => _CustomMarkerWidgetState();
+  _StopMarkerState createState() => _StopMarkerState();
 }
 
-class _CustomMarkerWidgetState extends State<CustomMarkerWidget> {
+class _StopMarkerState extends State<StopMarker> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<double>(
@@ -237,7 +238,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         width: size,
         height: size,
         rotate: false,
-        child: CustomMarkerWidget(
+        child: StopMarker(
           iconBytes: _iconCache[color]!,
           onTap: () {
             if (widget.onStopSelected != null) {
@@ -280,7 +281,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
       width: size,
       height: size,
       rotate: false,
-      child: CustomMarkerWidget(
+      child: StopMarker(
         iconBytes: uint8List,
         onTap: () {
           if (widget.onStopSelected != null) {
@@ -316,7 +317,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
           options: MapOptions(
             initialCenter: LatLng(37.7749, -122.4194), // Default fallback
             initialZoom: 12.0, // Default fallback zoom
-            maxZoom: 20.0,
+            maxZoom: 19.0,
             minZoom: 3.0,
             interactionOptions: widget.isDraggingPanel
                 ? const InteractionOptions(flags: InteractiveFlag.none)
@@ -325,8 +326,8 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
           children: [
             TileLayer(
               urlTemplate: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-              subdomains: const ['abcd'],
-              maxZoom: 20,
+              subdomains: ['abcd'],
+              maxZoom: 19,
               retinaMode: RetinaMode.isHighDensity(context),
             ),
             CurrentLocationLayer(
