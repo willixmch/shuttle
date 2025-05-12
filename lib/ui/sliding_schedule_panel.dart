@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shuttle/components/shuttle_card.dart';
 import 'package:shuttle/models/routes.dart';
+import 'package:shuttle/ui/shuttle_card.dart';
 
 class SlidingSchedulePanel extends StatelessWidget {
   final ScrollController scrollController;

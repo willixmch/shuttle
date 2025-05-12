@@ -1,53 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_cache/flutter_map_cache.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
+import 'package:flutter_map_cache/flutter_map_cache.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:shuttle/services/location_service.dart';
 import 'package:shuttle/services/database_helper.dart';
+import 'package:shuttle/services/map_tile_cache.dart';
+import 'package:shuttle/utils/marker_processing.dart';
 import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/models/stop.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:http_cache_file_store/http_cache_file_store.dart';
-import 'dart:ui' as ui;
-import 'dart:typed_data';
-
-// Custom marker widget that dynamically adjusts rotation
-class StopMarker extends StatefulWidget {
-  final Uint8List iconBytes;
-  final VoidCallback? onTap;
-  final ValueNotifier<double> rotationNotifier;
-
-  const StopMarker({
-    super.key,
-    required this.iconBytes,
-    this.onTap,
-    required this.rotationNotifier,
-  });
-
-  @override
-  _StopMarkerState createState() => _StopMarkerState();
-}
-
-class _StopMarkerState extends State<StopMarker> {
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<double>(
-      valueListenable: widget.rotationNotifier,
-      builder: (context, rotation, child) {
-        return GestureDetector(
-          onTap: widget.onTap,
-          child: Transform.rotate(
-            angle: -rotation * (pi / 180), // Inverse rotation in radians
-            child: Image.memory(widget.iconBytes),
-          ),
-        );
-      },
-    );
-  }
-}
 
 class LeafletMap extends StatefulWidget {
   final bool isDraggingPanel;
@@ -74,11 +37,10 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   Stream<Position>? _positionStream;
   LatLng? _currentLocation;
   static const double _userZoomLevel = 18.0;
-  bool _isUserCentered = false; // Initialize as false to show FAB initially
+  bool _showLocateMeFab = true; // Show FAB by default
   List<Stop> _estateStops = [];
   List<Marker> _cachedMarkers = [];
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
-  static final Map<Color, Uint8List> _iconCache = {};
   late final ValueNotifier<double> _rotationNotifier;
   CachedTileProvider? _tileProvider;
   late final Future<void> _tileProviderFuture;
@@ -93,7 +55,9 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     _rotationNotifier = ValueNotifier<double>(0.0);
 
     // Initialize tile caching and store the future
-    _tileProviderFuture = _initializeTileCaching();
+    _tileProviderFuture = MapTileCache.initializeTileCaching().then((provider) {
+      _tileProvider = provider;
+    });
 
     _startLocationUpdates();
     _loadEstateStops();
@@ -105,29 +69,18 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
           zoom: _userZoomLevel,
           duration: const Duration(milliseconds: 500),
         );
-        _checkIfUserCentered(); // Check centering after animation
       });
     }
     _mapController.mapController.mapEventStream.listen((event) {
       if (event is MapEventMove || event is MapEventMoveEnd) {
-        _checkIfUserCentered();
+        setState(() {
+          _showLocateMeFab = true; // Show FAB when map is moved
+        });
       }
       if (event is MapEventRotate || event is MapEventRotateEnd) {
         _rotationNotifier.value = _mapController.mapController.camera.rotation;
       }
     });
-  }
-
-  Future<void> _initializeTileCaching() async {
-    // Get cache directory
-    final cacheDir = await getTemporaryDirectory();
-    // Initialize FileCacheStore
-    final cacheStore = FileCacheStore(cacheDir.path);
-    // Set up CachedTileProvider
-    _tileProvider = CachedTileProvider(
-      store: cacheStore,
-      maxStale: const Duration(days: 30), // Cache tiles for 30 days
-    );
   }
 
   @override
@@ -145,7 +98,6 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
           zoom: _userZoomLevel,
           duration: const Duration(milliseconds: 500),
         );
-        _checkIfUserCentered(); // Check centering after animation
       }
     }
   }
@@ -196,38 +148,9 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
           setState(() {
             _currentLocation = LatLng(position.latitude, position.longitude);
           });
-
-          // Only animate to user location if no selectedStop and map is centered on user
-          if (_currentLocation != null && _isUserCentered && widget.selectedStop == null) {
-            _mapController.animateTo(
-              dest: _currentLocation!,
-              zoom: _userZoomLevel,
-              duration: const Duration(milliseconds: 500),
-            );
-          }
-
-          _checkIfUserCentered();
         }
       });
     }
-  }
-
-  void _checkIfUserCentered() {
-    if (_currentLocation == null) {
-      setState(() {
-        _isUserCentered = false;
-      });
-      return;
-    }
-
-    final mapCenter = _mapController.mapController.camera.center;
-    const double threshold = 0.0001;
-    final isCentered = (mapCenter.latitude - _currentLocation!.latitude).abs() < threshold &&
-        (mapCenter.longitude - _currentLocation!.longitude).abs() < threshold;
-
-    setState(() {
-      _isUserCentered = isCentered;
-    });
   }
 
   void _recenterMap() {
@@ -239,78 +162,9 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         duration: const Duration(milliseconds: 1000),
       );
       setState(() {
-        _isUserCentered = true;
+        _showLocateMeFab = false; // Hide FAB after recentering
       });
     }
-  }
-
-  Future<Marker> _buildMarker(Stop stop, bool isSelected) async {
-    final icon = Icons.pin_drop;
-    final color = isSelected
-        ? Theme.of(context).colorScheme.primaryContainer
-        : Theme.of(context).colorScheme.onSurfaceVariant;
-    const size = 40.0;
-
-    // Check icon cache
-    if (_iconCache.containsKey(color)) {
-      return Marker(
-        point: LatLng(stop.latitude, stop.longitude),
-        width: size,
-        height: size,
-        rotate: false,
-        child: StopMarker(
-          iconBytes: _iconCache[color]!,
-          onTap: () {
-            if (widget.onStopSelected != null) {
-              widget.onStopSelected!(stop);
-            }
-          },
-          rotationNotifier: _rotationNotifier,
-        ),
-      );
-    }
-
-    // Render icon to bitmap
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder);
-    final iconData = IconData(icon.codePoint, fontFamily: icon.fontFamily);
-    final iconPainter = TextPainter(
-      text: TextSpan(
-        text: String.fromCharCode(iconData.codePoint),
-        style: TextStyle(
-          fontFamily: iconData.fontFamily,
-          fontSize: size,
-          color: color,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    );
-    iconPainter.layout();
-    iconPainter.paint(canvas, Offset.zero);
-    final picture = recorder.endRecording();
-    final image = await picture.toImage(size.toInt(), size.toInt());
-    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-    if (bytes == null) throw Exception('Failed to render marker icon');
-    final uint8List = bytes.buffer.asUint8List();
-
-    // Cache the icon
-    _iconCache[color] = uint8List;
-
-    return Marker(
-      point: LatLng(stop.latitude, stop.longitude),
-      width: size,
-      height: size,
-      rotate: false,
-      child: StopMarker(
-        iconBytes: uint8List,
-        onTap: () {
-          if (widget.onStopSelected != null) {
-            widget.onStopSelected!(stop);
-          }
-        },
-        rotationNotifier: _rotationNotifier,
-      ),
-    );
   }
 
   Future<List<Marker>> _buildStopMarkers() async {
@@ -319,7 +173,13 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
       final isSelected = widget.selectedStop != null &&
           stop.stopId == widget.selectedStop!.stopId &&
           stop.routeId == widget.selectedStop!.routeId;
-      final marker = await _buildMarker(stop, isSelected);
+      final marker = await MarkerProcessing.buildMarker(
+        context: context,
+        stop: stop,
+        isSelected: isSelected,
+        rotationNotifier: _rotationNotifier,
+        onStopSelected: widget.onStopSelected,
+      );
       markers.add(marker);
     }
     return markers;
@@ -377,13 +237,13 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
               right: 16.0,
               bottom: screenHeight * 0.32,
               child: AnimatedOpacity(
-                opacity: !_isUserCentered && _currentLocation != null ? 1.0 : 0.0,
+                opacity: _showLocateMeFab ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 200),
                 child: FloatingActionButton.small(
                   onPressed: _recenterMap,
-                  child: const Icon(Icons.near_me),
                   foregroundColor: colorScheme.onSecondaryContainer,
                   backgroundColor: colorScheme.secondaryContainer,
+                  child: const Icon(Icons.near_me),
                 ),
               ),
             ),

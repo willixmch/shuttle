@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:shuttle/components/estate_filter_sheet.dart';
-import 'package:shuttle/components/home_bar.dart';
-import 'package:shuttle/components/sliding_schedule_panel.dart';
-import 'package:shuttle/components/stop_filter_sheet.dart';
+import 'package:shuttle/ui/estate_filter_sheet.dart';
+import 'package:shuttle/ui/home_bar.dart';
+import 'package:shuttle/ui/sliding_schedule_panel.dart';
+import 'package:shuttle/ui/stop_filter_sheet.dart';
 import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/pages/leaflet_map.dart';
