@@ -25,71 +25,69 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
     return Container(
       color: colorScheme.surface,
       child: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                height: toolbarHeight - 20,
-                child: GestureDetector(
-                  onTap: estateOnTap,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      spacing: 4,
-                      children: [
-                        Text(
-                          estateTitle,
-                          style: textTheme.headlineSmall!.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        Icon(
-                          Icons.import_export,
-                          size: 24,
-                          color: colorScheme.outlineVariant,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: toolbarHeight,
-                child: GestureDetector(
-                  onTap: locationOnTap,
+        bottom: false,
+        minimum: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SizedBox(
+              height: toolbarHeight - 20,
+              child: GestureDetector(
+                onTap: estateOnTap,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     spacing: 4,
                     children: [
-                      Lottie.asset(
-                        'lib/assets/pulsing_pin.json',
-                        width: 28,          
-                        height: 28,
-                        fit: BoxFit.contain,
-                        repeat: true,
-                        reverse: false,
-                      ),
                       Text(
-                        stopTitle,
-                        style: textTheme.labelLarge!.copyWith(
-                          color: colorScheme.onSurface,
+                        estateTitle,
+                        style: textTheme.headlineSmall!.copyWith(
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                       Icon(
-                        Icons.arrow_drop_down_rounded,
-                        size: 20,
-                        color: colorScheme.onSurface,
+                        Icons.import_export,
+                        size: 24,
+                        color: colorScheme.outlineVariant,
                       ),
                     ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+            SizedBox(
+              height: toolbarHeight,
+              child: GestureDetector(
+                onTap: locationOnTap,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 4,
+                  children: [
+                    Lottie.asset(
+                      'lib/assets/pulsing_pin.json',
+                      width: 28,          
+                      height: 28,
+                      fit: BoxFit.contain,
+                      repeat: true,
+                      reverse: false,
+                    ),
+                    Text(
+                      stopTitle,
+                      style: textTheme.labelLarge!.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_drop_down_rounded,
+                      size: 20,
+                      color: colorScheme.onSurface,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
