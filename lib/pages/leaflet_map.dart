@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:flutter_map_cache/flutter_map_cache.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
@@ -9,6 +9,8 @@ import 'package:shuttle/services/location_service.dart';
 import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/models/stop.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:http_cache_file_store/http_cache_file_store.dart';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 
@@ -78,6 +80,8 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   static final Map<Color, Uint8List> _iconCache = {};
   late final ValueNotifier<double> _rotationNotifier;
+  CachedTileProvider? _tileProvider;
+  late final Future<void> _tileProviderFuture;
 
   @override
   void initState() {
@@ -87,6 +91,10 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
       vsync: this,
     );
     _rotationNotifier = ValueNotifier<double>(0.0);
+
+    // Initialize tile caching and store the future
+    _tileProviderFuture = _initializeTileCaching();
+
     _startLocationUpdates();
     _loadEstateStops();
     // Animate to selectedStop if available
@@ -108,6 +116,18 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         _rotationNotifier.value = _mapController.mapController.camera.rotation;
       }
     });
+  }
+
+  Future<void> _initializeTileCaching() async {
+    // Get cache directory
+    final cacheDir = await getTemporaryDirectory();
+    // Initialize FileCacheStore
+    final cacheStore = FileCacheStore(cacheDir.path);
+    // Set up CachedTileProvider
+    _tileProvider = CachedTileProvider(
+      store: cacheStore,
+      maxStale: const Duration(days: 30), // Cache tiles for 30 days
+    );
   }
 
   @override
@@ -310,56 +330,66 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     final colorScheme = Theme.of(context).colorScheme;
     final double screenHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
 
-    return Stack(
-      children: [
-        FlutterMap(
-          mapController: _mapController.mapController,
-          options: MapOptions(
-            initialCenter: LatLng(37.7749, -122.4194), // Default fallback
-            initialZoom: 12.0, // Default fallback zoom
-            maxZoom: 19.0,
-            minZoom: 3.0,
-            interactionOptions: widget.isDraggingPanel
-                ? const InteractionOptions(flags: InteractiveFlag.none)
-                : const InteractionOptions(flags: InteractiveFlag.all),
-          ),
+    return FutureBuilder<void>(
+      future: _tileProviderFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done || _tileProvider == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return Stack(
           children: [
-            TileLayer(
-              urlTemplate: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-              subdomains: ['abcd'],
-              maxZoom: 19,
-              retinaMode: RetinaMode.isHighDensity(context),
+            FlutterMap(
+              mapController: _mapController.mapController,
+              options: MapOptions(
+                initialCenter: LatLng(37.7749, -122.4194), // Default fallback
+                initialZoom: 12.0, // Default fallback zoom
+                maxZoom: 19.0,
+                minZoom: 3.0,
+                interactionOptions: widget.isDraggingPanel
+                    ? const InteractionOptions(flags: InteractiveFlag.none)
+                    : const InteractionOptions(flags: InteractiveFlag.all),
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+                  subdomains: ['abcd'],
+                  maxZoom: 19,
+                  retinaMode: RetinaMode.isHighDensity(context),
+                  tileProvider: _tileProvider!, // Use cached tile provider
+                ),
+                CurrentLocationLayer(
+                  positionStream: _positionStream?.map(
+                    (position) => LocationMarkerPosition(
+                      latitude: position.latitude,
+                      longitude: position.longitude,
+                      accuracy: position.accuracy,
+                    ),
+                  ),
+                  style: const LocationMarkerStyle(
+                    markerSize: Size(20, 20),
+                  ),
+                ),
+                MarkerLayer(markers: _cachedMarkers),
+              ],
             ),
-            CurrentLocationLayer(
-              positionStream: _positionStream?.map(
-                (position) => LocationMarkerPosition(
-                  latitude: position.latitude,
-                  longitude: position.longitude,
-                  accuracy: position.accuracy,
+            Positioned(
+              right: 16.0,
+              bottom: screenHeight * 0.32,
+              child: AnimatedOpacity(
+                opacity: !_isUserCentered && _currentLocation != null ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 200),
+                child: FloatingActionButton.small(
+                  onPressed: _recenterMap,
+                  child: const Icon(Icons.near_me),
+                  foregroundColor: colorScheme.onSecondaryContainer,
+                  backgroundColor: colorScheme.secondaryContainer,
                 ),
               ),
-              style: const LocationMarkerStyle(
-                markerSize: Size(20, 20),
-              ),
             ),
-            MarkerLayer(markers: _cachedMarkers),
           ],
-        ),
-        Positioned(
-          right: 16.0,
-          bottom: screenHeight * 0.32,
-          child: AnimatedOpacity(
-            opacity: !_isUserCentered && _currentLocation != null ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 200),
-            child: FloatingActionButton.small(
-              onPressed: _recenterMap,
-              child: const Icon(Icons.near_me),
-              foregroundColor: colorScheme.onSecondaryContainer,
-              backgroundColor: colorScheme.secondaryContainer,
-            ),
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
