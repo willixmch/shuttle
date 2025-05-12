@@ -23,7 +23,7 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> with WidgetsBindingObserver {
+class _HomeState extends State<Home> {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   final PersistenceEstate _persistenceEstate = PersistenceEstate();
   final LocationService _locationService = LocationService();
@@ -35,7 +35,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   Stop? _selectedStop;
   int? _expandedCardIndex;
   Position? _userPosition;
-  DateTime? _backgroundTime;
 
   final PanelController _panelController = PanelController();
   final double _minHeightFraction = 0.2;
@@ -51,7 +50,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _panelController.open();
     });
-    WidgetsBinding.instance.addObserver(this);
     DayTypeChecker.initialize();
     _etaNotifier = ValueNotifier<List<Map<String, dynamic>>>([]);
     _etaRefreshTimer = EtaRefreshTimer(
@@ -66,34 +64,17 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       getRouteData: () => _cachedRouteData,
       getEffectiveStop: () => _selectedStop,
     );
-    _loadInitialData();
+    _loadSchedule();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _etaRefreshTimer.dispose();
     _etaNotifier.dispose();
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      _backgroundTime = DateTime.now();
-    } else if (state == AppLifecycleState.resumed) {
-      if (_backgroundTime != null) {
-        final duration = DateTime.now().difference(_backgroundTime!);
-        if (duration.inMinutes >= 30) {
-          _selectedStop = null;
-          _loadInitialData();
-        }
-      }
-      _backgroundTime = null;
-    }
-  }
-
-  Future<void> _loadInitialData() async {
+  Future<void> _loadSchedule() async {
     final persistenceEstate = await _persistenceEstate.loadPersistenceEstate();
     if (mounted && persistenceEstate['estate'] != null) {
       setState(() {
@@ -150,7 +131,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               _selectedStop = null;
               _expandedCardIndex = null;
             });
-            await _loadInitialData();
+            await _loadSchedule();
             await _panelController.open();
           },
         );
@@ -172,7 +153,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               _selectedStop = stop;
               _expandedCardIndex = null;
             });
-            await _loadInitialData();
+            await _loadSchedule();
           },
         );
       },
@@ -222,7 +203,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                     _selectedStop = stop;
                     _expandedCardIndex = null;
                   });
-                  await _loadInitialData();
+                  await _loadSchedule();
                   await _panelController.open();
                 }
               },
