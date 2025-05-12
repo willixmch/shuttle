@@ -22,8 +22,8 @@ class ShuttleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
-    final typescale = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return GestureDetector(
       onTap: onToggle,
@@ -33,7 +33,7 @@ class ShuttleCard extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(12),
         decoration: ShapeDecoration(
-          color: color.surfaceContainer,
+          color: colorScheme.surfaceContainer,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
@@ -50,15 +50,15 @@ class ShuttleCard extends StatelessWidget {
                 // Route
                 Text(
                   route,
-                  style: typescale.titleMedium!.copyWith(
-                    color: color.onSurfaceVariant,
+                  style: textTheme.titleMedium!.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
                 // Info
                 Text(
                   info,
-                  style: typescale.bodyMedium!.copyWith(
-                    color: color.onSurfaceVariant,
+                  style: textTheme.bodyMedium!.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -70,8 +70,8 @@ class ShuttleCard extends StatelessWidget {
               builder: (context, etaValue, child) {
                 return Text(
                   etaValue,
-                  style: typescale.titleLarge!.copyWith(
-                    color: color.onSurface,
+                  style: textTheme.titleLarge!.copyWith(
+                    color: colorScheme.onSurface,
                   ),
                 );
               },
@@ -99,8 +99,8 @@ class ShuttleCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             '稍後班次',
-                            style: typescale.labelSmall!.copyWith(
-                              color: color.onSurfaceVariant,
+                            style: textTheme.labelSmall!.copyWith(
+                              color: colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -122,15 +122,15 @@ class ShuttleCard extends StatelessWidget {
                                       alignment: Alignment.center,
                                       child: VerticalDivider(
                                         width: 1,
-                                        color: color.outlineVariant,
+                                        color: colorScheme.outlineVariant,
                                       ),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(vertical: 4),
                                       child: Text(
                                         '- 分鐘',
-                                        style: typescale.bodyLarge!.copyWith(
-                                          color: color.onSurface,
+                                        style: textTheme.bodyLarge!.copyWith(
+                                          color: colorScheme.onSurface,
                                         ),
                                       ),
                                     ),
@@ -145,15 +145,15 @@ class ShuttleCard extends StatelessWidget {
                                       alignment: Alignment.center,
                                       child: VerticalDivider(
                                         width: 1,
-                                        color: color.outlineVariant,
+                                        color: colorScheme.outlineVariant,
                                       ),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(vertical: 4),
                                       child: Text(
                                         '- 分鐘',
-                                        style: typescale.bodyLarge!.copyWith(
-                                          color: color.onSurface,
+                                        style: textTheme.bodyLarge!.copyWith(
+                                          color: colorScheme.onSurface,
                                         ),
                                       ),
                                     ),
@@ -172,15 +172,15 @@ class ShuttleCard extends StatelessWidget {
                                   alignment: Alignment.center,
                                   child: VerticalDivider(
                                     width: 1,
-                                    color: color.outlineVariant,
+                                    color: colorScheme.outlineVariant,
                                   ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 4),
                                   child: Text(
                                     eta,
-                                    style: typescale.bodyLarge!.copyWith(
-                                      color: color.onSurface,
+                                    style: textTheme.bodyLarge!.copyWith(
+                                      color: colorScheme.onSurface,
                                     ),
                                   ),
                                 ),

@@ -14,8 +14,8 @@ class StopFilterSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
-    final typescale = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.8,
@@ -24,7 +24,7 @@ class StopFilterSheet extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-            child: Text('車站', style: typescale.labelLarge?.copyWith(color: color.onSurfaceVariant)),
+            child: Text('車站', style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurfaceVariant)),
           ),
           Expanded(
             child: FutureBuilder<List<Stop>>(
@@ -46,7 +46,7 @@ class StopFilterSheet extends StatelessWidget {
                     // Each stop is a tappable tile
                     return ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 24),
-                      title: Text(stop.stopNameZh, style: typescale.titleMedium?.copyWith(color: color.onSurface)),
+                      title: Text(stop.stopNameZh, style: textTheme.titleMedium?.copyWith(color: colorScheme.onSurface)),
                       onTap: () {
                         onStopSelected(stop);
                         Navigator.pop(context);

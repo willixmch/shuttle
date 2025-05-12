@@ -65,8 +65,8 @@ class _EstateFilterSheetState extends State<EstateFilterSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme; 
-    final typescale = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme; 
+    final textTheme = Theme.of(context).textTheme;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16), // Padding for content
@@ -79,7 +79,7 @@ class _EstateFilterSheetState extends State<EstateFilterSheet> {
             focusNode: _searchFocusNode, // Manages focus
             hintText: '搜尋屋苑...', // Placeholder text
             leading: const Icon(Icons.search), // Search icon
-            textStyle: WidgetStatePropertyAll(typescale.bodyLarge), // Text style
+            textStyle: WidgetStatePropertyAll(textTheme.bodyLarge), // Text style
             padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 16.0)), // Inner padding
             elevation: const WidgetStatePropertyAll(0.0), // No shadow
           ),
@@ -98,11 +98,11 @@ class _EstateFilterSheetState extends State<EstateFilterSheet> {
                             contentPadding: const EdgeInsets.symmetric(horizontal: 8.0), // Item padding
                             title: Text(
                               estate.estateTitleEn, // English title
-                              style: typescale.bodyLarge?.copyWith(color: color.onSurfaceVariant),
+                              style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
                             ),
                             subtitle: Text(
                               estate.estateTitleZh, // Chinese title
-                              style: typescale.titleMedium?.copyWith(color: color.onSurface),
+                              style: textTheme.titleMedium?.copyWith(color: colorScheme.onSurface),
                             ),
                             onTap: () {
                               widget.onEstateSelected(estate); // Call callback

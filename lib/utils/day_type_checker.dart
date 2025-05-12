@@ -17,7 +17,6 @@ class DayTypeChecker {
         return DateTime.parse(dateStr);
       }).toList();
     } catch (e) {
-      print('Error loading holiday data: $e');
       _holidays = [];
     }
   }

@@ -204,7 +204,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   Future<Marker> _buildMarker(Stop stop, bool isSelected) async {
     final icon = Icons.pin_drop;
     final color = isSelected
-        ? Theme.of(context).colorScheme.primary
+        ? Theme.of(context).colorScheme.primaryContainer
         : Theme.of(context).colorScheme.onSurfaceVariant;
     const size = 40.0;
 
@@ -284,6 +284,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme; 
     final double screenHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
 
     return Stack(
@@ -332,6 +333,8 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
             child: FloatingActionButton.small(
               onPressed: _recenterMap,
               child: const Icon(Icons.near_me),
+              foregroundColor: colorScheme.onSecondaryContainer,
+              backgroundColor: colorScheme.secondaryContainer,
             ),
           ),
         ),

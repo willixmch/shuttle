@@ -2,7 +2,7 @@ import 'package:shuttle/data/NR818_golden_time_villa.dart';
 import 'package:shuttle/data/nr810_parc_royal.dart';
 import 'package:shuttle/data/nr819_granville_garden.dart';
 import 'package:shuttle/data/nr820_shatin_heights.dart';
-import 'package:shuttle/data/nr822_vistaIparadiso.dart';
+import 'package:shuttle/data/nr822_vista_paradiso.dart';
 import 'package:shuttle/data/nr826_villa_athena.dart';
 import 'package:shuttle/data/nr83_kwong_yuen_estate.dart';
 import 'package:shuttle/data/nr817_lakeview_garden.dart';

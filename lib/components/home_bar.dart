@@ -19,13 +19,13 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
-    final typescale = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      color: color.surface,
+      color: colorScheme.surface,
       child: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+        minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
         child: Align(
           alignment: Alignment.centerLeft,
           child: Row(
@@ -43,14 +43,14 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
                       children: [
                         Text(
                           estateTitle,
-                          style: typescale.headlineSmall!.copyWith(
-                            color: color.onSurfaceVariant,
+                          style: textTheme.headlineSmall!.copyWith(
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                         Icon(
                           Icons.import_export,
                           size: 24,
-                          color: color.outlineVariant,
+                          color: colorScheme.outlineVariant,
                         ),
                       ],
                     ),
@@ -75,14 +75,14 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
                       ),
                       Text(
                         stopTitle,
-                        style: typescale.labelLarge!.copyWith(
-                          color: color.onSurface,
+                        style: textTheme.labelLarge!.copyWith(
+                          color: colorScheme.onSurface,
                         ),
                       ),
                       Icon(
                         Icons.arrow_drop_down_rounded,
                         size: 20,
-                        color: color.onSurface,
+                        color: colorScheme.onSurface,
                       ),
                     ],
                   ),

@@ -22,11 +22,11 @@ class SlidingSchedulePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       decoration: BoxDecoration(
-        color: color.surface,
+        color: colorScheme.surface,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(28),
           topRight: Radius.circular(28),
@@ -40,7 +40,7 @@ class SlidingSchedulePanel extends StatelessWidget {
             width: 32,
             margin: const EdgeInsets.only(top: 16),
             decoration: BoxDecoration(
-              color: color.outline,
+              color: colorScheme.outline,
               borderRadius: BorderRadius.circular(10),
             ),
           ),
