@@ -71,8 +71,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   Stream<Position>? _positionStream;
   LatLng? _currentLocation;
   static const double _userZoomLevel = 18.0;
-  bool _isMapCentered = true;
-  final double _fabBottomPadding = 0.24;
+  bool _isUserCentered = false; // Initialize as false to show FAB initially
   List<Stop> _estateStops = [];
   List<Marker> _cachedMarkers = [];
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
@@ -89,9 +88,20 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     _rotationNotifier = ValueNotifier<double>(0.0);
     _startLocationUpdates();
     _loadEstateStops();
+    // Animate to selectedStop if available
+    if (widget.selectedStop != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _mapController.animateTo(
+          dest: LatLng(widget.selectedStop!.latitude, widget.selectedStop!.longitude),
+          zoom: _userZoomLevel,
+          duration: const Duration(milliseconds: 500),
+        );
+        _checkIfUserCentered(); // Check centering after animation
+      });
+    }
     _mapController.mapController.mapEventStream.listen((event) {
       if (event is MapEventMove || event is MapEventMoveEnd) {
-        _checkIfMapCentered();
+        _checkIfUserCentered();
       }
       if (event is MapEventRotate || event is MapEventRotateEnd) {
         _rotationNotifier.value = _mapController.mapController.camera.rotation;
@@ -105,6 +115,17 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     if (oldWidget.selectedEstate != widget.selectedEstate ||
         oldWidget.selectedStop != widget.selectedStop) {
       _loadEstateStops();
+      // Animate to new selectedStop if it changes
+      if (widget.selectedStop != null &&
+          (oldWidget.selectedStop?.stopId != widget.selectedStop!.stopId ||
+              oldWidget.selectedStop?.routeId != widget.selectedStop!.routeId)) {
+        _mapController.animateTo(
+          dest: LatLng(widget.selectedStop!.latitude, widget.selectedStop!.longitude),
+          zoom: _userZoomLevel,
+          duration: const Duration(milliseconds: 500),
+        );
+        _checkIfUserCentered(); // Check centering after animation
+      }
     }
   }
 
@@ -155,7 +176,8 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
             _currentLocation = LatLng(position.latitude, position.longitude);
           });
 
-          if (_currentLocation != null && _isMapCentered) {
+          // Only animate to user location if no selectedStop and map is centered on user
+          if (_currentLocation != null && _isUserCentered && widget.selectedStop == null) {
             _mapController.animateTo(
               dest: _currentLocation!,
               zoom: _userZoomLevel,
@@ -163,16 +185,16 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
             );
           }
 
-          _checkIfMapCentered();
+          _checkIfUserCentered();
         }
       });
     }
   }
 
-  void _checkIfMapCentered() {
+  void _checkIfUserCentered() {
     if (_currentLocation == null) {
       setState(() {
-        _isMapCentered = false;
+        _isUserCentered = false;
       });
       return;
     }
@@ -183,7 +205,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         (mapCenter.longitude - _currentLocation!.longitude).abs() < threshold;
 
     setState(() {
-      _isMapCentered = isCentered;
+      _isUserCentered = isCentered;
     });
   }
 
@@ -196,7 +218,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         duration: const Duration(milliseconds: 1000),
       );
       setState(() {
-        _isMapCentered = true;
+        _isUserCentered = true;
       });
     }
   }
@@ -284,7 +306,7 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme; 
+    final colorScheme = Theme.of(context).colorScheme;
     final double screenHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
 
     return Stack(
@@ -292,10 +314,8 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         FlutterMap(
           mapController: _mapController.mapController,
           options: MapOptions(
-            initialCenter: widget.userPosition != null
-                ? LatLng(widget.userPosition!.latitude, widget.userPosition!.longitude)
-                : LatLng(37.7749, -122.4194),
-            initialZoom: widget.userPosition != null ? _userZoomLevel : 12.0,
+            initialCenter: LatLng(37.7749, -122.4194), // Default fallback
+            initialZoom: 12.0, // Default fallback zoom
             maxZoom: 20.0,
             minZoom: 3.0,
             interactionOptions: widget.isDraggingPanel
@@ -326,9 +346,9 @@ class _LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         ),
         Positioned(
           right: 16.0,
-          bottom: screenHeight * _fabBottomPadding,
+          bottom: screenHeight * 0.32,
           child: AnimatedOpacity(
-            opacity: !_isMapCentered && _currentLocation != null ? 1.0 : 0.0,
+            opacity: !_isUserCentered && _currentLocation != null ? 1.0 : 0.0,
             duration: const Duration(milliseconds: 200),
             child: FloatingActionButton.small(
               onPressed: _recenterMap,

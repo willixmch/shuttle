@@ -37,7 +37,7 @@ class _HomeState extends State<Home> {
   Position? _userPosition;
 
   final PanelController _panelController = PanelController();
-  final double _minHeightFraction = 0.2;
+  final double _minHeightFraction = 0.28;
   final double _maxHeightFraction = 1.0;
   final double _overlapAmount = 20.0;
   bool _isDraggingPanel = false;
@@ -132,7 +132,6 @@ class _HomeState extends State<Home> {
               _expandedCardIndex = null;
             });
             await _loadSchedule();
-            await _panelController.open();
           },
         );
       },
@@ -162,7 +161,10 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
+    final double screenHeight =
+        MediaQuery.of(context).size.height -
+        kToolbarHeight -
+        MediaQuery.of(context).padding.top;
     final double minHeight = screenHeight * _minHeightFraction;
     final double maxHeight = screenHeight * _maxHeightFraction + _overlapAmount;
 
@@ -204,7 +206,6 @@ class _HomeState extends State<Home> {
                     _expandedCardIndex = null;
                   });
                   await _loadSchedule();
-                  await _panelController.open();
                 }
               },
             ),
