@@ -23,6 +23,7 @@ class SlidingSchedulePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Container(
       decoration: BoxDecoration(
@@ -92,6 +93,14 @@ class SlidingSchedulePanel extends StatelessWidget {
               },
             ),
           ),
+          // Discalimer
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 40),
+            child: Text(
+              '總站班次時間由營運商提供，分站到達時間為預估，僅供參考', 
+              style: textTheme.labelMedium!.copyWith(color: colorScheme.outline,),
+            ),
+          )
         ],
       ),
     );

@@ -96,6 +96,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         _mapController.animateTo(
           dest: LatLng(widget.selectedStop!.latitude, widget.selectedStop!.longitude),
           zoom: _userZoomLevel,
+          rotation: 0,
           duration: const Duration(milliseconds: 500),
         );
       }
