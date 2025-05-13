@@ -11,8 +11,8 @@ class MaterialTheme {
       primary: Color(0xFF00677F),
       surfaceTint: Color(0xFF00677F),
       onPrimary: Color(0xFFFFFFFF),
-      primaryContainer: Color(0xFFBDD8DE),
-      onPrimaryContainer: Color(0xFF005366),
+      primaryContainer: Color(0xFF35AFD1),
+      onPrimaryContainer: Color(0xFF001921),
       secondary: Color(0xFF3E6471),
       onSecondary: Color(0xFFFFFFFF),
       secondaryContainer: Color(0xFFC3EAFA),
@@ -56,7 +56,7 @@ class MaterialTheme {
       surfaceContainerLow: Color(0xFFF0F4F7),
       surfaceContainer: Color(0xFFEAEEF1),
       surfaceContainerHigh: Color(0xFFE4E9EB),
-      surfaceContainerHighest: Color(0xFFDADEE2),
+      surfaceContainerHighest: Color(0xFFDFE3E6),
     );
   }
 

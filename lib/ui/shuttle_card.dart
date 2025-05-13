@@ -83,7 +83,7 @@ class ShuttleCard extends StatelessWidget {
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
                 height: isExpanded
-                    ? (upcomingEta.value.isEmpty ? 2 * 32.0 + 40.0 : upcomingEta.value.length * 32.0 + 40.0)
+                    ? (upcomingEta.value.isEmpty ? 2 * 32.0 + 100.0  : upcomingEta.value.length * 32.0 + 100.0)
                     : 0.0,
                 // Content
                 child: SingleChildScrollView(
@@ -189,6 +189,37 @@ class ShuttleCard extends StatelessWidget {
                           );
                         },
                       ),
+                      // BTNs RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Row(
+                          spacing: 12,
+                          children: [
+                            Expanded(
+                              child: FilledButton.icon(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: colorScheme.surfaceContainerHighest,
+                                  foregroundColor: colorScheme.onSurfaceVariant,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
+                                onPressed: () {}, 
+                                label: Text('路線詳情'),
+                                icon: Icon(Icons.route)
+                              )
+                            ),
+                            Expanded(
+                              child: FilledButton.icon(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: colorScheme.primaryContainer,
+                                  foregroundColor: colorScheme.onPrimaryContainer,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
+                                onPressed: () {}, 
+                                label: Text('時間表'),
+                                icon: Icon(Icons.table_view)
+                              )
+                            )
+                          ],
+                        ),
+                      )
                     ],
                   ),
                 ),
