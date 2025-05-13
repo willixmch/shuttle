@@ -165,7 +165,7 @@ const theRegentData = {
     {
       'routeId': 'NR538-C',
       'routeName': 'C 線',
-      'info': '由天鑽(第 9 座)開出',
+      'info': '由天鑽第9座開出',
       'schedules': {
         'workday': [
           '06:35', '07:05', '07:30', '07:55', '08:20', '08:45',
