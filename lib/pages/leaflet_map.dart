@@ -10,13 +10,14 @@ import 'package:shuttle/services/map_tile_cache.dart';
 import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/services/database_helper.dart';
-import 'package:shuttle/ui/stop_marker.dart';
+import 'package:shuttle/ui/stop_marker_widget.dart';
 
 class LeafletMap extends StatefulWidget {
   final bool isDraggingPanel;
   final Position? userPosition;
   final Estate? selectedEstate;
   final Stop? selectedStop;
+  final ValueChanged<Stop>? onStopSelected; // New callback
 
   const LeafletMap({
     super.key,
@@ -24,6 +25,7 @@ class LeafletMap extends StatefulWidget {
     this.userPosition,
     this.selectedEstate,
     this.selectedStop,
+    this.onStopSelected,
   });
 
   @override
@@ -183,8 +185,11 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                   markers: _stops.map((stop) {
                     return Marker(
                       point: LatLng(stop.latitude, stop.longitude),
-                      child: StopMarkerWidget(
-                        selected: widget.selectedStop?.stopId == stop.stopId,
+                      child: GestureDetector(
+                        onTap: () => widget.onStopSelected?.call(stop),
+                        child: StopMarkerWidget(
+                          selected: widget.selectedStop?.stopId == stop.stopId,
+                        ),
                       ),
                       width: 32,
                       height: 32,

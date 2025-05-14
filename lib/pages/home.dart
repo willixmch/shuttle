@@ -173,28 +173,34 @@ class HomeState extends State<Home> {
             minHeight: minHeight,
             maxHeight: maxHeight,
             snapPoint: null,
-            panelBuilder:
-                (scrollController) => SlidingSchedulePanel(
-                  scrollController: scrollController,
-                  overlapAmount: _overlapAmount,
-                  routeData: _cachedRouteData,
-                  etaNotifier: _etaNotifier,
-                  expandedCardIndex: _expandedCardIndex,
-                  onToggleCard: (index) {
-                    setState(() {
-                      if (_expandedCardIndex == index) {
-                        _expandedCardIndex = null;
-                      } else {
-                        _expandedCardIndex = index;
-                      }
-                    });
-                  },
-                ),
+            panelBuilder: (scrollController) => SlidingSchedulePanel(
+              scrollController: scrollController,
+              overlapAmount: _overlapAmount,
+              routeData: _cachedRouteData,
+              etaNotifier: _etaNotifier,
+              expandedCardIndex: _expandedCardIndex,
+              onToggleCard: (index) {
+                setState(() {
+                  if (_expandedCardIndex == index) {
+                    _expandedCardIndex = null;
+                  } else {
+                    _expandedCardIndex = index;
+                  }
+                });
+              },
+            ),
             body: LeafletMap(
               isDraggingPanel: _isDraggingPanel,
               userPosition: _userPosition,
               selectedEstate: _selectedEstate,
               selectedStop: _selectedStop,
+              onStopSelected: (Stop stop) {
+                setState(() {
+                  _selectedStop = stop;
+                  _expandedCardIndex = null;
+                });
+                _loadSchedule();
+              },
             ),
             onPanelSlide: (position) {
               setState(() {
