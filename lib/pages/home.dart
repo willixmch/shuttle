@@ -193,6 +193,8 @@ class HomeState extends State<Home> {
             body: LeafletMap(
               isDraggingPanel: _isDraggingPanel,
               userPosition: _userPosition,
+              selectedEstate: _selectedEstate,
+              selectedStop: _selectedStop,
             ),
             onPanelSlide: (position) {
               setState(() {

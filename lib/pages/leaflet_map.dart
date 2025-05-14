@@ -7,15 +7,23 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:shuttle/services/location_service.dart';
 import 'package:shuttle/services/map_tile_cache.dart';
+import 'package:shuttle/models/estate.dart';
+import 'package:shuttle/models/stop.dart';
+import 'package:shuttle/services/database_helper.dart';
+import 'package:shuttle/ui/stop_marker.dart';
 
 class LeafletMap extends StatefulWidget {
   final bool isDraggingPanel;
   final Position? userPosition;
+  final Estate? selectedEstate;
+  final Stop? selectedStop;
 
   const LeafletMap({
     super.key,
     required this.isDraggingPanel,
     this.userPosition,
+    this.selectedEstate,
+    this.selectedStop,
   });
 
   @override
@@ -27,10 +35,12 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   Stream<Position>? _positionStream;
   LatLng? _currentLocation;
   static const double _userZoomLevel = 18.0;
-  bool _showLocateMeFab = true; // Show FAB by default
+  bool _showLocateMeFab = true;
   late final ValueNotifier<double> _rotationNotifier;
   CachedTileProvider? _tileProvider;
   late final Future<void> _tileProviderFuture;
+  List<Stop> _stops = [];
+  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   @override
   void initState() {
@@ -41,23 +51,46 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     );
     _rotationNotifier = ValueNotifier<double>(0.0);
 
-    // Initialize tile caching and store the future
     _tileProviderFuture = MapTileCache.initializeTileCaching().then((provider) {
       _tileProvider = provider;
     });
 
     _startLocationUpdates();
+    _fetchStops();
 
     _mapController.mapController.mapEventStream.listen((event) {
       if (event is MapEventMove || event is MapEventMoveEnd) {
         setState(() {
-          _showLocateMeFab = true; // Show FAB when map is moved
+          _showLocateMeFab = true;
         });
       }
       if (event is MapEventRotate || event is MapEventRotateEnd) {
         _rotationNotifier.value = _mapController.mapController.camera.rotation;
       }
     });
+  }
+
+  @override
+  void didUpdateWidget(LeafletMap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedEstate?.estateId != widget.selectedEstate?.estateId) {
+      _fetchStops();
+    }
+  }
+
+  Future<void> _fetchStops() async {
+    if (widget.selectedEstate != null) {
+      final stops = await _dbHelper.getStopsForEstate(widget.selectedEstate!.estateId);
+      if (mounted) {
+        setState(() {
+          _stops = stops;
+        });
+      }
+    } else {
+      setState(() {
+        _stops = [];
+      });
+    }
   }
 
   @override
@@ -96,7 +129,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         duration: const Duration(milliseconds: 1000),
       );
       setState(() {
-        _showLocateMeFab = false; // Hide FAB after recentering
+        _showLocateMeFab = false;
       });
     }
   }
@@ -118,8 +151,8 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
             FlutterMap(
               mapController: _mapController.mapController,
               options: MapOptions(
-                initialCenter: LatLng(37.7749, -122.4194), // Default fallback
-                initialZoom: 12.0, // Default fallback zoom
+                initialCenter: LatLng(37.7749, -122.4194), // Will update in Step 6
+                initialZoom: 12.0,
                 maxZoom: 19.0,
                 minZoom: 3.0,
                 interactionOptions: widget.isDraggingPanel
@@ -132,7 +165,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                   subdomains: ['abcd'],
                   maxZoom: 19,
                   retinaMode: RetinaMode.isHighDensity(context),
-                  tileProvider: _tileProvider!, // Use cached tile provider
+                  tileProvider: _tileProvider!,
                 ),
                 CurrentLocationLayer(
                   positionStream: _positionStream?.map(
@@ -145,6 +178,18 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                   style: const LocationMarkerStyle(
                     markerSize: Size(20, 20),
                   ),
+                ),
+                MarkerLayer(
+                  markers: _stops.map((stop) {
+                    return Marker(
+                      point: LatLng(stop.latitude, stop.longitude),
+                      child: StopMarkerWidget(
+                        selected: widget.selectedStop?.stopId == stop.stopId,
+                      ),
+                      width: 32,
+                      height: 32,
+                    );
+                  }).toList(),
                 ),
               ],
             ),
