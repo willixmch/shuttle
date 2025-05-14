@@ -75,8 +75,19 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(LeafletMap oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedEstate?.estateId != widget.selectedEstate?.estateId) {
+    if (oldWidget.selectedEstate?.estateId != widget.selectedEstate?.estateId ||
+        oldWidget.selectedStop?.stopId != widget.selectedStop?.stopId) {
       _fetchStops();
+      // Animate to new selected stop if it changed
+      if (widget.selectedStop != null &&
+          widget.selectedStop!.stopId != oldWidget.selectedStop?.stopId) {
+        _mapController.animateTo(
+          dest: LatLng(widget.selectedStop!.latitude, widget.selectedStop!.longitude),
+          zoom: _userZoomLevel,
+          rotation: 0,
+          duration: const Duration(milliseconds: 1000),
+        );
+      }
     }
   }
 
@@ -141,6 +152,14 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     final colorScheme = Theme.of(context).colorScheme;
     final double screenHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
 
+    // Determine initial center and zoom
+    final initialCenter = widget.selectedStop != null
+        ? LatLng(widget.selectedStop!.latitude, widget.selectedStop!.longitude)
+        : widget.userPosition != null
+            ? LatLng(widget.userPosition!.latitude, widget.userPosition!.longitude)
+            : const LatLng(22.3964, 114.1095); // Updated fallback to Hong Kong
+    final initialZoom = widget.selectedStop != null ? _userZoomLevel : 12.0;
+
     return FutureBuilder<void>(
       future: _tileProviderFuture,
       builder: (context, snapshot) {
@@ -153,8 +172,9 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
             FlutterMap(
               mapController: _mapController.mapController,
               options: MapOptions(
-                initialCenter: LatLng(37.7749, -122.4194), // Will update in Step 6
-                initialZoom: 12.0,
+                initialCenter: initialCenter,
+                initialZoom: initialZoom,
+                initialRotation: 0.0, // Ensure north-up on init
                 maxZoom: 19.0,
                 minZoom: 3.0,
                 interactionOptions: widget.isDraggingPanel
