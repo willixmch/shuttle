@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class StopMarkerWidget extends StatelessWidget {
+class StopMarker extends StatelessWidget {
   final bool selected;
 
-  const StopMarkerWidget({
+  const StopMarker({
     super.key,
     required this.selected,
   });

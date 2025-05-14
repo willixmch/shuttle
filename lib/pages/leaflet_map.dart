@@ -10,7 +10,7 @@ import 'package:shuttle/services/map_tile_cache.dart';
 import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/services/database_helper.dart';
-import 'package:shuttle/ui/stop_marker_widget.dart';
+import 'package:shuttle/ui/stop_marker.dart';
 
 class LeafletMap extends StatefulWidget {
   final bool isDraggingPanel;
@@ -180,7 +180,9 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                 minZoom: 3.0,
                 interactionOptions: widget.isDraggingPanel
                     ? const InteractionOptions(flags: InteractiveFlag.none)
-                    : const InteractionOptions(flags: InteractiveFlag.all),
+                    : const InteractionOptions(
+                        flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+                      ),
               ),
               children: [
                 TileLayer(
@@ -216,7 +218,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                           );
                           widget.onStopSelected?.call(stop);
                         },
-                        child: StopMarkerWidget(
+                        child: StopMarker(
                           selected: widget.selectedStop?.stopId == stop.stopId,
                         ),
                       ),
