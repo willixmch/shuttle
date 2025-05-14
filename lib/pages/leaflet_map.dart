@@ -151,6 +151,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final double screenHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
+    final double stopMarkerSize = 40;
 
     // Determine initial center and zoom
     final initialCenter = widget.selectedStop != null
@@ -219,8 +220,8 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                           selected: widget.selectedStop?.stopId == stop.stopId,
                         ),
                       ),
-                      width: 32,
-                      height: 32,
+                      width: stopMarkerSize,
+                      height: stopMarkerSize,
                     );
                   }).toList(),
                 ),
