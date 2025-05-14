@@ -161,10 +161,7 @@ class HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight =
-        MediaQuery.of(context).size.height -
-        kToolbarHeight -
-        MediaQuery.of(context).padding.top;
+    final double screenHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
     final double minHeight = screenHeight * _minHeightFraction;
     final double maxHeight = screenHeight * _maxHeightFraction + _overlapAmount;
 
@@ -196,18 +193,6 @@ class HomeState extends State<Home> {
             body: LeafletMap(
               isDraggingPanel: _isDraggingPanel,
               userPosition: _userPosition,
-              selectedEstate: _selectedEstate,
-              selectedStop: _selectedStop,
-              onStopSelected: (Stop stop) async {
-                if (_selectedStop?.stopId != stop.stopId ||
-                    _selectedStop?.routeId != stop.routeId) {
-                  setState(() {
-                    _selectedStop = stop;
-                    _expandedCardIndex = null;
-                  });
-                  await _loadSchedule();
-                }
-              },
             ),
             onPanelSlide: (position) {
               setState(() {
