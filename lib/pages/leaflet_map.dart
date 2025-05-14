@@ -17,7 +17,7 @@ class LeafletMap extends StatefulWidget {
   final Position? userPosition;
   final Estate? selectedEstate;
   final Stop? selectedStop;
-  final ValueChanged<Stop>? onStopSelected; // New callback
+  final ValueChanged<Stop>? onStopSelected;
 
   const LeafletMap({
     super.key,
@@ -186,7 +186,15 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                     return Marker(
                       point: LatLng(stop.latitude, stop.longitude),
                       child: GestureDetector(
-                        onTap: () => widget.onStopSelected?.call(stop),
+                        onTap: () {
+                          _mapController.animateTo(
+                            dest: LatLng(stop.latitude, stop.longitude),
+                            zoom: _userZoomLevel,
+                            rotation: 0,
+                            duration: const Duration(milliseconds: 1000),
+                          );
+                          widget.onStopSelected?.call(stop);
+                        },
                         child: StopMarkerWidget(
                           selected: widget.selectedStop?.stopId == stop.stopId,
                         ),
