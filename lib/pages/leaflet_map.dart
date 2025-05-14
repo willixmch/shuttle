@@ -38,7 +38,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   LatLng? _currentLocation;
   static const double _userZoomLevel = 18.0;
   bool _showLocateMeFab = true;
-  late final ValueNotifier<double> _rotationNotifier;
   CachedTileProvider? _tileProvider;
   late final Future<void> _tileProviderFuture;
   List<Stop> _stops = [];
@@ -51,7 +50,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
       mapController: MapController(),
       vsync: this,
     );
-    _rotationNotifier = ValueNotifier<double>(0.0);
 
     _tileProviderFuture = MapTileCache.initializeTileCaching().then((provider) {
       _tileProvider = provider;
@@ -65,9 +63,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         setState(() {
           _showLocateMeFab = true;
         });
-      }
-      if (event is MapEventRotate || event is MapEventRotateEnd) {
-        _rotationNotifier.value = _mapController.mapController.camera.rotation;
       }
     });
   }
@@ -84,8 +79,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         _mapController.animateTo(
           dest: LatLng(widget.selectedStop!.latitude, widget.selectedStop!.longitude),
           zoom: _userZoomLevel,
-          rotation: 0,
-          duration: const Duration(milliseconds: 1000),
+          duration: const Duration(milliseconds: 500),
         );
       }
     }
@@ -109,7 +103,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   @override
   void dispose() {
     _positionStream?.drain();
-    _rotationNotifier.dispose();
     _mapController.dispose();
     super.dispose();
   }
@@ -138,7 +131,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
       _mapController.animateTo(
         dest: _currentLocation!,
         zoom: _userZoomLevel,
-        rotation: 0,
         duration: const Duration(milliseconds: 1000),
       );
       setState(() {
@@ -213,8 +205,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                           _mapController.animateTo(
                             dest: LatLng(stop.latitude, stop.longitude),
                             zoom: _userZoomLevel,
-                            rotation: 0,
-                            duration: const Duration(milliseconds: 1000),
+                            duration: const Duration(milliseconds: 500),
                           );
                           widget.onStopSelected?.call(stop);
                         },
