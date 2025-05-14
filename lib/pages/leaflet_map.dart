@@ -59,12 +59,16 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     _fetchStops();
 
     _mapController.mapController.mapEventStream.listen((event) {
-      if (event is MapEventMove || event is MapEventMoveEnd) {
-        setState(() {
-          _showLocateMeFab = true;
-        });
-      }
-    });
+        if ((event is MapEventMove || event is MapEventMoveEnd) &&
+            (event.source == MapEventSource.onDrag ||
+                event.source == MapEventSource.multiFingerGestureStart ||
+                event.source == MapEventSource.multiFingerEnd ||
+                event.source == MapEventSource.scrollWheel)) {
+          setState(() {
+            _showLocateMeFab = true;
+          });
+        }
+      });
   }
 
   @override
@@ -131,7 +135,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
       _mapController.animateTo(
         dest: _currentLocation!,
         zoom: _userZoomLevel,
-        duration: const Duration(milliseconds: 1000),
+        duration: const Duration(milliseconds: 500),
       );
       setState(() {
         _showLocateMeFab = false;
@@ -167,7 +171,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
               options: MapOptions(
                 initialCenter: initialCenter,
                 initialZoom: initialZoom,
-                initialRotation: 0.0, // Ensure north-up on init
                 maxZoom: 19.0,
                 minZoom: 3.0,
                 interactionOptions: widget.isDraggingPanel
