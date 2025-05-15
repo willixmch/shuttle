@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shuttle/models/routes.dart';
 import 'package:shuttle/models/schedule.dart';
+import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/services/database_helper.dart';
 
 // Page to display route details and schedule for a selected shuttle route
@@ -26,6 +27,7 @@ class RouteDetailsState extends State<RouteDetails> {
   late final PageController _pageController;
   Routes? _route; // Store route details
   Map<String, List<Schedule>> _schedules = {}; // Store schedules by day type
+  List<Stop> _stopsName = []; // Store stops for the route
   bool _isLoading = true; // Track loading state
 
   @override
@@ -55,10 +57,14 @@ class RouteDetailsState extends State<RouteDetails> {
         schedules[dayType] = scheduleList;
       }
 
+      // Fetch stops for the route
+      final stopsName = await _dbHelper.getStopsForRoute(widget.routeId);
+
       if (mounted) {
         setState(() {
           _route = route;
           _schedules = schedules;
+          _stopsName = stopsName;
           _isLoading = false;
         });
       }
@@ -94,17 +100,19 @@ class RouteDetailsState extends State<RouteDetails> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.routeName),
-        backgroundColor: colorScheme.surfaceContainer,
       ),
       body: Column(
         children: [
+
           // Segmented Button for tab switching
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          Container(
+            width: double.infinity,
+            margin: EdgeInsets.all(16),
             child: SegmentedButton<int>(
               segments: const [
                 ButtonSegment(
@@ -122,6 +130,7 @@ class RouteDetailsState extends State<RouteDetails> {
               onSelectionChanged: _onSegmentChanged,
             ),
           ),
+
           // Content area with swipeable PageView
           Expanded(
             child: PageView(
@@ -129,30 +138,155 @@ class RouteDetailsState extends State<RouteDetails> {
               onPageChanged: _onPageChanged,
               physics: const CustomPageViewScrollPhysics(),
               children: [
-                // Placeholder for Route Details
+                // Route Details UI
                 _isLoading
                     ? const Center(child: CircularProgressIndicator())
-                    : Container(
-                        color: colorScheme.surfaceContainerLowest,
-                        child: Center(
-                          child: Text(
-                            _route != null
-                                ? 'Route Details: ${_route!.routeName}\nInfo: ${_route!.info}'
-                                : 'No Route Data',
-                          ),
+                    : SingleChildScrollView(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          spacing: 24,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+
+                            // Route ID
+                            Text(
+                              widget.routeId,
+                              style: textTheme.headlineLarge!.copyWith(
+                              color: colorScheme.onSurface
+                              )
+                            ),
+
+                            Divider(
+                              color: colorScheme.outlineVariant,
+                            ),
+
+                            // List of Stops
+                            _stopsName.isNotEmpty
+                                ? Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: _stopsName
+                                        .map((stop) => Padding(
+                                              padding: const EdgeInsets.only(bottom: 4.0),
+                                              child: Text(
+                                                stop.stopNameZh,
+                                                style: textTheme.bodyLarge!.copyWith(
+                                                color: colorScheme.onSurface
+                                                )
+                                              ),
+                                            ))
+                                        .toList(),
+                                  )
+                                : Text(
+                                    '無巴士站資料',
+                                    style: textTheme.bodyLarge!.copyWith(
+                                    color: colorScheme.onSurface
+                                    )
+                                  ),
+                          ],
                         ),
                       ),
-                // Placeholder for Schedule
+                // Schedule UI
                 _isLoading
                     ? const Center(child: CircularProgressIndicator())
-                    : Container(
-                        color: colorScheme.surfaceContainerLowest,
-                        child: Center(
-                          child: Text(
-                            _schedules.isNotEmpty
-                                ? 'Schedules Loaded: ${_schedules.keys.join(", ")}'
-                                : 'No Schedules Available',
-                          ),
+                    : SingleChildScrollView(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          spacing: 24,
+                          children: [
+                            // Workday Schedule
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    spacing: 8,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '星期一至五（公眾假期除外）',
+                                        style: textTheme.titleMedium!.copyWith(
+                                        color: colorScheme.onSurface
+                                        )
+                                      ),
+                                      Text(
+                                        _schedules['workday']!.isNotEmpty
+                                            ? _schedules['workday']!
+                                                .map((s) => s.departureTime)
+                                                .join(', ')
+                                            : '沒有班次',
+                                        style: textTheme.bodyMedium!.copyWith(
+                                        color: colorScheme.onSurfaceVariant
+                                        )
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            // Saturday Schedule
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    spacing: 8,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '星期六',
+                                        style: textTheme.titleMedium!.copyWith(
+                                        color: colorScheme.onSurface
+                                        )
+                                      ),
+                                      Text(
+                                        _schedules['saturday']!.isNotEmpty
+                                            ? _schedules['saturday']!
+                                                .map((s) => s.departureTime)
+                                                .join(', ')
+                                            : '沒有班次',
+                                        style: textTheme.bodyMedium!.copyWith(
+                                        color: colorScheme.onSurfaceVariant
+                                        )
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            // Sunday and Public Holiday Schedule
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    spacing: 8,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '星期日及公眾假期',
+                                        style: textTheme.titleMedium!.copyWith(
+                                        color: colorScheme.onSurface
+                                        )
+                                      ),
+
+                                      Text(
+                                        _schedules['public_holiday']!.isNotEmpty
+                                            ? _schedules['public_holiday']!
+                                                .map((s) => s.departureTime)
+                                                .join(', ')
+                                            : '沒有班次',
+                                        style: textTheme.bodyMedium!.copyWith(
+                                        color: colorScheme.onSurfaceVariant
+                                        )
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
               ],
