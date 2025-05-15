@@ -166,6 +166,7 @@ class HomeState extends State<Home> {
     final double maxHeight = screenHeight * _maxHeightFraction + _overlapAmount;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           SlidingUpPanel(
