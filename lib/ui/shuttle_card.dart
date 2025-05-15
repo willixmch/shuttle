@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:shuttle/pages/shuttle_route_page.dart';
 
 // Widget to display a shuttle route card with ETA information.
 // Expands to show upcoming ETAs based on isExpanded, controlled by parent.
 class ShuttleCard extends StatelessWidget {
-  final String route;
+  final String routeId; // Added for navigation
+  final String route; // Route name, used as routeName
   final String info;
   final ValueNotifier<String> eta;
   final ValueNotifier<List<String>> upcomingEta;
@@ -12,6 +14,7 @@ class ShuttleCard extends StatelessWidget {
 
   const ShuttleCard({
     super.key,
+    required this.routeId,
     required this.route,
     required this.info,
     required this.eta,
@@ -28,7 +31,6 @@ class ShuttleCard extends StatelessWidget {
     return GestureDetector(
       onTap: onToggle,
       child: Container(
-
         // Card Styling
         width: double.infinity,
         padding: const EdgeInsets.all(12),
@@ -38,7 +40,6 @@ class ShuttleCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-
         // Content
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,13 +80,13 @@ class ShuttleCard extends StatelessWidget {
             // Upcoming ETA (Expandable)
             ClipRect(
               child: AnimatedContainer(
-                // Config
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
                 height: isExpanded
-                    ? (upcomingEta.value.isEmpty ? 2 * 32.0 + 100.0  : upcomingEta.value.length * 32.0 + 100.0)
+                    ? (upcomingEta.value.isEmpty
+                        ? 2 * 32.0 + 100.0
+                        : upcomingEta.value.length * 32.0 + 100.0)
                     : 0.0,
-                // Content
                 child: SingleChildScrollView(
                   physics: const NeverScrollableScrollPhysics(),
                   child: Column(
@@ -126,7 +127,8 @@ class ShuttleCard extends StatelessWidget {
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 4),
+                                      padding:
+                                          const EdgeInsets.symmetric(vertical: 4),
                                       child: Text(
                                         '- 分鐘',
                                         style: textTheme.bodyLarge!.copyWith(
@@ -149,7 +151,8 @@ class ShuttleCard extends StatelessWidget {
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 4),
+                                      padding:
+                                          const EdgeInsets.symmetric(vertical: 4),
                                       child: Text(
                                         '- 分鐘',
                                         style: textTheme.bodyLarge!.copyWith(
@@ -163,33 +166,38 @@ class ShuttleCard extends StatelessWidget {
                             );
                           }
                           return Column(
-                            children: upcomingEtaValue.map((eta) => Row(
-                              spacing: 4,
-                              children: [
-                                Container(
-                                  width: 16,
-                                  height: 34,
-                                  alignment: Alignment.center,
-                                  child: VerticalDivider(
-                                    width: 1,
-                                    color: colorScheme.outlineVariant,
+                            children: upcomingEtaValue
+                                .map(
+                                  (eta) => Row(
+                                    spacing: 4,
+                                    children: [
+                                      Container(
+                                        width: 16,
+                                        height: 34,
+                                        alignment: Alignment.center,
+                                        child: VerticalDivider(
+                                          width: 1,
+                                          color: colorScheme.outlineVariant,
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 4),
+                                        child: Text(
+                                          eta,
+                                          style: textTheme.bodyLarge!.copyWith(
+                                            color: colorScheme.onSurface,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 4),
-                                  child: Text(
-                                    eta,
-                                    style: textTheme.bodyLarge!.copyWith(
-                                      color: colorScheme.onSurface,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )).toList(),
+                                )
+                                .toList(),
                           );
                         },
                       ),
-                      // BTNs RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))
+                      // Buttons
                       Padding(
                         padding: const EdgeInsets.only(top: 12),
                         child: Row(
@@ -198,28 +206,56 @@ class ShuttleCard extends StatelessWidget {
                             Expanded(
                               child: FilledButton.icon(
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: colorScheme.surfaceContainerHighest,
+                                  backgroundColor:
+                                      colorScheme.surfaceContainerHighest,
                                   foregroundColor: colorScheme.onSurfaceVariant,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
-                                onPressed: () {}, 
-                                label: Text('路線詳情'),
-                                icon: Icon(Icons.route)
-                              )
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4)),
+                                ),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ShuttleRoutePage(
+                                        routeId: routeId,
+                                        routeName: route,
+                                        initialTab: 0, // Route Details
+                                      ),
+                                    ),
+                                  );
+                                },
+                                label: const Text('路線詳情'),
+                                icon: const Icon(Icons.route),
+                              ),
                             ),
                             Expanded(
                               child: FilledButton.icon(
                                 style: FilledButton.styleFrom(
                                   backgroundColor: colorScheme.primaryContainer,
-                                  foregroundColor: colorScheme.onPrimaryContainer,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
-                                onPressed: () {}, 
-                                label: Text('時間表'),
-                                icon: Icon(Icons.table_view)
-                              )
-                            )
+                                  foregroundColor:
+                                      colorScheme.onPrimaryContainer,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4)),
+                                ),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ShuttleRoutePage(
+                                        routeId: routeId,
+                                        routeName: route,
+                                        initialTab: 1, // Schedule
+                                      ),
+                                    ),
+                                  );
+                                },
+                                label: const Text('時間表'),
+                                icon: const Icon(Icons.table_view),
+                              ),
+                            ),
                           ],
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),

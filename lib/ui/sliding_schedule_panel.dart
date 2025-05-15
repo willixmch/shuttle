@@ -53,10 +53,10 @@ class SlidingSchedulePanel extends StatelessWidget {
                 if (routeDataValue.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
-            
+
                 return ListView.builder(
                   controller: scrollController,
-                  padding: EdgeInsets.only(top: 24), 
+                  padding: const EdgeInsets.only(top: 24),
                   itemCount: routeDataValue.length,
                   itemBuilder: (context, index) {
                     final data = routeDataValue[index];
@@ -64,7 +64,7 @@ class SlidingSchedulePanel extends StatelessWidget {
                     final etaNotifier = data['etaNotifier'] as ValueNotifier<String>;
                     final upcomingEtaNotifier =
                         data['upcomingEtaNotifier'] as ValueNotifier<List<String>>;
-            
+
                     if (route == null) {
                       return const Padding(
                         padding: EdgeInsets.only(bottom: 12),
@@ -76,10 +76,11 @@ class SlidingSchedulePanel extends StatelessWidget {
                         ),
                       );
                     }
-            
+
                     return Padding(
-                      padding: EdgeInsets.fromLTRB(16, 6, 16, 6),
+                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
                       child: ShuttleCard(
+                        routeId: route.routeId, // Pass routeId from Routes object
                         route: route.routeName,
                         info: route.info,
                         eta: etaNotifier,
@@ -93,15 +94,15 @@ class SlidingSchedulePanel extends StatelessWidget {
               },
             ),
           ),
-          // Discalimer
+          // Disclaimer
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 40),
             child: Text(
-              '總站班次時間由營運商提供\n分站到達時間則為預估，僅供參考', 
+              '總站班次時間由營運商提供\n分站到達時間則為預估，僅供參考',
               style: textTheme.labelMedium!.copyWith(color: colorScheme.outline),
               textAlign: TextAlign.center,
             ),
-          )
+          ),
         ],
       ),
     );
