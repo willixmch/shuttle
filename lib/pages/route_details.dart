@@ -4,12 +4,12 @@ import 'package:shuttle/models/schedule.dart';
 import 'package:shuttle/services/database_helper.dart';
 
 // Page to display route details and schedule for a selected shuttle route
-class ShuttleRoutePage extends StatefulWidget {
+class RouteDetails extends StatefulWidget {
   final String routeId; // ID of the selected route
   final String routeName; // Name of the selected route for app bar
   final int initialTab; // 0 for Route Details, 1 for Schedule
 
-  const ShuttleRoutePage({
+  const RouteDetails({
     super.key,
     required this.routeId,
     required this.routeName,
@@ -17,13 +17,13 @@ class ShuttleRoutePage extends StatefulWidget {
   });
 
   @override
-  ShuttleRoutePageState createState() => ShuttleRoutePageState();
+  RouteDetailsState createState() => RouteDetailsState();
 }
 
-class ShuttleRoutePageState extends State<ShuttleRoutePage> {
+class RouteDetailsState extends State<RouteDetails> {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   late int _selectedSegment;
-  final PageController _pageController = PageController();
+  late final PageController _pageController;
   Routes? _route; // Store route details
   Map<String, List<Schedule>> _schedules = {}; // Store schedules by day type
   bool _isLoading = true; // Track loading state
@@ -32,6 +32,7 @@ class ShuttleRoutePageState extends State<ShuttleRoutePage> {
   void initState() {
     super.initState();
     _selectedSegment = widget.initialTab; // Set initial tab from navigation
+    _pageController = PageController(initialPage: _selectedSegment); // Set initial page
     _loadRouteData(); // Fetch route data
   }
 
@@ -60,10 +61,6 @@ class ShuttleRoutePageState extends State<ShuttleRoutePage> {
           _schedules = schedules;
           _isLoading = false;
         });
-        // Set initial page after loading and PageView is built
-        if (_pageController.hasClients) {
-          _pageController.jumpToPage(_selectedSegment);
-        }
       }
     } catch (e) {
       if (mounted) {
@@ -80,13 +77,11 @@ class ShuttleRoutePageState extends State<ShuttleRoutePage> {
   void _onSegmentChanged(Set<int> newSelection) {
     setState(() {
       _selectedSegment = newSelection.first;
-      if (_pageController.hasClients) {
-        _pageController.animateToPage(
-          _selectedSegment,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeInOutCubic,
-        );
-      }
+      _pageController.animateToPage(
+        _selectedSegment,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOutCubic,
+      );
     });
   }
 
@@ -129,15 +124,15 @@ class ShuttleRoutePageState extends State<ShuttleRoutePage> {
           ),
           // Content area with swipeable PageView
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : PageView(
-                    controller: _pageController,
-                    onPageChanged: _onPageChanged,
-                    physics: const CustomPageViewScrollPhysics(),
-                    children: [
-                      // Placeholder for Route Details
-                      Container(
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: _onPageChanged,
+              physics: const CustomPageViewScrollPhysics(),
+              children: [
+                // Placeholder for Route Details
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Container(
                         color: colorScheme.surfaceContainerLowest,
                         child: Center(
                           child: Text(
@@ -147,8 +142,10 @@ class ShuttleRoutePageState extends State<ShuttleRoutePage> {
                           ),
                         ),
                       ),
-                      // Placeholder for Schedule
-                      Container(
+                // Placeholder for Schedule
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : Container(
                         color: colorScheme.surfaceContainerLowest,
                         child: Center(
                           child: Text(
@@ -158,8 +155,8 @@ class ShuttleRoutePageState extends State<ShuttleRoutePage> {
                           ),
                         ),
                       ),
-                    ],
-                  ),
+              ],
+            ),
           ),
         ],
       ),
@@ -169,7 +166,7 @@ class ShuttleRoutePageState extends State<ShuttleRoutePage> {
 
 // Custom scroll physics for PageView to enhance fling behavior
 class CustomPageViewScrollPhysics extends ScrollPhysics {
-  const CustomPageViewScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
+  const CustomPageViewScrollPhysics({super.parent});
 
   @override
   CustomPageViewScrollPhysics applyTo(ScrollPhysics? ancestor) {

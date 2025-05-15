@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shuttle/pages/shuttle_route_page.dart';
+import 'package:shuttle/pages/route_details.dart';
 
 // Widget to display a shuttle route card with ETA information.
 // Expands to show upcoming ETAs based on isExpanded, controlled by parent.
@@ -216,7 +216,7 @@ class ShuttleCard extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => ShuttleRoutePage(
+                                      builder: (context) => RouteDetails(
                                         routeId: routeId,
                                         routeName: route,
                                         initialTab: 0, // Route Details
@@ -241,7 +241,7 @@ class ShuttleCard extends StatelessWidget {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => ShuttleRoutePage(
+                                      builder: (context) => RouteDetails(
                                         routeId: routeId,
                                         routeName: route,
                                         initialTab: 1, // Schedule
