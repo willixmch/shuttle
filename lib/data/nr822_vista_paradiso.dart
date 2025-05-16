@@ -97,6 +97,8 @@ const vistaParadisoData = {
       'routeId': 'NR824',
       'routeName': '聽濤雅苑至馬鞍山海柏花園 (循環線)',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00',

@@ -15,11 +15,19 @@ class Routes {
   // Additional information about the route (e.g., '由天鑽第2座開出').
   final String info;
 
+  // Fare for residents (e.g., '$4').
+  final String residentFare;
+
+  // Fare for visitors (e.g., '$6').
+  final String visitorFare;
+
   const Routes({
     required this.routeId,
     required this.routeName,
     required this.estateId,
     required this.info,
+    required this.residentFare,
+    required this.visitorFare,
   });
 
   // Converts a Routes object to a map for database insertion.
@@ -29,6 +37,8 @@ class Routes {
       'routeName': routeName,
       'estateId': estateId,
       'info': info,
+      'residentFare': residentFare,
+      'visitorFare': visitorFare,
     };
   }
 
@@ -38,7 +48,14 @@ class Routes {
     final routeName = map['routeName'];
     final estateId = map['estateId'];
     final info = map['info'];
-    if (routeId == null || routeName == null || estateId == null || info == null) {
+    final residentFare = map['residentFare'];
+    final visitorFare = map['visitorFare'];
+    if (routeId == null ||
+        routeName == null ||
+        estateId == null ||
+        info == null ||
+        residentFare == null ||
+        visitorFare == null) {
       throw Exception('Invalid route data: one or more fields are null in map: $map');
     }
     return Routes(
@@ -46,12 +63,14 @@ class Routes {
       routeName: routeName as String,
       estateId: estateId as String,
       info: info as String,
+      residentFare: residentFare as String,
+      visitorFare: visitorFare as String,
     );
   }
 
   // String representation for debugging.
   @override
   String toString() {
-    return 'Routes{routeId: $routeId, routeName: $routeName, estateId: $estateId, info: $info}';
+    return 'Routes{routeId: $routeId, routeName: $routeName, estateId: $estateId, info: $info, residentFare: $residentFare, visitorFare: $visitorFare}';
   }
 }

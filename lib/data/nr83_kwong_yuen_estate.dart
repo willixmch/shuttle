@@ -31,6 +31,8 @@ const kwongYuenEstateData = {
       'routeId': 'NR83-B',
       'routeName': '往沙田廣源邨',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '17:45', '18:05', '18:25', '18:45'

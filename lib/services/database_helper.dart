@@ -7,14 +7,14 @@ import 'package:shuttle/data/nr826_villa_athena.dart';
 import 'package:shuttle/data/nr83_kwong_yuen_estate.dart';
 import 'package:shuttle/data/nr817_lakeview_garden.dart';
 import 'package:shuttle/data/nr815_royal_ascot.dart';
-import '../data/nr829_the_castello.dart';
-import '../data/nr538_the_regent.dart'; 
+import 'package:shuttle/data/nr829_the_castello.dart';
+import 'package:shuttle/data/nr538_the_regent.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../models/estate.dart';
-import '../models/routes.dart';
-import '../models/schedule.dart';
-import '../models/stop.dart';
+import 'package:shuttle/models/estate.dart';
+import 'package:shuttle/models/routes.dart';
+import 'package:shuttle/models/schedule.dart';
+import 'package:shuttle/models/stop.dart';
 
 // Manages SQLite database for shuttle bus data (singleton)
 class DatabaseHelper {
@@ -55,6 +55,8 @@ class DatabaseHelper {
       estateId TEXT,
       routeName TEXT,
       info TEXT,
+      residentFare TEXT,
+      visitorFare TEXT,
       FOREIGN KEY (estateId) REFERENCES estates (estateId)
     )
     ''');
@@ -96,7 +98,6 @@ class DatabaseHelper {
     await _insertEstateData(db, vistaParadisoData);
     await _insertEstateData(db, villaAthenaData);
     await _insertEstateData(db, theCastelloData);
-
   }
 
   // Inserts estate, route, schedule, and stop data
@@ -121,6 +122,8 @@ class DatabaseHelper {
           'estateId': estateData['estateId'],
           'routeName': route['routeName'],
           'info': route['info'],
+          'residentFare': route['residentFare'],
+          'visitorFare': route['visitorFare'],
         },
         conflictAlgorithm: ConflictAlgorithm.replace,
       );

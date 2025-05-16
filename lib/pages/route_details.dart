@@ -28,6 +28,7 @@ class RouteDetailsState extends State<RouteDetails> {
   late final PageController _pageController;
   Map<String, List<Schedule>> _schedules = {}; // Store schedules by day type
   List<Stop> _stopsName = []; // Store stops for the route
+  Routes? _route; // Store the route object
   bool _isLoading = true; // Track loading state
 
   @override
@@ -62,6 +63,7 @@ class RouteDetailsState extends State<RouteDetails> {
 
       if (mounted) {
         setState(() {
+          _route = route;
           _schedules = schedules;
           _stopsName = stopsName;
           _isLoading = false;
@@ -144,9 +146,9 @@ class RouteDetailsState extends State<RouteDetails> {
                           spacing: 24,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Route ID
+                            // Route Fares
                             Row(
-                              spacing: 24,
+                              spacing: 32,
                               children: [
                                 Column(
                                   spacing: 4,
@@ -159,8 +161,8 @@ class RouteDetailsState extends State<RouteDetails> {
                                       ),
                                     ),
                                     Text(
-                                      '\$5',
-                                      style: textTheme.headlineMedium!.copyWith(
+                                      _route?.residentFare ?? 'N/A',
+                                      style: textTheme.headlineLarge!.copyWith(
                                         color: colorScheme.onSurface,
                                       ),
                                     ),
@@ -177,8 +179,8 @@ class RouteDetailsState extends State<RouteDetails> {
                                       ),
                                     ),
                                     Text(
-                                      '\$6',
-                                      style: textTheme.headlineMedium!.copyWith(
+                                      _route?.visitorFare ?? 'N/A',
+                                      style: textTheme.headlineLarge!.copyWith(
                                         color: colorScheme.onSurface,
                                       ),
                                     ),
@@ -225,7 +227,6 @@ class RouteDetailsState extends State<RouteDetails> {
                                                 ),
                                               ],
                                             ),
-                                            
                                           ],
                                         ),
                                       ];
@@ -239,7 +240,7 @@ class RouteDetailsState extends State<RouteDetails> {
                                               'lib/assets/stop_connector.svg',
                                               width: 4,
                                               height: 36,
-                                              ),
+                                            ),
                                           ),
                                         );
                                       }
