@@ -59,16 +59,16 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     _fetchStops();
 
     _mapController.mapController.mapEventStream.listen((event) {
-        if ((event is MapEventMove || event is MapEventMoveEnd) &&
-            (event.source == MapEventSource.onDrag ||
-                event.source == MapEventSource.multiFingerGestureStart ||
-                event.source == MapEventSource.multiFingerEnd ||
-                event.source == MapEventSource.scrollWheel)) {
-          setState(() {
-            _showLocateMeFab = true;
-          });
-        }
-      });
+      if ((event is MapEventMove || event is MapEventMoveEnd) &&
+          (event.source == MapEventSource.onDrag ||
+              event.source == MapEventSource.multiFingerGestureStart ||
+              event.source == MapEventSource.multiFingerEnd ||
+              event.source == MapEventSource.scrollWheel)) {
+        setState(() {
+          _showLocateMeFab = true;
+        });
+      }
+    });
   }
 
   @override
@@ -77,7 +77,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     if (oldWidget.selectedEstate?.estateId != widget.selectedEstate?.estateId ||
         oldWidget.selectedStop?.stopId != widget.selectedStop?.stopId) {
       _fetchStops();
-      // Animate to new selected stop if it changed
       if (widget.selectedStop != null &&
           widget.selectedStop!.stopId != oldWidget.selectedStop?.stopId) {
         _mapController.animateTo(
@@ -112,7 +111,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   }
 
   void _startLocationUpdates() async {
-    if (await LocationService().checkLocationPermissions()) {
+    try {
       _positionStream = Geolocator.getPositionStream(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
@@ -120,13 +119,20 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         ),
       );
 
-      _positionStream!.listen((Position position) {
-        if (mounted) {
-          setState(() {
-            _currentLocation = LatLng(position.latitude, position.longitude);
-          });
-        }
-      });
+      _positionStream!.listen(
+        (Position position) {
+          if (mounted) {
+            setState(() {
+              _currentLocation = LatLng(position.latitude, position.longitude);
+            });
+          }
+        },
+        onError: (e) {
+          // Handle stream errors silently
+        },
+      );
+    } catch (e) {
+      // Handle initialization errors silently
     }
   }
 
@@ -149,12 +155,11 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     final double screenHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
     final double stopMarkerSize = 40;
 
-    // Determine initial center and zoom
     final initialCenter = widget.selectedStop != null
         ? LatLng(widget.selectedStop!.latitude, widget.selectedStop!.longitude)
         : widget.userPosition != null
             ? LatLng(widget.userPosition!.latitude, widget.userPosition!.longitude)
-            : const LatLng(22.3964, 114.1095); // Updated fallback to Hong Kong
+            : const LatLng(22.3964, 114.1095);
     final initialZoom = widget.selectedStop != null ? _userZoomLevel : 12.0;
 
     return FutureBuilder<void>(
