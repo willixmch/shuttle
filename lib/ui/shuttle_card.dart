@@ -37,7 +37,7 @@ class ShuttleCard extends StatelessWidget {
         decoration: ShapeDecoration(
           color: colorScheme.surfaceContainer,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
         // Content
