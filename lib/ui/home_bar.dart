@@ -31,59 +31,64 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             SizedBox(
-              height: toolbarHeight - 20,
-              child: GestureDetector(
-                onTap: estateOnTap,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 4,
-                    children: [
-                      Text(
-                        estateTitle,
-                        style: textTheme.headlineSmall!.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      Icon(
-                        Icons.import_export,
-                        size: 24,
-                        color: colorScheme.outlineVariant,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(
-              height: toolbarHeight,
+              height: 48,
               child: GestureDetector(
                 onTap: locationOnTap,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  spacing: 4,
+                  spacing: 8,
                   children: [
                     Lottie.asset(
                       'lib/assets/pulsing_pin.json',
-                      width: 28,          
-                      height: 28,
+                      width: 32,          
+                      height: 48,
                       fit: BoxFit.contain,
                       repeat: true,
                       reverse: false,
                     ),
-                    Text(
-                      stopTitle,
-                      style: textTheme.labelLarge!.copyWith(
-                        color: colorScheme.onSurface,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 4,
+                      children: [
+                        Text(
+                          '車站', 
+                          style: textTheme.bodySmall!.copyWith(
+                            color: colorScheme.outline
+                          )
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              stopTitle,
+                              style: textTheme.titleLarge!.copyWith(
+                                color: colorScheme.onSurface
+                              ),
+                            ),
+                            Icon(
+                              Icons.arrow_drop_down_rounded,
+                              size: 28,
+                              color: colorScheme.onSurface,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    Icon(
-                      Icons.arrow_drop_down_rounded,
-                      size: 20,
-                      color: colorScheme.onSurface,
-                    ),
+                    
                   ],
+                ),
+              ),
+            ),
+            Container(
+              height: 56,
+              alignment: Alignment.bottomCenter,
+              child: IconButton.outlined(
+                color: colorScheme.outline,
+                onPressed: estateOnTap, 
+                icon: Icon(Icons.home_work_outlined),
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ),
