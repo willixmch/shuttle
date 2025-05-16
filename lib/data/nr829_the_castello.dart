@@ -7,6 +7,8 @@ const theCastelloData = {
       'routeId': 'NR829-A',
       'routeName': '往沙田新城市廣場',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '06:45', '06:52', '07:00', '07:07', '07:15', '07:22', '07:30', '07:37', '07:45', '07:52',
@@ -64,6 +66,8 @@ const theCastelloData = {
       'routeId': 'NR829-B',
       'routeName': '往帝堡城',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '06:58', '07:05', '07:13', '07:20', '07:28', '07:35', '07:43', '07:50', '07:58', '08:05',

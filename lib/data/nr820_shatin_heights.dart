@@ -7,6 +7,8 @@ const shatinHeightsData = {
       'routeId': 'NR820-A',
       'routeName': '往大圍站',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '07:00', '07:20', '07:40', '08:00', '08:20', '08:40', '09:00', '09:20', '09:40', '10:00',
@@ -33,6 +35,8 @@ const shatinHeightsData = {
       'routeId': 'NR820-B',
       'routeName': '往沙田花園',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '07:15', '07:35', '07:55', '08:15', '08:35', '08:55', '09:15', '09:35', '09:55', '16:55',

@@ -85,6 +85,8 @@ flutter:
   - lib/assets/pulsing_pin.json
   - lib/assets/hk_public_holiday.json
   - lib/assets/stop_marker.svg
+  - lib/assets/stop_dot.svg
+  - lib/assets/stop_connector.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -7,6 +7,8 @@ const granvilleGardenData = {
       'routeId': 'NR819-A',
       'routeName': '往大圍站',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '06:30', '06:45', '07:00', '07:15', '07:30', '07:45', '08:00', '08:15', '08:30', '08:45',
@@ -37,6 +39,8 @@ const granvilleGardenData = {
       'routeId': 'NR819-B',
       'routeName': '往恒峰花園',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '06:35', '06:50', '07:05', '07:20', '07:35', '07:50', '08:05', '08:20', '08:35', '08:50',

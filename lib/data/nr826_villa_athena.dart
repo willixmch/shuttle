@@ -7,6 +7,8 @@ const villaAthenaData = {
       'routeId': 'NR826-A',
       'routeName': '往沙田排頭街 (循環線)',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '06:55', '07:40', '08:25', '09:10', '09:55', '10:40', '11:25', '12:10', '12:55', '13:40',

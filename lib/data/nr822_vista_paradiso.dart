@@ -7,6 +7,8 @@ const vistaParadisoData = {
       'routeId': 'NR822',
       'routeName': '聽濤雅苑至大學站 (循環線)',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '06:40', '07:00', '07:15', '07:30', '07:45', '08:00', '08:15', '08:30', '08:45', '09:00',
@@ -58,6 +60,8 @@ const vistaParadisoData = {
       'routeId': 'NR823',
       'routeName': '聽濤雅苑至鑽石山站 (循環線)',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '06:40', '06:50', '07:00', '07:10', '07:20', '07:30', '07:40', '07:50', '08:00', '08:10',

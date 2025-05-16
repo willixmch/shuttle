@@ -7,6 +7,8 @@ const theRegentData = {
       'routeId': 'NR538-A',
       'routeName': 'A 線',
       'info': '由天鑽第2座開出',
+      'residentFare': '\$4',
+      'visitorFare': '\$6',
       'schedules': {
         'workday': [
           '06:30', '06:40', '06:50', '07:00', '07:05', '07:10', '07:20', '07:25', '07:30', '07:40',
@@ -88,6 +90,8 @@ const theRegentData = {
       'routeId': 'NR538-B',
       'routeName': 'B 線',
       'info': '由天鑽第18座開出',
+      'residentFare': '\$4',
+      'visitorFare': '\$6',
       'schedules': {
         'workday': [
           '06:35', '06:45', '06:55', '07:10', '07:15', '07:20', '07:35', '07:40', '07:45', '08:00',
@@ -166,6 +170,8 @@ const theRegentData = {
       'routeId': 'NR538-C',
       'routeName': 'C 線',
       'info': '由天鑽第9座開出',
+      'residentFare': '\$4',
+      'visitorFare': '\$6',
       'schedules': {
         'workday': [
           '06:35', '07:05', '07:30', '07:55', '08:20', '08:45',
@@ -202,6 +208,8 @@ const theRegentData = {
       'routeId': 'NR538-D',
       'routeName': '特別班次',
       'info': '由天鑽開出',
+      'residentFare': '\$5',
+      'visitorFare': '\$7',
       'schedules': {
         'workday': [
           '09:15', '10:15', '11:15', '12:15', '13:15', '14:15', '15:15', '16:15', '17:15', '20:15',

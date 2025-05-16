@@ -7,6 +7,8 @@ const lakeviewGardenData = {
       'routeId': 'NR817-A',
       'routeName': '往大圍站',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '06:30', '06:50', '07:10', '07:30', '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
@@ -43,6 +45,8 @@ const lakeviewGardenData = {
       'routeId': 'NR817-B',
       'routeName': '往湖景花園',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '06:40', '07:00', '07:20', '07:45', '08:15', '08:45', '09:15', '09:45', '10:15', '10:45',

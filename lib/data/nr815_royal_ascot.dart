@@ -7,6 +7,8 @@ const royalAscotData = {
       'routeId': 'NR815-A',
       'routeName': '往沙田新城市廣場',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '06:30', '06:40', '06:50', '07:00', '07:08', '07:16', '07:24', '07:32', '07:40', '07:48',

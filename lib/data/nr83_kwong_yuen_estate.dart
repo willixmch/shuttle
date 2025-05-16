@@ -7,6 +7,8 @@ const kwongYuenEstateData = {
       'routeId': 'NR83-A',
       'routeName': '往中環',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '07:05', '07:30', '07:50', '08:05', '08:25', '08:45'

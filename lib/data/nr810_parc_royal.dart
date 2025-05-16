@@ -7,6 +7,8 @@ const parcRoyaleData = {
       'routeId': 'NR810-A',
       'routeName': '往九龍塘站',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '07:00', '07:20', '07:40', '08:00', '08:20', '08:40', '09:00', '09:20', '09:40', '10:00',

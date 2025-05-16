@@ -3,6 +3,7 @@ import 'package:shuttle/models/routes.dart';
 import 'package:shuttle/models/schedule.dart';
 import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/services/database_helper.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 // Page to display route details and schedule for a selected shuttle route
 class RouteDetails extends StatefulWidget {
@@ -25,7 +26,6 @@ class RouteDetailsState extends State<RouteDetails> {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   late int _selectedSegment;
   late final PageController _pageController;
-  Routes? _route; // Store route details
   Map<String, List<Schedule>> _schedules = {}; // Store schedules by day type
   List<Stop> _stopsName = []; // Store stops for the route
   bool _isLoading = true; // Track loading state
@@ -62,7 +62,6 @@ class RouteDetailsState extends State<RouteDetails> {
 
       if (mounted) {
         setState(() {
-          _route = route;
           _schedules = schedules;
           _stopsName = stopsName;
           _isLoading = false;
@@ -108,7 +107,6 @@ class RouteDetailsState extends State<RouteDetails> {
       ),
       body: Column(
         children: [
-
           // Segmented Button for tab switching
           Container(
             width: double.infinity,
@@ -130,7 +128,6 @@ class RouteDetailsState extends State<RouteDetails> {
               onSelectionChanged: _onSegmentChanged,
             ),
           ),
-
           // Content area with swipeable PageView
           Expanded(
             child: PageView(
@@ -147,40 +144,113 @@ class RouteDetailsState extends State<RouteDetails> {
                           spacing: 24,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-
                             // Route ID
-                            Text(
-                              widget.routeId,
-                              style: textTheme.headlineLarge!.copyWith(
-                              color: colorScheme.onSurface
-                              )
+                            Row(
+                              spacing: 24,
+                              children: [
+                                Column(
+                                  spacing: 4,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '住戶收費',
+                                      style: textTheme.bodySmall!.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    Text(
+                                      '\$5',
+                                      style: textTheme.headlineMedium!.copyWith(
+                                        color: colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  spacing: 4,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '訪客收費',
+                                      style: textTheme.bodySmall!.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                    Text(
+                                      '\$6',
+                                      style: textTheme.headlineMedium!.copyWith(
+                                        color: colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-
                             Divider(
                               color: colorScheme.outlineVariant,
                             ),
-
                             // List of Stops
                             _stopsName.isNotEmpty
                                 ? Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: _stopsName
-                                        .map((stop) => Padding(
-                                              padding: const EdgeInsets.only(bottom: 4.0),
-                                              child: Text(
-                                                stop.stopNameZh,
-                                                style: textTheme.bodyLarge!.copyWith(
-                                                color: colorScheme.onSurface
-                                                )
+                                        .asMap()
+                                        .entries
+                                        .expand((entry) {
+                                      final index = entry.key;
+                                      final stop = entry.value;
+                                      final List<Widget> widgets = [
+                                        Row(
+                                          spacing: 16,
+                                          children: [
+                                            SvgPicture.asset(
+                                              'lib/assets/stop_dot.svg',
+                                              height: 24,
+                                              width: 24,
+                                            ),
+                                            Row(
+                                              spacing: 8,
+                                              children: [
+                                                Text(
+                                                  stop.stopNameZh,
+                                                  style: textTheme.bodyLarge!.copyWith(
+                                                    color: colorScheme.onSurface,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  stop.etaOffset == 0 ? '(總站)' : '(${stop.etaOffset} 分鐘)',
+                                                  style: textTheme.bodyLarge!.copyWith(
+                                                    color: colorScheme.onSurfaceVariant,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            
+                                          ],
+                                        ),
+                                      ];
+                                      // Add Container between Rows, except after the last stop
+                                      if (index < _stopsName.length - 1) {
+                                        widgets.add(
+                                          Container(
+                                            alignment: Alignment.centerLeft,
+                                            padding: EdgeInsets.symmetric(horizontal: 10),
+                                            child: SvgPicture.asset(
+                                              'lib/assets/stop_connector.svg',
+                                              width: 4,
+                                              height: 36,
                                               ),
-                                            ))
-                                        .toList(),
+                                          ),
+                                        );
+                                      }
+                                      return widgets;
+                                    }).toList(),
                                   )
                                 : Text(
                                     '無巴士站資料',
                                     style: textTheme.bodyLarge!.copyWith(
-                                    color: colorScheme.onSurface
-                                    )
+                                      color: colorScheme.onSurface,
+                                    ),
                                   ),
                           ],
                         ),
@@ -189,104 +259,61 @@ class RouteDetailsState extends State<RouteDetails> {
                 _isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : SingleChildScrollView(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          spacing: 24,
-                          children: [
-                            // Workday Schedule
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    spacing: 8,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '星期一至五（公眾假期除外）',
-                                        style: textTheme.titleMedium!.copyWith(
-                                        color: colorScheme.onSurface
-                                        )
-                                      ),
-                                      Text(
-                                        _schedules['workday']!.isNotEmpty
-                                            ? _schedules['workday']!
-                                                .map((s) => s.departureTime)
-                                                .join(', ')
-                                            : '沒有班次',
-                                        style: textTheme.bodyMedium!.copyWith(
-                                        color: colorScheme.onSurfaceVariant
-                                        )
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 48),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final dayTypes = [
+                              {
+                                'key': 'workday',
+                                'label': '星期一至五（公眾假期除外）',
+                              },
+                              {
+                                'key': 'saturday',
+                                'label': '星期六',
+                              },
+                              {
+                                'key': 'public_holiday',
+                                'label': '星期日及公眾假期',
+                              },
+                            ];
 
-                            // Saturday Schedule
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    spacing: 8,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '星期六',
-                                        style: textTheme.titleMedium!.copyWith(
-                                        color: colorScheme.onSurface
-                                        )
-                                      ),
-                                      Text(
-                                        _schedules['saturday']!.isNotEmpty
-                                            ? _schedules['saturday']!
-                                                .map((s) => s.departureTime)
-                                                .join(', ')
-                                            : '沒有班次',
-                                        style: textTheme.bodyMedium!.copyWith(
-                                        color: colorScheme.onSurfaceVariant
-                                        )
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            // Sunday and Public Holiday Schedule
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    spacing: 8,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '星期日及公眾假期',
-                                        style: textTheme.titleMedium!.copyWith(
-                                        color: colorScheme.onSurface
-                                        )
-                                      ),
-
-                                      Text(
-                                        _schedules['public_holiday']!.isNotEmpty
-                                            ? _schedules['public_holiday']!
-                                                .map((s) => s.departureTime)
-                                                .join(', ')
-                                            : '沒有班次',
-                                        style: textTheme.bodyMedium!.copyWith(
-                                        color: colorScheme.onSurfaceVariant
-                                        )
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                            return Column(
+                              children: dayTypes
+                                  .map((dayType) => Padding(
+                                        padding: const EdgeInsets.only(bottom: 24.0),
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                spacing: 8,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    dayType['label']!,
+                                                    style: textTheme.titleMedium!.copyWith(
+                                                      color: colorScheme.onSurface,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    _schedules[dayType['key']]!.isNotEmpty
+                                                        ? _schedules[dayType['key']]!
+                                                            .map((s) => s.departureTime)
+                                                            .join(', ')
+                                                        : '沒有班次',
+                                                    style: textTheme.bodyMedium!.copyWith(
+                                                      color: colorScheme.onSurfaceVariant,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ))
+                                  .toList(),
+                            );
+                          },
                         ),
                       ),
               ],

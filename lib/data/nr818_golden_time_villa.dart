@@ -7,6 +7,8 @@ const goldenTimeVillasData = {
       'routeId': 'NR818-A',
       'routeName': '往大圍站',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '07:00', '07:30', '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
@@ -52,6 +54,8 @@ const goldenTimeVillasData = {
       'routeId': 'NR818-B',
       'routeName': '往金泰別墅',
       'info': '',
+      'residentFare': '\$0',
+      'visitorFare': '\$0',
       'schedules': {
         'workday': [
           '07:15', '07:45', '08:15', '08:45', '09:15', '09:45', '10:15', '10:45', '11:15', '11:45',
