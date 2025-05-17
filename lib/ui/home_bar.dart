@@ -61,8 +61,11 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
                             Text(
                               stopTitle,
                               style: textTheme.titleLarge!.copyWith(
-                                color: colorScheme.onSurface
+                                color: colorScheme.onSurface,
+                                height: 1.2,
+                                overflow: TextOverflow.ellipsis, 
                               ),
+                              maxLines: 1,
                             ),
                             Icon(
                               Icons.arrow_drop_down_rounded,

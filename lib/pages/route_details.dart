@@ -114,6 +114,22 @@ class RouteDetailsState extends State<RouteDetails> {
             width: double.infinity,
             margin: EdgeInsets.all(16),
             child: SegmentedButton<int>(
+              style: ButtonStyle(
+                side: WidgetStateProperty.all(
+                  BorderSide(color: colorScheme.surface)
+                ),
+                backgroundColor: WidgetStateProperty.resolveWith((states) {
+                  if (states.contains(WidgetState.selected)) {
+                    return null; // Use default theme color for selected segments
+                  }
+                  return colorScheme.surfaceContainerHighest; // Unselected segment background color
+                }),
+                shape: WidgetStateProperty.all(
+                  const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(4)),
+                  ),
+                ),
+              ),
               segments: const [
                 ButtonSegment(
                   value: 0,
@@ -188,9 +204,24 @@ class RouteDetailsState extends State<RouteDetails> {
                                 ),
                               ],
                             ),
-                            Divider(
-                              color: colorScheme.outlineVariant,
+
+                            //Divider
+                            Column(
+                              spacing: 2,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Divider(
+                                  color: colorScheme.outlineVariant,
+                                ),
+                                Text(
+                                  '上客點(車程)',
+                                  style: textTheme.bodySmall!.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
                             ),
+                            
                             // List of Stops
                             _stopsName.isNotEmpty
                                 ? Column(
@@ -273,8 +304,12 @@ class RouteDetailsState extends State<RouteDetails> {
                                 'label': '星期六',
                               },
                               {
+                                'key': 'sunday',
+                                'label': '星期日',
+                              },
+                              {
                                 'key': 'public_holiday',
-                                'label': '星期日及公眾假期',
+                                'label': '公眾假期',
                               },
                             ];
 
@@ -301,7 +336,7 @@ class RouteDetailsState extends State<RouteDetails> {
                                                         ? _schedules[dayType['key']]!
                                                             .map((s) => s.departureTime)
                                                             .join(', ')
-                                                        : '沒有班次',
+                                                        : '沒有服務',
                                                     style: textTheme.bodyMedium!.copyWith(
                                                       color: colorScheme.onSurfaceVariant,
                                                     ),
