@@ -1,19 +1,19 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:shuttle/ui/estate_filter_sheet.dart';
 import 'package:shuttle/ui/home_bar.dart';
 import 'package:shuttle/ui/sliding_schedule_panel.dart';
 import 'package:shuttle/ui/stop_filter_sheet.dart';
 import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/models/stop.dart';
-import 'package:shuttle/pages/leaflet_map.dart';
+import 'package:shuttle/ui/leaflet_map.dart';
 import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/utils/day_type_checker.dart';
 import 'package:shuttle/services/location_service.dart';
 import 'package:shuttle/services/route_query.dart';
 import 'package:shuttle/services/persistence_estate.dart';
 import 'package:shuttle/utils/eta_refresh_timer.dart';
+import 'package:shuttle/services/stop_query.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class Home extends StatefulWidget {
@@ -24,9 +24,9 @@ class Home extends StatefulWidget {
 }
 
 class HomeState extends State<Home> {
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   final PersistenceEstate _persistneceEstate = PersistenceEstate();
   final LocationService _locationService = LocationService();
+  final StopQuery _stopQuery;
   final RouteQuery _routeQuery;
   late final EtaRefreshTimer _etaRefreshTimer;
   List<Map<String, dynamic>> _cachedRouteData = [];
@@ -34,7 +34,7 @@ class HomeState extends State<Home> {
   Estate? _selectedEstate;
   Stop? _selectedStop;
   int? _expandedCardIndex;
-  Position? _userPosition;
+  bool _hasLocationPermission = false;
 
   final PanelController _panelController = PanelController();
   final double _minHeightFraction = 0.28;
@@ -42,13 +42,16 @@ class HomeState extends State<Home> {
   final double _overlapAmount = 20.0;
   bool _isDraggingPanel = false;
 
-  HomeState() : _routeQuery = RouteQuery(DatabaseHelper.instance);
+  HomeState()
+      : _routeQuery = RouteQuery(DatabaseHelper.instance),
+        _stopQuery = StopQuery(DatabaseHelper.instance, LocationService());
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _panelController.open();
+      _loadSchedule();
     });
     DayTypeChecker.initialize();
     _etaNotifier = ValueNotifier<List<Map<String, dynamic>>>([]);
@@ -64,7 +67,6 @@ class HomeState extends State<Home> {
       getRouteData: () => _cachedRouteData,
       getEffectiveStop: () => _selectedStop,
     );
-    _loadSchedule();
   }
 
   @override
@@ -82,24 +84,13 @@ class HomeState extends State<Home> {
       });
     }
 
-    _userPosition = await _locationService.getCurrentPosition();
+    _hasLocationPermission = await _locationService.checkLocationPermissions();
 
-    if (_selectedStop == null) {
-      if (_userPosition != null && _selectedEstate != null) {
-        _selectedStop = await _locationService.findClosestStop(
-          _userPosition!,
-          _selectedEstate!.estateId,
-          _dbHelper,
-        );
-      }
-      if (_selectedStop == null && _selectedEstate != null) {
-        final stops = await _dbHelper.getBordingStopsForEstate(
-          _selectedEstate!.estateId,
-        );
-        if (stops.isNotEmpty) {
-          _selectedStop = stops.first;
-        }
-      }
+    if (_selectedStop == null && _selectedEstate != null) {
+      _selectedStop = await _stopQuery.getInitialStop(
+        _selectedEstate!.estateId,
+        _hasLocationPermission,
+      );
     }
 
     final routeData = await _routeQuery.loadRouteData(
@@ -189,12 +180,13 @@ class HomeState extends State<Home> {
                   }
                 });
               },
+              hasLocationPermission: _hasLocationPermission,
             ),
             body: LeafletMap(
               isDraggingPanel: _isDraggingPanel,
-              userPosition: _userPosition,
               selectedEstate: _selectedEstate,
               selectedStop: _selectedStop,
+              hasLocationPermission: _hasLocationPermission,
               onStopSelected: (Stop stop) {
                 setState(() {
                   _selectedStop = stop;

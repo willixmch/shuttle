@@ -5,7 +5,6 @@ import 'package:flutter_map_cache/flutter_map_cache.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:shuttle/services/location_service.dart';
 import 'package:shuttle/services/map_tile_cache.dart';
 import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/models/stop.dart';
@@ -14,17 +13,17 @@ import 'package:shuttle/ui/stop_marker.dart';
 
 class LeafletMap extends StatefulWidget {
   final bool isDraggingPanel;
-  final Position? userPosition;
   final Estate? selectedEstate;
   final Stop? selectedStop;
+  final bool hasLocationPermission;
   final ValueChanged<Stop>? onStopSelected;
 
   const LeafletMap({
     super.key,
     required this.isDraggingPanel,
-    this.userPosition,
     this.selectedEstate,
     this.selectedStop,
+    required this.hasLocationPermission,
     this.onStopSelected,
   });
 
@@ -59,16 +58,16 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     _fetchStops();
 
     _mapController.mapController.mapEventStream.listen((event) {
-        if ((event is MapEventMove || event is MapEventMoveEnd) &&
-            (event.source == MapEventSource.onDrag ||
-                event.source == MapEventSource.multiFingerGestureStart ||
-                event.source == MapEventSource.multiFingerEnd ||
-                event.source == MapEventSource.scrollWheel)) {
-          setState(() {
-            _showLocateMeFab = true;
-          });
-        }
-      });
+      if ((event is MapEventMove || event is MapEventMoveEnd) &&
+          (event.source == MapEventSource.onDrag ||
+              event.source == MapEventSource.multiFingerGestureStart ||
+              event.source == MapEventSource.multiFingerEnd ||
+              event.source == MapEventSource.scrollWheel)) {
+        setState(() {
+          _showLocateMeFab = true;
+        });
+      }
+    });
   }
 
   @override
@@ -111,8 +110,8 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _startLocationUpdates() async {
-    if (await LocationService().checkLocationPermissions()) {
+  void _startLocationUpdates() {
+    if (widget.hasLocationPermission) {
       _positionStream = Geolocator.getPositionStream(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
@@ -152,9 +151,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     // Determine initial center and zoom
     final initialCenter = widget.selectedStop != null
         ? LatLng(widget.selectedStop!.latitude, widget.selectedStop!.longitude)
-        : widget.userPosition != null
-            ? LatLng(widget.userPosition!.latitude, widget.userPosition!.longitude)
-            : const LatLng(22.3964, 114.1095); // Updated fallback to Hong Kong
+        : const LatLng(22.3964, 114.1095); // Updated fallback to Hong Kong
     final initialZoom = widget.selectedStop != null ? _userZoomLevel : 12.0;
 
     return FutureBuilder<void>(

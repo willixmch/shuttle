@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:shuttle/models/routes.dart';
 import 'package:shuttle/ui/shuttle_card.dart';
 
@@ -9,6 +10,7 @@ class SlidingSchedulePanel extends StatelessWidget {
   final ValueNotifier<List<Map<String, dynamic>>> etaNotifier;
   final int? expandedCardIndex;
   final Function(int) onToggleCard;
+  final bool hasLocationPermission;
 
   const SlidingSchedulePanel({
     super.key,
@@ -18,6 +20,7 @@ class SlidingSchedulePanel extends StatelessWidget {
     required this.etaNotifier,
     required this.expandedCardIndex,
     required this.onToggleCard,
+    required this.hasLocationPermission,
   });
 
   @override
@@ -80,7 +83,7 @@ class SlidingSchedulePanel extends StatelessWidget {
                     return Padding(
                       padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
                       child: ShuttleCard(
-                        routeId: route.routeId, // Pass routeId from Routes object
+                        routeId: route.routeId,
                         route: route.routeName,
                         info: route.info,
                         eta: etaNotifier,
@@ -94,14 +97,41 @@ class SlidingSchedulePanel extends StatelessWidget {
               },
             ),
           ),
-          // Disclaimer
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 8, 24, 40),
-            child: Text(
-              '總站班次時間由營運商提供\n分站到達時間則為預估，僅供參考',
-              style: textTheme.labelMedium!.copyWith(color: colorScheme.outline),
-              textAlign: TextAlign.center,
-            ),
+          // Location Permission Reminder
+          ValueListenableBuilder<List<Map<String, dynamic>>>(
+            valueListenable: etaNotifier,
+            builder: (context, routeDataValue, child) {
+              if (!hasLocationPermission && !routeDataValue.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 40),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () async {
+                          await Geolocator.openAppSettings();
+                        },
+                        child: Text(
+                          '按此啟用定位服務',
+                          style: textTheme.labelMedium!.copyWith(
+                            color: colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                            decorationColor: colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '以尋找最接近你位置的車站',
+                        style: textTheme.labelMedium!.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
           ),
         ],
       ),
