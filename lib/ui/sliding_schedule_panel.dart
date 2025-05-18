@@ -121,7 +121,7 @@ class SlidingSchedulePanel extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '以尋找最接近你位置的車站',
+                        '以尋找最接近你的車站',
                         style: textTheme.labelMedium!.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
