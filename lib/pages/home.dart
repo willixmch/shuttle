@@ -93,7 +93,7 @@ class HomeState extends State<Home> {
         );
       }
       if (_selectedStop == null && _selectedEstate != null) {
-        final stops = await _dbHelper.getStopsForEstate(
+        final stops = await _dbHelper.getBordingStopsForEstate(
           _selectedEstate!.estateId,
         );
         if (stops.isNotEmpty) {

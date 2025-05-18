@@ -72,7 +72,7 @@ class DatabaseHelper {
     )
     ''');
 
-    // Stops table, linked to routes with ETA offset and coordinates
+    // Stops table, linked to routes with ETA offset, coordinates, and boardingStop
     await db.execute('''
     CREATE TABLE stops (
       stopId TEXT,
@@ -81,6 +81,7 @@ class DatabaseHelper {
       etaOffset INTEGER,
       latitude REAL,
       longitude REAL,
+      boardingStop INTEGER DEFAULT 0,
       PRIMARY KEY (stopId, routeId),
       FOREIGN KEY (routeId) REFERENCES routes (routeId)
     )
@@ -145,9 +146,10 @@ class DatabaseHelper {
         }
       }
 
-      // Insert stops with ETA offset and coordinates
+      // Insert stops with ETA offset, coordinates, and boardingStop
       if (route['stops'] != null) {
-        for (var stop in route['stops']) {
+        for (var i = 0; i < route['stops'].length; i++) {
+          var stop = route['stops'][i];
           await db.insert(
             'stops',
             {
@@ -157,6 +159,7 @@ class DatabaseHelper {
               'etaOffset': stop['etaOffset'],
               'latitude': stop['latitude'],
               'longitude': stop['longitude'],
+              'boardingStop': stop['boardingStop'] ?? (i == 0 ? 1 : 0), // Default first stop as boarding
             },
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
@@ -212,14 +215,14 @@ class DatabaseHelper {
     return result.map((e) => Stop.fromMap(e)).toList();
   }
 
-  // Fetches unique stops for an estate
-  Future<List<Stop>> getStopsForEstate(String estateId) async {
+  // Fetches unique boarding stops for an estate
+  Future<List<Stop>> getBordingStopsForEstate(String estateId) async {
     final db = await database;
     final result = await db.rawQuery('''
-      SELECT DISTINCT s.stopId, MIN(s.routeId) AS routeId, s.stopNameZh, MIN(s.etaOffset) AS etaOffset, s.latitude, s.longitude
+      SELECT DISTINCT s.stopId, MIN(s.routeId) AS routeId, s.stopNameZh, MIN(s.etaOffset) AS etaOffset, s.latitude, s.longitude, s.boardingStop
       FROM stops s
       JOIN routes r ON s.routeId = r.routeId
-      WHERE r.estateId = ?
+      WHERE r.estateId = ? AND s.boardingStop = 1
       GROUP BY s.stopId, s.stopNameZh, s.latitude, s.longitude
     ''', [estateId]);
     return result.map((e) => Stop.fromMap(e)).toList();

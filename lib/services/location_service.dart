@@ -37,7 +37,7 @@ class LocationService {
   }
 
   Future<Stop?> findClosestStop(Position userPosition, String estateId, DatabaseHelper dbHelper) async {
-    final stops = await dbHelper.getStopsForEstate(estateId);
+    final stops = await dbHelper.getBordingStopsForEstate(estateId);
     if (stops.isEmpty) {
       return null; // No stops available
     }

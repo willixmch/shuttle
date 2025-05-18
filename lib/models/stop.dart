@@ -21,6 +21,9 @@ class Stop {
   // Longitude of the stop location (e.g., 114.214314).
   final double longitude;
 
+  // Indicates if this stop is a boarding stop.
+  final bool boardingStop;
+
   const Stop({
     required this.stopId,
     required this.stopNameZh,
@@ -28,6 +31,7 @@ class Stop {
     required this.etaOffset,
     required this.latitude,
     required this.longitude,
+    required this.boardingStop,
   });
 
   // Converts a Stop object to a map for database insertion.
@@ -39,6 +43,7 @@ class Stop {
       'etaOffset': etaOffset,
       'latitude': latitude,
       'longitude': longitude,
+      'boardingStop': boardingStop ? 1 : 0,
     };
   }
 
@@ -48,6 +53,7 @@ class Stop {
     final stopNameZh = map['stopNameZh'];
     final routeId = map['routeId'];
     final etaOffset = map['etaOffset'];
+    final boardingStop = map['boardingStop'] ?? 0;
     if (stopId == null || stopNameZh == null || routeId == null || etaOffset == null) {
       throw Exception('Invalid stop data: one or more required fields are null in map: $map');
     }
@@ -58,12 +64,13 @@ class Stop {
       etaOffset: etaOffset as int,
       latitude: map['latitude'] as double,
       longitude: map['longitude'] as double,
+      boardingStop: (boardingStop as int) == 1,
     );
   }
 
   // String representation for debugging.
   @override
   String toString() {
-    return 'Stop{stopId: $stopId, stopNameZh: $stopNameZh, routeId: $routeId, etaOffset: $etaOffset, latitude: $latitude, longitude: $longitude}';
+    return 'Stop{stopId: $stopId, stopNameZh: $stopNameZh, routeId: $routeId, etaOffset: $etaOffset, latitude: $latitude, longitude: $longitude, boardingStop: $boardingStop}';
   }
 }

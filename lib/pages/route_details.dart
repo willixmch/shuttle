@@ -251,7 +251,11 @@ class RouteDetailsState extends State<RouteDetails> {
                                                   ),
                                                 ),
                                                 Text(
-                                                  stop.etaOffset == 0 ? '(總站)' : '(${stop.etaOffset} 分鐘)',
+                                                  stop.etaOffset == 0
+                                                    ? '(總站)'
+                                                    : stop.boardingStop == false
+                                                        ? '(循環線)'
+                                                        : '(${stop.etaOffset} 分鐘)',
                                                   style: textTheme.bodyLarge!.copyWith(
                                                     color: colorScheme.onSurfaceVariant,
                                                   ),

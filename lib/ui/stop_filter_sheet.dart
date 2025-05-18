@@ -24,11 +24,11 @@ class StopFilterSheet extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-            child: Text('車站', style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurfaceVariant)),
+            child: Text('上客點', style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurfaceVariant)),
           ),
           Expanded(
             child: FutureBuilder<List<Stop>>(
-              future: DatabaseHelper.instance.getStopsForEstate(estateId),
+              future: DatabaseHelper.instance.getBordingStopsForEstate(estateId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
