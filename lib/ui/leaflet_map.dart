@@ -41,6 +41,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   late final Future<void> _tileProviderFuture;
   List<Stop> _stops = [];
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  bool _hasStartedLocationUpdates = false;
 
   @override
   void initState() {
@@ -54,7 +55,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
       _tileProvider = provider;
     });
 
-    _startLocationUpdates();
     _fetchStops();
 
     _mapController.mapController.mapEventStream.listen((event) {
@@ -86,6 +86,11 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         );
       }
     }
+    // Start location updates when hasLocationPermission changes to true
+    if (widget.hasLocationPermission && !_hasStartedLocationUpdates) {
+      _startLocationUpdates();
+      _hasStartedLocationUpdates = true;
+    }
   }
 
   Future<void> _fetchStops() async {
@@ -110,8 +115,21 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _startLocationUpdates() {
+  void _startLocationUpdates() async {
     if (widget.hasLocationPermission) {
+      // Fetch initial position
+      try {
+        final initialPosition = await Geolocator.getCurrentPosition();
+        if (mounted) {
+          setState(() {
+            _currentLocation = LatLng(initialPosition.latitude, initialPosition.longitude);
+          });
+        }
+      } catch (e) {
+        // Handle failure silently; _currentLocation remains null
+      }
+
+      // Start position stream for real-time updates
       _positionStream = Geolocator.getPositionStream(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
@@ -125,6 +143,8 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
             _currentLocation = LatLng(position.latitude, position.longitude);
           });
         }
+      }, onError: (e) {
+        // Handle stream errors silently; keep _currentLocation as is
       });
     }
   }
@@ -224,7 +244,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
               right: 16.0,
               bottom: screenHeight * 0.32,
               child: AnimatedOpacity(
-                opacity: _showLocateMeFab ? 1.0 : 0.0,
+                opacity: widget.hasLocationPermission && _showLocateMeFab ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 200),
                 child: FloatingActionButton.small(
                   onPressed: _recenterMap,
