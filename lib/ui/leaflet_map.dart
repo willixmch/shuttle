@@ -33,7 +33,6 @@ class LeafletMap extends StatefulWidget {
 
 class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   late final AnimatedMapController _mapController;
-  Stream<Position>? _positionStream;
   LatLng? _currentLocation;
   static const double _userZoomLevel = 18.0;
   bool _showLocateMeFab = true;
@@ -110,42 +109,20 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _positionStream?.drain();
     _mapController.dispose();
     super.dispose();
   }
 
   void _startLocationUpdates() async {
-    if (widget.hasLocationPermission) {
-      // Fetch initial position
-      try {
-        final initialPosition = await Geolocator.getCurrentPosition();
-        if (mounted) {
-          setState(() {
-            _currentLocation = LatLng(initialPosition.latitude, initialPosition.longitude);
-          });
-        }
-      } catch (e) {
-        // Handle failure silently; _currentLocation remains null
+    try {
+      final initialPosition = await Geolocator.getCurrentPosition();
+      if (mounted) {
+        setState(() {
+          _currentLocation = LatLng(initialPosition.latitude, initialPosition.longitude);
+        });
       }
-
-      // Start position stream for real-time updates
-      _positionStream = Geolocator.getPositionStream(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter: 5,
-        ),
-      );
-
-      _positionStream!.listen((Position position) {
-        if (mounted) {
-          setState(() {
-            _currentLocation = LatLng(position.latitude, position.longitude);
-          });
-        }
-      }, onError: (e) {
-        // Handle stream errors silently; keep _currentLocation as is
-      });
+    } catch (e) {
+      // Handle failure silently; _currentLocation remains null
     }
   }
 
@@ -203,18 +180,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                   maxZoom: 19,
                   retinaMode: RetinaMode.isHighDensity(context),
                   tileProvider: _tileProvider!,
-                ),
-                CurrentLocationLayer(
-                  positionStream: _positionStream?.map(
-                    (position) => LocationMarkerPosition(
-                      latitude: position.latitude,
-                      longitude: position.longitude,
-                      accuracy: position.accuracy,
-                    ),
-                  ),
-                  style: const LocationMarkerStyle(
-                    markerSize: Size(20, 20),
-                  ),
                 ),
                 MarkerLayer(
                   markers: _stops.map((stop) {
