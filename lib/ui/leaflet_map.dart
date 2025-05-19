@@ -16,8 +16,6 @@ class LeafletMap extends StatefulWidget {
   final Estate? selectedEstate;
   final Stop? selectedStop;
   final bool hasLocationPermission;
-  final Stream<Position>? positionStream;
-  final bool isStreamStarted;
   final ValueChanged<Stop>? onStopSelected;
 
   const LeafletMap({
@@ -26,8 +24,6 @@ class LeafletMap extends StatefulWidget {
     this.selectedEstate,
     this.selectedStop,
     required this.hasLocationPermission,
-    this.positionStream,
-    required this.isStreamStarted,
     this.onStopSelected,
   });
 
@@ -44,6 +40,8 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   late final Future<void> _tileProviderFuture;
   List<Stop> _stops = [];
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  Stream<Position>? _positionStream;
+  bool _isStreamStarted = false;
 
   @override
   void initState() {
@@ -59,6 +57,18 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
 
     _fetchStops();
     _startLocationUpdates();
+
+    if (widget.hasLocationPermission) {
+      _positionStream = Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 5,
+        ),
+      );
+      setState(() {
+        _isStreamStarted = true;
+      });
+    }
 
     _mapController.mapController.mapEventStream.listen((event) {
       if ((event is MapEventMove || event is MapEventMoveEnd) &&
@@ -90,7 +100,25 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     }
     if (widget.hasLocationPermission != oldWidget.hasLocationPermission) {
       _startLocationUpdates();
+      if (widget.hasLocationPermission && !_isStreamStarted) {
+        _positionStream = Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 5,
+          ),
+        );
+        setState(() {
+          _isStreamStarted = true;
+        });
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    _positionStream?.drain();
+    _mapController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchStops() async {
@@ -106,12 +134,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         _stops = [];
       });
     }
-  }
-
-  @override
-  void dispose() {
-    _mapController.dispose();
-    super.dispose();
   }
 
   void _startLocationUpdates() async {
@@ -185,9 +207,9 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                   retinaMode: RetinaMode.isHighDensity(context),
                   tileProvider: _tileProvider!,
                 ),
-                if (widget.isStreamStarted && widget.hasLocationPermission)
+                if (_isStreamStarted && widget.hasLocationPermission)
                   CurrentLocationLayer(
-                    positionStream: widget.positionStream?.map(
+                    positionStream: _positionStream?.map(
                       (position) => LocationMarkerPosition(
                         latitude: position.latitude,
                         longitude: position.longitude,

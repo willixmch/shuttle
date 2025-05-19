@@ -10,7 +10,6 @@ import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/ui/leaflet_map.dart';
 import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/utils/day_type_checker.dart';
-import 'package:shuttle/services/location_service.dart';
 import 'package:shuttle/services/route_query.dart';
 import 'package:shuttle/services/persistence_estate.dart';
 import 'package:shuttle/utils/eta_refresh_timer.dart';
@@ -35,8 +34,6 @@ class HomeState extends State<Home> {
   Stop? _selectedStop;
   int? _expandedCardIndex;
   bool _hasLocationPermission = false;
-  Stream<Position>? _positionStream;
-  bool _isStreamStarted = false;
 
   final PanelController _panelController = PanelController();
   final double _minHeightFraction = 0.28;
@@ -46,22 +43,13 @@ class HomeState extends State<Home> {
 
   HomeState()
       : _routeQuery = RouteQuery(DatabaseHelper.instance),
-        _stopQuery = StopQuery(DatabaseHelper.instance, LocationService());
+        _stopQuery = StopQuery(DatabaseHelper.instance);
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _panelController.open();
-      _positionStream = Geolocator.getPositionStream(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter: 5,
-        ),
-      );
-      setState(() {
-        _isStreamStarted = true;
-      });
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -87,7 +75,6 @@ class HomeState extends State<Home> {
 
   @override
   void dispose() {
-    _positionStream?.drain();
     _etaRefreshTimer.dispose();
     _etaNotifier.dispose();
     super.dispose();
@@ -202,8 +189,6 @@ class HomeState extends State<Home> {
               selectedEstate: _selectedEstate,
               selectedStop: _selectedStop,
               hasLocationPermission: _hasLocationPermission,
-              positionStream: _positionStream,
-              isStreamStarted: _isStreamStarted,
               onStopSelected: (Stop stop) {
                 setState(() {
                   _selectedStop = stop;

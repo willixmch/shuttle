@@ -1,13 +1,11 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/services/database_helper.dart';
-import 'package:shuttle/services/location_service.dart';
 
 class StopQuery {
   final DatabaseHelper _dbHelper;
-  final LocationService _locationService;
 
-  StopQuery(this._dbHelper, this._locationService);
+  StopQuery(this._dbHelper);
 
   Future<Stop?> selectStop(String? estateId, Position? userPosition) async {
     if (estateId == null) {
@@ -48,7 +46,7 @@ class StopQuery {
   }
 
   Future<Stop?> getInitialStop(String? estateId, bool hasPermission) async {
-    Position? userPosition = hasPermission ? await _locationService.getCurrentPosition() : null;
+    Position? userPosition = hasPermission ? await Geolocator.getCurrentPosition() : null;
     return selectStop(estateId, userPosition);
   }
 }
