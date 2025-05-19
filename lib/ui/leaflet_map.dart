@@ -44,7 +44,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   late final Future<void> _tileProviderFuture;
   List<Stop> _stops = [];
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
-  bool _hasStartedLocationUpdates = false;
 
   @override
   void initState() {
@@ -59,6 +58,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     });
 
     _fetchStops();
+    _startLocationUpdates();
 
     _mapController.mapController.mapEventStream.listen((event) {
       if ((event is MapEventMove || event is MapEventMoveEnd) &&
@@ -88,9 +88,8 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         );
       }
     }
-    if (widget.hasLocationPermission && !_hasStartedLocationUpdates) {
+    if (widget.hasLocationPermission != oldWidget.hasLocationPermission) {
       _startLocationUpdates();
-      _hasStartedLocationUpdates = true;
     }
   }
 
@@ -125,7 +124,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
           });
         }
       } catch (e) {
-        // Handle failure silently; _currentLocation remains null
+        // Handle failure silently
       }
     }
   }
@@ -140,6 +139,8 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
       setState(() {
         _showLocateMeFab = false;
       });
+    } else {
+      _startLocationUpdates();
     }
   }
 
