@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:shuttle/ui/estate_filter_sheet.dart';
 import 'package:shuttle/ui/home_bar.dart';
 import 'package:shuttle/ui/sliding_schedule_panel.dart';
@@ -35,6 +36,8 @@ class HomeState extends State<Home> {
   Stop? _selectedStop;
   int? _expandedCardIndex;
   bool _hasLocationPermission = false;
+  Stream<Position>? _positionStream;
+  bool _isStreamStarted = false;
 
   final PanelController _panelController = PanelController();
   final double _minHeightFraction = 0.28;
@@ -49,9 +52,27 @@ class HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       _panelController.open();
-      _loadSchedule();
+      print('Starting position stream');
+      _positionStream = Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 5,
+        ),
+      );
+      setState(() {
+        _isStreamStarted = true;
+      });
+      print('Checking permission');
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        print('Requesting permission');
+        permission = await Geolocator.requestPermission();
+      }
+      _hasLocationPermission = permission == LocationPermission.always || permission == LocationPermission.whileInUse;
+      print('Permission: $_hasLocationPermission');
+      await _loadSchedule();
     });
     DayTypeChecker.initialize();
     _etaNotifier = ValueNotifier<List<Map<String, dynamic>>>([]);
@@ -71,12 +92,14 @@ class HomeState extends State<Home> {
 
   @override
   void dispose() {
+    _positionStream?.drain();
     _etaRefreshTimer.dispose();
     _etaNotifier.dispose();
     super.dispose();
   }
 
   Future<void> _loadSchedule() async {
+    print('Starting _loadSchedule');
     final persistenceEstate = await _persistneceEstate.estateQuery();
     if (mounted && persistenceEstate['estate'] != null) {
       setState(() {
@@ -84,15 +107,15 @@ class HomeState extends State<Home> {
       });
     }
 
-    _hasLocationPermission = await _locationService.checkLocationPermissions();
-
     if (_selectedStop == null && _selectedEstate != null) {
+      print('Calling getInitialStop with permission: $_hasLocationPermission');
       _selectedStop = await _stopQuery.getInitialStop(
         _selectedEstate!.estateId,
         _hasLocationPermission,
       );
     }
 
+    print('Loading route data');
     final routeData = await _routeQuery.loadRouteData(
       selectedEstate: _selectedEstate,
       selectedStop: _selectedStop,
@@ -105,6 +128,7 @@ class HomeState extends State<Home> {
       });
       _etaRefreshTimer.startRefreshTimer();
     }
+    print('Finished _loadSchedule');
   }
 
   void _showEstateFilterSheet() {
@@ -187,6 +211,8 @@ class HomeState extends State<Home> {
               selectedEstate: _selectedEstate,
               selectedStop: _selectedStop,
               hasLocationPermission: _hasLocationPermission,
+              positionStream: _positionStream,
+              isStreamStarted: _isStreamStarted,
               onStopSelected: (Stop stop) {
                 setState(() {
                   _selectedStop = stop;

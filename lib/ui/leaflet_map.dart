@@ -16,6 +16,8 @@ class LeafletMap extends StatefulWidget {
   final Estate? selectedEstate;
   final Stop? selectedStop;
   final bool hasLocationPermission;
+  final Stream<Position>? positionStream;
+  final bool isStreamStarted;
   final ValueChanged<Stop>? onStopSelected;
 
   const LeafletMap({
@@ -24,6 +26,8 @@ class LeafletMap extends StatefulWidget {
     this.selectedEstate,
     this.selectedStop,
     required this.hasLocationPermission,
+    this.positionStream,
+    required this.isStreamStarted,
     this.onStopSelected,
   });
 
@@ -75,7 +79,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     if (oldWidget.selectedEstate?.estateId != widget.selectedEstate?.estateId ||
         oldWidget.selectedStop?.stopId != widget.selectedStop?.stopId) {
       _fetchStops();
-      // Animate to new selected stop if it changed
       if (widget.selectedStop != null &&
           widget.selectedStop!.stopId != oldWidget.selectedStop?.stopId) {
         _mapController.animateTo(
@@ -85,7 +88,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         );
       }
     }
-    // Start location updates when hasLocationPermission changes to true
     if (widget.hasLocationPermission && !_hasStartedLocationUpdates) {
       _startLocationUpdates();
       _hasStartedLocationUpdates = true;
@@ -114,15 +116,18 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   }
 
   void _startLocationUpdates() async {
-    try {
-      final initialPosition = await Geolocator.getCurrentPosition();
-      if (mounted) {
-        setState(() {
-          _currentLocation = LatLng(initialPosition.latitude, initialPosition.longitude);
-        });
+    if (widget.hasLocationPermission) {
+      print('Starting location updates');
+      try {
+        final initialPosition = await Geolocator.getCurrentPosition();
+        if (mounted) {
+          setState(() {
+            _currentLocation = LatLng(initialPosition.latitude, initialPosition.longitude);
+          });
+        }
+      } catch (e) {
+        print('Failed to get initial position: $e');
       }
-    } catch (e) {
-      // Handle failure silently; _currentLocation remains null
     }
   }
 
@@ -145,10 +150,9 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     final double screenHeight = MediaQuery.of(context).size.height - kToolbarHeight - MediaQuery.of(context).padding.top;
     final double stopMarkerSize = 40;
 
-    // Determine initial center and zoom
     final initialCenter = widget.selectedStop != null
         ? LatLng(widget.selectedStop!.latitude, widget.selectedStop!.longitude)
-        : const LatLng(22.3964, 114.1095); // Updated fallback to Hong Kong
+        : const LatLng(22.3964, 114.1095);
     final initialZoom = widget.selectedStop != null ? _userZoomLevel : 12.0;
 
     return FutureBuilder<void>(
@@ -181,6 +185,19 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                   retinaMode: RetinaMode.isHighDensity(context),
                   tileProvider: _tileProvider!,
                 ),
+                if (widget.isStreamStarted && widget.hasLocationPermission)
+                  CurrentLocationLayer(
+                    positionStream: widget.positionStream?.map(
+                      (position) => LocationMarkerPosition(
+                        latitude: position.latitude,
+                        longitude: position.longitude,
+                        accuracy: position.accuracy,
+                      ),
+                    ),
+                    style: const LocationMarkerStyle(
+                      markerSize: Size(20, 20),
+                    ),
+                  ),
                 MarkerLayer(
                   markers: _stops.map((stop) {
                     return Marker(

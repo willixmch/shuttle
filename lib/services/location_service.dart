@@ -4,7 +4,6 @@ class LocationService {
   bool? _hasPermission;
 
   Future<bool> checkLocationPermissions() async {
-    // Return cached result if already checked
     if (_hasPermission != null) {
       return _hasPermission!;
     }
@@ -12,32 +11,27 @@ class LocationService {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       _hasPermission = false;
-      return false; // Location services disabled
+      return false;
     }
 
     LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
-        _hasPermission = false;
-        return false; // Permission denied or permanently denied
-      }
-    }
-
     if (permission == LocationPermission.deniedForever) {
       _hasPermission = false;
-      return false; // Permission permanently denied
+      return false;
     }
 
-    _hasPermission = true;
-    return true; // Permissions granted
+    _hasPermission = permission == LocationPermission.always || permission == LocationPermission.whileInUse;
+    return _hasPermission!;
   }
 
   Future<Position?> getCurrentPosition() async {
-    try {
-      return await Geolocator.getCurrentPosition();
-    } catch (e) {
-      return null; // Handle location retrieval failure
+    if (await checkLocationPermissions()) {
+      try {
+        return await Geolocator.getCurrentPosition();
+      } catch (e) {
+        return null;
+      }
     }
+    return null;
   }
 }
