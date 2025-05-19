@@ -26,7 +26,6 @@ class Home extends StatefulWidget {
 
 class HomeState extends State<Home> {
   final PersistenceEstate _persistneceEstate = PersistenceEstate();
-  final LocationService _locationService = LocationService();
   final StopQuery _stopQuery;
   final RouteQuery _routeQuery;
   late final EtaRefreshTimer _etaRefreshTimer;
@@ -54,7 +53,6 @@ class HomeState extends State<Home> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       _panelController.open();
-      print('Starting position stream');
       _positionStream = Geolocator.getPositionStream(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
@@ -64,14 +62,11 @@ class HomeState extends State<Home> {
       setState(() {
         _isStreamStarted = true;
       });
-      print('Checking permission');
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
-        print('Requesting permission');
         permission = await Geolocator.requestPermission();
       }
       _hasLocationPermission = permission == LocationPermission.always || permission == LocationPermission.whileInUse;
-      print('Permission: $_hasLocationPermission');
       await _loadSchedule();
     });
     DayTypeChecker.initialize();
@@ -99,7 +94,6 @@ class HomeState extends State<Home> {
   }
 
   Future<void> _loadSchedule() async {
-    print('Starting _loadSchedule');
     final persistenceEstate = await _persistneceEstate.estateQuery();
     if (mounted && persistenceEstate['estate'] != null) {
       setState(() {
@@ -108,14 +102,12 @@ class HomeState extends State<Home> {
     }
 
     if (_selectedStop == null && _selectedEstate != null) {
-      print('Calling getInitialStop with permission: $_hasLocationPermission');
       _selectedStop = await _stopQuery.getInitialStop(
         _selectedEstate!.estateId,
         _hasLocationPermission,
       );
     }
 
-    print('Loading route data');
     final routeData = await _routeQuery.loadRouteData(
       selectedEstate: _selectedEstate,
       selectedStop: _selectedStop,
@@ -128,7 +120,6 @@ class HomeState extends State<Home> {
       });
       _etaRefreshTimer.startRefreshTimer();
     }
-    print('Finished _loadSchedule');
   }
 
   void _showEstateFilterSheet() {

@@ -117,7 +117,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
 
   void _startLocationUpdates() async {
     if (widget.hasLocationPermission) {
-      print('Starting location updates');
       try {
         final initialPosition = await Geolocator.getCurrentPosition();
         if (mounted) {
@@ -126,7 +125,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
           });
         }
       } catch (e) {
-        print('Failed to get initial position: $e');
+        // Handle failure silently; _currentLocation remains null
       }
     }
   }

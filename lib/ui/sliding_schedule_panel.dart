@@ -101,7 +101,7 @@ class SlidingSchedulePanel extends StatelessWidget {
           ValueListenableBuilder<List<Map<String, dynamic>>>(
             valueListenable: etaNotifier,
             builder: (context, routeDataValue, child) {
-              if (!hasLocationPermission && !routeDataValue.isEmpty) {
+              if (!hasLocationPermission && routeDataValue.isNotEmpty) {
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(24, 8, 24, 40),
                   child: Row(
