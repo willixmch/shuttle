@@ -51,7 +51,7 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
                       spacing: 4,
                       children: [
                         Text(
-                          '車站', 
+                          estateTitle, 
                           style: textTheme.bodySmall!.copyWith(
                             color: colorScheme.outline
                           )

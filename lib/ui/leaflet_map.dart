@@ -58,18 +58,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     _fetchStops();
     _startLocationUpdates();
 
-    if (widget.hasLocationPermission) {
-      _positionStream = Geolocator.getPositionStream(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter: 5,
-        ),
-      );
-      setState(() {
-        _isStreamStarted = true;
-      });
-    }
-
     _mapController.mapController.mapEventStream.listen((event) {
       if ((event is MapEventMove || event is MapEventMoveEnd) &&
           (event.source == MapEventSource.onDrag ||
@@ -100,17 +88,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     }
     if (widget.hasLocationPermission != oldWidget.hasLocationPermission) {
       _startLocationUpdates();
-      if (widget.hasLocationPermission && !_isStreamStarted) {
-        _positionStream = Geolocator.getPositionStream(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.high,
-            distanceFilter: 5,
-          ),
-        );
-        setState(() {
-          _isStreamStarted = true;
-        });
-      }
     }
   }
 
@@ -137,7 +114,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   }
 
   void _startLocationUpdates() async {
-    if (widget.hasLocationPermission) {
+    if (widget.hasLocationPermission && !_isStreamStarted) {
       try {
         final initialPosition = await Geolocator.getCurrentPosition();
         if (mounted) {
@@ -145,6 +122,16 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
             _currentLocation = LatLng(initialPosition.latitude, initialPosition.longitude);
           });
         }
+
+        _positionStream = Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            distanceFilter: 5,
+          ),
+        );
+        setState(() {
+          _isStreamStarted = true;
+        });
       } catch (e) {
         // Handle failure silently
       }
@@ -161,8 +148,6 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
       setState(() {
         _showLocateMeFab = false;
       });
-    } else {
-      _startLocationUpdates();
     }
   }
 
