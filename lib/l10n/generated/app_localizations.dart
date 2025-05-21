@@ -106,6 +106,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No estates found'**
   String get noResult;
+
+  /// No description provided for @upcomingEta.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming ETA'**
+  String get upcomingEta;
+
+  /// No description provided for @minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes'**
+  String get minutes;
+
+  /// No description provided for @routeDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get routeDetails;
+
+  /// No description provided for @schedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedules'**
+  String get schedule;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

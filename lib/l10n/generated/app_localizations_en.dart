@@ -13,4 +13,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noResult => 'No estates found';
+
+  @override
+  String get upcomingEta => 'Upcoming ETA';
+
+  @override
+  String get minutes => 'Minutes';
+
+  @override
+  String get routeDetails => 'Details';
+
+  @override
+  String get schedule => 'Schedules';
 }

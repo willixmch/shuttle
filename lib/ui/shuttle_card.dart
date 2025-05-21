@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:shuttle/l10n/generated/app_localizations.dart';
 import 'package:shuttle/pages/route_details.dart';
 
 // Widget to display a shuttle route card with ETA information.
 // Expands to show upcoming ETAs based on isExpanded, controlled by parent.
 class ShuttleCard extends StatelessWidget {
-  final String routeId; // Added for navigation
-  final String route; // Route name, used as routeName
+  final String routeId; 
+  final String route;
   final String info;
   final ValueNotifier<String> eta;
   final ValueNotifier<List<String>> upcomingEta;
@@ -27,6 +28,7 @@ class ShuttleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final localizations = Localizations.of(context, AppLocalizations);
 
     return GestureDetector(
       onTap: onToggle,
@@ -99,7 +101,7 @@ class ShuttleCard extends StatelessWidget {
                           const Icon(Icons.departure_board, size: 16),
                           const SizedBox(width: 4),
                           Text(
-                            '稍後班次',
+                            localizations.upcomingEta,
                             style: textTheme.labelSmall!.copyWith(
                               color: colorScheme.onSurfaceVariant,
                             ),
@@ -130,7 +132,7 @@ class ShuttleCard extends StatelessWidget {
                                       padding:
                                           const EdgeInsets.symmetric(vertical: 4),
                                       child: Text(
-                                        '- 分鐘',
+                                        '- ${localizations.minutes}',
                                         style: textTheme.bodyLarge!.copyWith(
                                           color: colorScheme.onSurface,
                                         ),
@@ -154,7 +156,7 @@ class ShuttleCard extends StatelessWidget {
                                       padding:
                                           const EdgeInsets.symmetric(vertical: 4),
                                       child: Text(
-                                        '- 分鐘',
+                                        '- ${localizations.minutes}',
                                         style: textTheme.bodyLarge!.copyWith(
                                           color: colorScheme.onSurface,
                                         ),
@@ -224,7 +226,7 @@ class ShuttleCard extends StatelessWidget {
                                     ),
                                   );
                                 },
-                                label: const Text('路線詳情'),
+                                label: Text(localizations.routeDetails),
                                 icon: const Icon(Icons.route),
                               ),
                             ),
@@ -249,7 +251,7 @@ class ShuttleCard extends StatelessWidget {
                                     ),
                                   );
                                 },
-                                label: const Text('時間表'),
+                                label: Text(localizations.schedule),
                                 icon: const Icon(Icons.table_view),
                               ),
                             ),

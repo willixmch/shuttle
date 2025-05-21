@@ -31,21 +31,20 @@ class MyApp extends StatelessWidget {
       ],
       supportedLocales: const [
         Locale('en'), // English
-        Locale('zh'), // Traditional Chinese
+        Locale('zh', 'Hant'), // Traditional Chinese
+        // Add more locales here, e.g., Locale('zh', 'Hans'), Locale('fr')
       ],
       localeResolutionCallback: (locale, supportedLocales) {
         // Fallback to English if the device locale is not supported
         for (var supportedLocale in supportedLocales) {
           if (locale?.languageCode == supportedLocale.languageCode &&
-              locale?.scriptCode == supportedLocale.scriptCode) {
+              (locale?.scriptCode == supportedLocale.scriptCode || locale?.scriptCode == null)) {
             return supportedLocale;
           }
         }
         return supportedLocales.first; // Default to English
       },
-
-      locale: const Locale('zh'),
-
+      locale: const Locale('zh'), // for testing
       home: const Home(),
     );
   }

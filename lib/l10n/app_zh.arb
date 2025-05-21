@@ -1,5 +1,9 @@
 {
   "@@locale": "zh",
   "searchHint": "搜尋屋苑...",
-  "noResult": "沒有結果"
+  "noResult": "沒有結果",
+  "upcomingEta": "稍後班次",
+  "minutes": "分鐘",
+  "routeDetails": "路線詳情",
+  "schedule": "時間表"
 }

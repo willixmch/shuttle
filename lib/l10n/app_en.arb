@@ -1,5 +1,9 @@
 {
   "@@locale": "en",
   "searchHint": "Search Estate...",
-  "noResult": "No estates found"
+  "noResult": "No estates found",
+  "upcomingEta": "Upcoming ETA",
+  "minutes": "Minutes",
+  "routeDetails": "Details",
+  "schedule": "Schedules"
 }
