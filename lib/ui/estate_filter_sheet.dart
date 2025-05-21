@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart'; 
 import 'package:shuttle/models/estate.dart'; 
-import 'package:shuttle/services/database_helper.dart'; 
+import 'package:shuttle/services/database_helper.dart';
+import 'package:shuttle/l10n/generated/app_localizations.dart';
 
 // Bottom sheet for filtering estates with search and list
 class EstateFilterSheet extends StatefulWidget {
@@ -67,6 +68,7 @@ class EstateFilterSheetState extends State<EstateFilterSheet> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme; 
     final textTheme = Theme.of(context).textTheme;
+    final localizations = AppLocalizations.of(context)!;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16), // Padding for content
@@ -77,7 +79,7 @@ class EstateFilterSheetState extends State<EstateFilterSheet> {
           SearchBar(
             controller: _searchController, // Connects to input
             focusNode: _searchFocusNode, // Manages focus
-            hintText: '搜尋屋苑...', // Placeholder text
+            hintText: localizations.searchHint, // Search hint
             leading: const Icon(Icons.search), // Search icon
             textStyle: WidgetStatePropertyAll(textTheme.bodyLarge), // Text style
             padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 16.0)), // Inner padding
@@ -89,7 +91,7 @@ class EstateFilterSheetState extends State<EstateFilterSheet> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator()) // Show loading
                 : _filteredEstates.isEmpty
-                    ? const Center(child: Text('沒有結果')) // Show no results
+                    ? Center(child: Text(localizations.noResult)) // Show no results
                     : ListView.separated(
                         itemCount: _filteredEstates.length, // Number of estates
                         itemBuilder: (context, index) {

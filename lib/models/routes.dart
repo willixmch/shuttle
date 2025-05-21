@@ -1,76 +1,70 @@
-// lib/models/route.dart
-// Defines the Routes model to represent a shuttle route (e.g., A 線) in the database.
-// Used to store and retrieve route data from the 'routes' table.
-
 class Routes {
-  // Unique identifier for the route (e.g., '0001').
   final String routeId;
-
-  // Name of the route (e.g., 'A 線').
-  final String routeName;
-
-  // ID of the estate this route belongs to (e.g., '0001').
+  final String routeNameZh;
+  final String routeNameEn;
   final String estateId;
-
-  // Additional information about the route (e.g., '由天鑽第2座開出').
-  final String info;
-
-  // Fare for residents (e.g., '$4').
+  final String infoZh;
+  final String infoEn;
   final String residentFare;
-
-  // Fare for visitors (e.g., '$6').
   final String visitorFare;
 
   const Routes({
     required this.routeId,
-    required this.routeName,
+    required this.routeNameZh,
+    required this.routeNameEn,
     required this.estateId,
-    required this.info,
+    required this.infoZh,
+    required this.infoEn,
     required this.residentFare,
     required this.visitorFare,
   });
 
-  // Converts a Routes object to a map for database insertion.
   Map<String, dynamic> toMap() {
     return {
       'routeId': routeId,
-      'routeName': routeName,
+      'routeNameZh': routeNameZh,
+      'routeNameEn': routeNameEn,
       'estateId': estateId,
-      'info': info,
+      'infoZh': infoZh,
+      'infoEn': infoEn,
       'residentFare': residentFare,
       'visitorFare': visitorFare,
     };
   }
 
-  // Creates a Routes object from a database row (map).
   factory Routes.fromMap(Map<String, dynamic> map) {
     final routeId = map['routeId'];
-    final routeName = map['routeName'];
+    final routeNameZh = map['routeNameZh'];
+    final routeNameEn = map['routeNameEn'];
     final estateId = map['estateId'];
-    final info = map['info'];
+    final infoZh = map['info'];
+    final infoEn = map['infoEn'] ?? '';
     final residentFare = map['residentFare'];
     final visitorFare = map['visitorFare'];
     if (routeId == null ||
-        routeName == null ||
+        routeNameZh == null ||
+        routeNameEn == null ||
         estateId == null ||
-        info == null ||
+        infoZh == null ||
+        infoEn == null ||
         residentFare == null ||
         visitorFare == null) {
       throw Exception('Invalid route data: one or more fields are null in map: $map');
     }
     return Routes(
       routeId: routeId as String,
-      routeName: routeName as String,
+      routeNameZh: routeNameZh as String,
+      routeNameEn: routeNameEn as String,
       estateId: estateId as String,
-      info: info as String,
+      infoZh: infoZh as String,
+      infoEn: infoEn as String,
       residentFare: residentFare as String,
       visitorFare: visitorFare as String,
     );
   }
 
-  // String representation for debugging.
   @override
   String toString() {
-    return 'Routes{routeId: $routeId, routeName: $routeName, estateId: $estateId, info: $info, residentFare: $residentFare, visitorFare: $visitorFare}';
+    return 'Routes{routeId: $routeId, routeNameZh: $routeNameZh, routeNameEn: $routeNameEn, estateId: $estateId, info: $infoZh, infoEn: $infoEn, residentFare: $residentFare, visitorFare: $visitorFare}';
   }
 }

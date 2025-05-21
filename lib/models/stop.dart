@@ -6,8 +6,11 @@ class Stop {
   // Unique identifier for the stop (e.g., '0001').
   final String stopId;
 
-  // Chinese name of the stop (e.g., '帝堡城').
+  // Chinese name of the stop (e.g., '新城市廣場').
   final String stopNameZh;
+
+  // Chinese name of the stop (e.g., 'New Town Plaza').
+  final String stopNameEn;
 
   // ID of the route this stop belongs to (e.g., '0005').
   final String routeId;
@@ -27,6 +30,7 @@ class Stop {
   const Stop({
     required this.stopId,
     required this.stopNameZh,
+    required this.stopNameEn,
     required this.routeId,
     required this.etaOffset,
     required this.latitude,
@@ -39,6 +43,7 @@ class Stop {
     return {
       'stopId': stopId,
       'stopNameZh': stopNameZh,
+      'stopNameEn': stopNameEn,
       'routeId': routeId,
       'etaOffset': etaOffset,
       'latitude': latitude,
@@ -51,6 +56,7 @@ class Stop {
   factory Stop.fromMap(Map<String, dynamic> map) {
     final stopId = map['stopId'];
     final stopNameZh = map['stopNameZh'];
+    final stopNameEn = map['stopNameEn'];
     final routeId = map['routeId'];
     final etaOffset = map['etaOffset'];
     final boardingStop = map['boardingStop'] ?? 0;
@@ -60,6 +66,7 @@ class Stop {
     return Stop(
       stopId: stopId as String,
       stopNameZh: stopNameZh as String,
+      stopNameEn: stopNameEn as String,
       routeId: routeId as String,
       etaOffset: etaOffset as int,
       latitude: map['latitude'] as double,
@@ -71,6 +78,6 @@ class Stop {
   // String representation for debugging.
   @override
   String toString() {
-    return 'Stop{stopId: $stopId, stopNameZh: $stopNameZh, routeId: $routeId, etaOffset: $etaOffset, latitude: $latitude, longitude: $longitude, boardingStop: $boardingStop}';
+    return 'Stop{stopId: $stopId, stopNameZh: $stopNameZh, stopNameEn: $stopNameEn, routeId: $routeId, etaOffset: $etaOffset, latitude: $latitude, longitude: $longitude, boardingStop: $boardingStop}';
   }
 }

@@ -53,8 +53,10 @@ class DatabaseHelper {
     CREATE TABLE routes (
       routeId TEXT PRIMARY KEY,
       estateId TEXT,
-      routeName TEXT,
-      info TEXT,
+      routeNameZh TEXT,
+      routeNameEn TEXT,
+      infoZh TEXT,
+      infoEn TEXT,
       residentFare TEXT,
       visitorFare TEXT,
       FOREIGN KEY (estateId) REFERENCES estates (estateId)
@@ -78,6 +80,7 @@ class DatabaseHelper {
       stopId TEXT,
       routeId TEXT,
       stopNameZh TEXT,
+      stopNameEn TEXT,
       etaOffset INTEGER,
       latitude REAL,
       longitude REAL,
@@ -121,8 +124,10 @@ class DatabaseHelper {
         {
           'routeId': route['routeId'],
           'estateId': estateData['estateId'],
-          'routeName': route['routeName'],
-          'info': route['info'],
+          'routeNameZh': route['routeNameZh'],
+          'routeNameEn': route['routeNameEn'],
+          'infoZh': route['infoZh'],
+          'infoEn': route['infoEn'],
           'residentFare': route['residentFare'],
           'visitorFare': route['visitorFare'],
         },
@@ -156,6 +161,7 @@ class DatabaseHelper {
               'stopId': stop['stopId'],
               'routeId': route['routeId'],
               'stopNameZh': stop['stopNameZh'],
+              'stopNameEn': stop['stopNameEn'],
               'etaOffset': stop['etaOffset'],
               'latitude': stop['latitude'],
               'longitude': stop['longitude'],
@@ -219,11 +225,11 @@ class DatabaseHelper {
   Future<List<Stop>> getBordingStopsForEstate(String estateId) async {
     final db = await database;
     final result = await db.rawQuery('''
-      SELECT DISTINCT s.stopId, MIN(s.routeId) AS routeId, s.stopNameZh, MIN(s.etaOffset) AS etaOffset, s.latitude, s.longitude, s.boardingStop
+      SELECT DISTINCT s.stopId, MIN(s.routeId) AS routeId, s.stopNameZh, s.stopNameEn, MIN(s.etaOffset) AS etaOffset, s.latitude, s.longitude, s.boardingStop
       FROM stops s
       JOIN routes r ON s.routeId = r.routeId
       WHERE r.estateId = ? AND s.boardingStop = 1
-      GROUP BY s.stopId, s.stopNameZh, s.latitude, s.longitude
+      GROUP BY s.stopId, s.stopNameZh, s.stopNameEn, s.latitude, s.longitude
     ''', [estateId]);
     return result.map((e) => Stop.fromMap(e)).toList();
   }

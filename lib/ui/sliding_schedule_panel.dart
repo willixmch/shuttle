@@ -84,8 +84,8 @@ class SlidingSchedulePanel extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
                       child: ShuttleCard(
                         routeId: route.routeId,
-                        route: route.routeName,
-                        info: route.info,
+                        route: route.routeNameZh,
+                        info: route.infoZh,
                         eta: etaNotifier,
                         upcomingEta: upcomingEtaNotifier,
                         isExpanded: expandedCardIndex == index,
