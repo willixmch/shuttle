@@ -5,8 +5,10 @@ const theRegentData = {
   'routes': [
     {
       'routeId': 'NR538-A',
-      'routeName': 'A 線',
-      'info': '由天鑽第2座開出',
+      'routeNameZh': 'A 線',
+      'routeNameEn': 'A Line',
+      'infoZh': '由天鑽第2座開出',
+      'infoEn': 'From Tower 2',
       'residentFare': '\$4',
       'visitorFare': '\$6',
       'schedules': {
@@ -66,6 +68,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-1',
           'stopNameZh': '天鑽屋苑',
+          'stopNameEn': 'The Regent',
           'etaOffset': 0,
           'latitude': 22.438345,
           'longitude': 114.167447,
@@ -74,6 +77,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-2',
           'stopNameZh': '運頭塘公共運輸交匯處',
+          'stopNameEn': 'Wan Tau Tong Public Transport Interchange',
           'etaOffset': 4,
           'latitude': 22.442094,
           'longitude': 114.166659,
@@ -82,6 +86,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-3',
           'stopNameZh': '新達廣場巴士站',
+          'stopNameEn': 'Uptown Plaza bus stop',
           'etaOffset': 6,
           'latitude': 22.443354,
           'longitude': 114.169140,
@@ -90,6 +95,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-100',
           'stopNameZh': '天鑽屋苑',
+          'stopNameEn': 'The Regent',
           'etaOffset': -1,
           'latitude': 22.438345,
           'longitude': 114.167447,
@@ -99,8 +105,10 @@ const theRegentData = {
     },
     {
       'routeId': 'NR538-B',
-      'routeName': 'B 線',
-      'info': '由天鑽第18座開出',
+      'routeNameZh': 'B 線',
+      'routeNameEn': 'B Line',
+      'infoZh': '由天鑽第18座開出',
+      'infoEn': 'From Tower 18',
       'residentFare': '\$4',
       'visitorFare': '\$6',
       'schedules': {
@@ -157,6 +165,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-1',
           'stopNameZh': '天鑽屋苑',
+          'stopNameEn': 'The Regent',
           'etaOffset': 0,
           'latitude': 22.438345,
           'longitude': 114.167447,
@@ -165,6 +174,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-2',
           'stopNameZh': '運頭塘公共運輸交匯處',
+          'stopNameEn': 'Wan Tau Tong Public Transport Interchange',
           'etaOffset': 4,
           'latitude': 22.442094,
           'longitude': 114.166659,
@@ -173,6 +183,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-3',
           'stopNameZh': '新達廣場巴士站',
+          'stopNameEn': 'Uptown Plaza bus stop',
           'etaOffset': 6,
           'latitude': 22.443354,
           'longitude': 114.169140,
@@ -181,6 +192,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-100',
           'stopNameZh': '天鑽屋苑',
+          'stopNameEn': 'The Regent',
           'etaOffset': -1,
           'latitude': 22.438345,
           'longitude': 114.167447,
@@ -190,8 +202,10 @@ const theRegentData = {
     },
     {
       'routeId': 'NR538-C',
-      'routeName': 'C 線',
-      'info': '由天鑽第9座開出',
+      'routeNameZh': 'C 線',
+      'routeNameEn': 'C Line',
+      'infoZh': '由天鑽第9座開出',
+      'infoEn': 'From Tower 9',
       'residentFare': '\$4',
       'visitorFare': '\$6',
       'schedules': {
@@ -206,6 +220,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-1',
           'stopNameZh': '天鑽屋苑',
+          'stopNameEn': 'The Regent',
           'etaOffset': 0,
           'latitude': 22.438345,
           'longitude': 114.167447,
@@ -214,6 +229,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-2',
           'stopNameZh': '運頭塘公共運輸交匯處',
+          'stopNameEn': 'Wan Tau Tong Public Transport Interchange',
           'etaOffset': 4,
           'latitude': 22.442094,
           'longitude': 114.166659,
@@ -222,6 +238,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-3',
           'stopNameZh': '新達廣場巴士站',
+          'stopNameEn': 'Uptown Plaza bus stop',
           'etaOffset': 6,
           'latitude': 22.443354,
           'longitude': 114.169140,
@@ -230,6 +247,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-100',
           'stopNameZh': '天鑽屋苑',
+          'stopNameEn': 'The Regent',
           'etaOffset': -1,
           'latitude': 22.438345,
           'longitude': 114.167447,
@@ -239,8 +257,10 @@ const theRegentData = {
     },
     {
       'routeId': 'NR538-D',
-      'routeName': '特別班次',
-      'info': '由天鑽開出',
+      'routeNameZh': '特別班次',
+      'routeNameEn': 'Special Services',
+      'infoZh': '',
+      'infoEn': '',
       'residentFare': '\$5',
       'visitorFare': '\$7',
       'schedules': {
@@ -265,6 +285,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-1',
           'stopNameZh': '天鑽屋苑',
+          'stopNameEn': 'The Regent',
           'etaOffset': 0,
           'latitude': 22.438345,
           'longitude': 114.167447,
@@ -273,6 +294,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-4',
           'stopNameZh': '廣福道近美德大廈',
+          'stopNameEn': 'Kwong Fuk Road near Mei Tak Building',
           'etaOffset': 6,
           'latitude': 22.449220,
           'longitude': 114.165825,
@@ -281,6 +303,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-5',
           'stopNameZh': '運頭街大埔綜合大樓對面',
+          'stopNameEn': 'Wan Tau Street opposite Tai Po Complex',
           'etaOffset': 11,
           'latitude': 22.446006,
           'longitude': 114.167183,
@@ -289,6 +312,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-3',
           'stopNameZh': '新達廣場巴士站',
+          'stopNameEn': 'Uptown Plaza bus stop',
           'etaOffset': 12,
           'latitude': 22.443354,
           'longitude': 114.169140,
@@ -297,6 +321,7 @@ const theRegentData = {
         {
           'stopId': 'NR538-100',
           'stopNameZh': '天鑽屋苑',
+          'stopNameEn': 'The Regent',
           'etaOffset': -1,
           'latitude': 22.438345,
           'longitude': 114.167447,
