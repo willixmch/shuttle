@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shuttle/l10n/generated/app_localizations.dart';
 import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/services/database_helper.dart';
 
@@ -16,6 +17,7 @@ class StopFilterSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final localizations = Localizations.of(context, AppLocalizations);
 
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.8,
@@ -24,7 +26,7 @@ class StopFilterSheet extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
-            child: Text('上客點', style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurfaceVariant)),
+            child: Text(localizations.pickUpStop, style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurfaceVariant)),
           ),
           Expanded(
             child: FutureBuilder<List<Stop>>(
@@ -34,7 +36,7 @@ class StopFilterSheet extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('沒有可用的停靠站'));
+                  return const Center(child: Text('No Stop'));
                 }
 
                 final stops = snapshot.data!;

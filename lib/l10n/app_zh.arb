@@ -5,5 +5,12 @@
   "upcomingEta": "稍後班次",
   "minutes": "分鐘",
   "routeDetails": "路線詳情",
-  "schedule": "時間表"
+  "schedule": "時間表",
+  "pickUpStop": "上客點",
+  "residentFare": "住戶收費",
+  "visitorFare": "訪客收費",
+  "workday": "星期一至五（公眾假期除外）",
+  "saturday": "星期六",
+  "sunday": "星期日",
+  "publicHoliday": "公眾假期"
 }

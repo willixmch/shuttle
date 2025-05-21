@@ -37,7 +37,7 @@ class Routes {
     final routeNameZh = map['routeNameZh'];
     final routeNameEn = map['routeNameEn'];
     final estateId = map['estateId'];
-    final infoZh = map['info'];
+    final infoZh = map['infoZh'];
     final infoEn = map['infoEn'] ?? '';
     final residentFare = map['residentFare'];
     final visitorFare = map['visitorFare'];
@@ -65,6 +65,6 @@ class Routes {
 
   @override
   String toString() {
-    return 'Routes{routeId: $routeId, routeNameZh: $routeNameZh, routeNameEn: $routeNameEn, estateId: $estateId, info: $infoZh, infoEn: $infoEn, residentFare: $residentFare, visitorFare: $visitorFare}';
+    return 'Routes{routeId: $routeId, routeNameZh: $routeNameZh, routeNameEn: $routeNameEn, estateId: $estateId, infoZh: $infoZh, infoEn: $infoEn, residentFare: $residentFare, visitorFare: $visitorFare}';
   }
 }

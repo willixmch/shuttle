@@ -4,13 +4,12 @@ import 'package:shuttle/models/schedule.dart';
 import 'package:shuttle/models/stop.dart';
 import 'package:shuttle/services/database_helper.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shuttle/l10n/generated/app_localizations.dart';
 
-// Page to display route details and schedule for a selected shuttle route
 class RouteDetails extends StatefulWidget {
-  final String routeId; // ID of the selected route
-  final String routeName; // Name of the selected route for app bar
-  final int initialTab; // 0 for Route Details, 1 for Schedule
-
+  final String routeId;
+  final String routeName; 
+  final int initialTab; 
   const RouteDetails({
     super.key,
     required this.routeId,
@@ -102,6 +101,8 @@ class RouteDetailsState extends State<RouteDetails> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final localizations = Localizations.of(context, AppLocalizations);
+    
 
     return Scaffold(
       appBar: AppBar(
@@ -130,15 +131,15 @@ class RouteDetailsState extends State<RouteDetails> {
                   ),
                 ),
               ),
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: 0,
-                  label: Text('路線詳情'),
+                  label: Text(localizations.routeDetails),
                   icon: Icon(Icons.route),
                 ),
                 ButtonSegment(
                   value: 1,
-                  label: Text('時間表'),
+                  label: Text(localizations.schedule),
                   icon: Icon(Icons.table_view),
                 ),
               ],
@@ -171,7 +172,7 @@ class RouteDetailsState extends State<RouteDetails> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      '住戶收費',
+                                      localizations.residentFare,
                                       style: textTheme.bodySmall!.copyWith(
                                         color: colorScheme.onSurfaceVariant,
                                       ),
@@ -189,7 +190,7 @@ class RouteDetailsState extends State<RouteDetails> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      '訪客收費',
+                                      localizations.visitorFare,
                                       style: textTheme.bodySmall!.copyWith(
                                         color: colorScheme.onSurfaceVariant,
                                       ),
@@ -214,7 +215,7 @@ class RouteDetailsState extends State<RouteDetails> {
                                   color: colorScheme.outlineVariant,
                                 ),
                                 Text(
-                                  '上客點(車程)',
+                                  localizations.pickUpStop,
                                   style: textTheme.bodySmall!.copyWith(
                                     color: colorScheme.onSurfaceVariant,
                                   ),
@@ -301,19 +302,19 @@ class RouteDetailsState extends State<RouteDetails> {
                             final dayTypes = [
                               {
                                 'key': 'workday',
-                                'label': '星期一至五（公眾假期除外）',
+                                'label': localizations.workday,
                               },
                               {
                                 'key': 'saturday',
-                                'label': '星期六',
+                                'label': localizations.saturday,
                               },
                               {
                                 'key': 'sunday',
-                                'label': '星期日',
+                                'label': localizations.sunday,
                               },
                               {
                                 'key': 'public_holiday',
-                                'label': '公眾假期',
+                                'label': localizations.publicHoliday,
                               },
                             ];
 

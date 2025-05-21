@@ -1,9 +1,16 @@
 {
   "@@locale": "en",
   "searchHint": "Search Estate...",
-  "noResult": "No estates found",
+  "noResult": "No Results",
   "upcomingEta": "Upcoming ETA",
   "minutes": "Minutes",
   "routeDetails": "Details",
-  "schedule": "Schedules"
+  "schedule": "Schedules",
+  "pickUpStop": "Pick Up Stop",
+  "residentFare": "Resident Fare",
+  "visitorFare": "Vistor Fare",
+  "workday": "Mondays to Fridays(except Public Holidays)",
+  "saturday": "Saturdays",
+  "sunday": "Sundays",
+  "publicHoliday": "Public Holidays"
 }

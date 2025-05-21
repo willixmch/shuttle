@@ -92,16 +92,16 @@ class DatabaseHelper {
 
     // Insert initial data
     await _insertEstateData(db, theRegentData);
-    await _insertEstateData(db, kwongYuenEstateData);
-    await _insertEstateData(db, royalAscotData);
-    await _insertEstateData(db, lakeviewGardenData);
-    await _insertEstateData(db, parcRoyaleData);
-    await _insertEstateData(db, goldenTimeVillasData);
-    await _insertEstateData(db, granvilleGardenData);
-    await _insertEstateData(db, shatinHeightsData);
-    await _insertEstateData(db, vistaParadisoData);
-    await _insertEstateData(db, villaAthenaData);
-    await _insertEstateData(db, theCastelloData);
+    // await _insertEstateData(db, kwongYuenEstateData);
+    // await _insertEstateData(db, royalAscotData);
+    // await _insertEstateData(db, lakeviewGardenData);
+    // await _insertEstateData(db, parcRoyaleData);
+    // await _insertEstateData(db, goldenTimeVillasData);
+    // await _insertEstateData(db, granvilleGardenData);
+    // await _insertEstateData(db, shatinHeightsData);
+    // await _insertEstateData(db, vistaParadisoData);
+    // await _insertEstateData(db, villaAthenaData);
+    // await _insertEstateData(db, theCastelloData);
   }
 
   // Inserts estate, route, schedule, and stop data

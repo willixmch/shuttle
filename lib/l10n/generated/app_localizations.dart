@@ -104,7 +104,7 @@ abstract class AppLocalizations {
   /// No description provided for @noResult.
   ///
   /// In en, this message translates to:
-  /// **'No estates found'**
+  /// **'No Results'**
   String get noResult;
 
   /// No description provided for @upcomingEta.
@@ -130,6 +130,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Schedules'**
   String get schedule;
+
+  /// No description provided for @pickUpStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Up Stop'**
+  String get pickUpStop;
+
+  /// No description provided for @residentFare.
+  ///
+  /// In en, this message translates to:
+  /// **'Resident Fare'**
+  String get residentFare;
+
+  /// No description provided for @visitorFare.
+  ///
+  /// In en, this message translates to:
+  /// **'Vistor Fare'**
+  String get visitorFare;
+
+  /// No description provided for @workday.
+  ///
+  /// In en, this message translates to:
+  /// **'Mondays to Fridays(except Public Holidays)'**
+  String get workday;
+
+  /// No description provided for @saturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturdays'**
+  String get saturday;
+
+  /// No description provided for @sunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sundays'**
+  String get sunday;
+
+  /// No description provided for @publicHoliday.
+  ///
+  /// In en, this message translates to:
+  /// **'Public Holidays'**
+  String get publicHoliday;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

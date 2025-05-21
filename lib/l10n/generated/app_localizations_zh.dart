@@ -25,4 +25,25 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get schedule => '時間表';
+
+  @override
+  String get pickUpStop => '上客點';
+
+  @override
+  String get residentFare => '住戶收費';
+
+  @override
+  String get visitorFare => '訪客收費';
+
+  @override
+  String get workday => '星期一至五（公眾假期除外）';
+
+  @override
+  String get saturday => '星期六';
+
+  @override
+  String get sunday => '星期日';
+
+  @override
+  String get publicHoliday => '公眾假期';
 }
