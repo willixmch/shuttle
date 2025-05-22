@@ -27,7 +27,7 @@ class RouteQuery {
     final dayType = EtaCalculator.getDayType(currentTime);
 
     for (var route in routes) {
-      // Skip routes that don't match the selected estate
+      // Skip routes that don't match selected estate
       if (route.estateId != selectedEstate.estateId) {
         continue;
       }
@@ -88,21 +88,21 @@ class RouteQuery {
       selectedStop,
     );
 
+    // Explicitly cast upcomingEta to List<int>
+    final upcomingEta = (etaData['upcomingEta'] as List<dynamic>).cast<int>();
+
     // Create route data entry with notifiers for real-time updates
     return {
       'route': route,
       'estate': estate,
       'schedules': schedules,
       'eta': etaData['eta'],
-      'upcomingEta': etaData['upcomingEta'],
+      'upcomingEta': upcomingEta,
       'etaNotifier': ValueNotifier<String>(
         EtaCalculator.formatEta(etaData['eta']),
       ),
       'upcomingEtaNotifier': ValueNotifier<List<String>>(
-        (etaData['upcomingEta'] as List<dynamic>)
-            .cast<int>()
-            .map((e) => EtaCalculator.formatEta(e))
-            .toList(),
+        upcomingEta.map((e) => EtaCalculator.formatEta(e)).toList(),
       ),
     };
   }

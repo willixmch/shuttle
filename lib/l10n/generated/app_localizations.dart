@@ -188,20 +188,8 @@ abstract class AppLocalizations {
   /// No description provided for @languageSwitch.
   ///
   /// In en, this message translates to:
-  /// **'中文'**
+  /// **'繁中'**
   String get languageSwitch;
-
-  /// No description provided for @noService.
-  ///
-  /// In en, this message translates to:
-  /// **'No Service'**
-  String get noService;
-
-  /// No description provided for @arriving.
-  ///
-  /// In en, this message translates to:
-  /// **'Arriving'**
-  String get arriving;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

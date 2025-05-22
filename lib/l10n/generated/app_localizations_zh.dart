@@ -54,11 +54,5 @@ class AppLocalizationsZh extends AppLocalizations {
   String get estateSwitch => '選擇屋苑';
 
   @override
-  String get languageSwitch => 'English';
-
-  @override
-  String get noService => '沒有服務';
-
-  @override
-  String get arriving => '即將到達';
+  String get languageSwitch => 'En';
 }

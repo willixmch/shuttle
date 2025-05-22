@@ -18,7 +18,7 @@ import 'package:shuttle/services/stop_query.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class Home extends StatefulWidget {
-  final void Function(VoidCallback) toggleLanguage; // Updated to accept callback
+  final void Function(VoidCallback) toggleLanguage;
   final ValueNotifier<String> languageNotifier;
 
   const Home({
@@ -79,7 +79,6 @@ class HomeState extends State<Home> {
       getRouteData: () => _cachedRouteData,
       getEffectiveStop: () => _selectedStop,
     );
-    // Listen for language changes (for initialization or other updates)
     widget.languageNotifier.addListener(_refreshEtaStrings);
   }
 
@@ -92,10 +91,10 @@ class HomeState extends State<Home> {
   }
 
   void _refreshEtaStrings() {
-    // Update etaNotifier and upcomingEtaNotifier for each routeData entry
     final updatedRouteData = _cachedRouteData.map((entry) {
       final eta = entry['eta'] as int?;
-      final upcomingEta = entry['upcomingEta'] as List<int>;
+      // Safely cast upcomingEta, handling dynamic lists
+      final upcomingEta = (entry['upcomingEta'] as List<dynamic>?)?.cast<int>() ?? [];
       return {
         ...entry,
         'etaNotifier': ValueNotifier<String>(EtaCalculator.formatEta(eta)),
@@ -135,6 +134,7 @@ class HomeState extends State<Home> {
         _cachedRouteData = routeData;
         _etaNotifier.value = routeData;
       });
+      _refreshEtaStrings(); // Ensure ETAs are formatted in current language
       _etaRefreshTimer.startRefreshTimer();
     }
   }

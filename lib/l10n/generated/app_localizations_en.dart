@@ -54,11 +54,5 @@ class AppLocalizationsEn extends AppLocalizations {
   String get estateSwitch => 'Choose Estate';
 
   @override
-  String get languageSwitch => '中文';
-
-  @override
-  String get noService => 'No Service';
-
-  @override
-  String get arriving => 'Arriving';
+  String get languageSwitch => '繁中';
 }
