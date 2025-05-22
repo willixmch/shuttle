@@ -32,7 +32,7 @@ class StopFilterSheet extends StatelessWidget {
           ),
           Expanded(
             child: FutureBuilder<List<Stop>>(
-              future: DatabaseHelper.instance.getBordingStopsForEstate(estateId),
+              future: DatabaseHelper.instance.getBoardingStopsForEstate(estateId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());

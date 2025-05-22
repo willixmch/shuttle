@@ -222,7 +222,7 @@ class DatabaseHelper {
   }
 
   // Fetches unique boarding stops for an estate
-  Future<List<Stop>> getBordingStopsForEstate(String estateId) async {
+  Future<List<Stop>> getBoardingStopsForEstate(String estateId) async {
     final db = await database;
     final result = await db.rawQuery('''
       SELECT DISTINCT s.stopId, MIN(s.routeId) AS routeId, s.stopNameZh, s.stopNameEn, MIN(s.etaOffset) AS etaOffset, s.latitude, s.longitude, s.boardingStop

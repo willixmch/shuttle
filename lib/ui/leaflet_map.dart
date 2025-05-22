@@ -100,7 +100,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
 
   Future<void> _fetchStops() async {
     if (widget.selectedEstate != null) {
-      final stops = await _dbHelper.getBordingStopsForEstate(widget.selectedEstate!.estateId);
+      final stops = await _dbHelper.getBoardingStopsForEstate(widget.selectedEstate!.estateId);
       if (mounted) {
         setState(() {
           _stops = stops;

@@ -12,7 +12,7 @@ class StopQuery {
       return null; // No estate selected
     }
 
-    final stops = await _dbHelper.getBordingStopsForEstate(estateId);
+    final stops = await _dbHelper.getBoardingStopsForEstate(estateId);
     if (stops.isEmpty) {
       return null; // No stops available
     }

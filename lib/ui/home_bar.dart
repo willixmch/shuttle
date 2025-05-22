@@ -32,6 +32,7 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
         bottom: false,
         minimum: const EdgeInsets.fromLTRB(16, 0, 16, 8),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             SizedBox(
@@ -84,58 +85,61 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
             ),
-            PopupMenuButton<String>(
-              icon: Icon(
-                Icons.menu,
-                color: colorScheme.outline,
-              ),
-              onSelected: (String value) {
-                if (value == 'estate') {
-                  estateOnTap?.call();
-                } else if (value == 'language') {
-                  toggleLanguage?.call();
-                }
-              },
-              itemBuilder: (BuildContext context) => [
-                PopupMenuItem<String>(
-                  value: 'estate',
-                  child: ListTile(
-                    leading: Icon(
-                      Icons.home_work_outlined,
-                      color: colorScheme.onSurface,
-                    ),
-                    title: Text(
-                      localizations.estateSwitch,
-                      style: textTheme.bodyMedium!.copyWith(
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                  ),
+            Padding(
+              padding: const EdgeInsets.only(top:12),
+              child: PopupMenuButton<String>(
+                icon: Icon(
+                  Icons.menu,
+                  color: colorScheme.outline,
                 ),
-                PopupMenuItem<String>(
-                  value: 'language',
-                  child: ListTile(
-                    leading: Icon(
-                      Icons.translate_outlined,
-                      color: colorScheme.onSurface,
-                    ),
-                    title: Text(
-                      localizations.languageSwitch,
-                      style: textTheme.bodyMedium!.copyWith(
-                        color: colorScheme.onSurface,
+                onSelected: (String value) {
+                  if (value == 'estate') {
+                    estateOnTap?.call();
+                  } else if (value == 'language') {
+                    toggleLanguage?.call();
+                  }
+                },
+                itemBuilder: (BuildContext context) => [
+                  PopupMenuItem<String>(
+                    value: 'estate',
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.home_work_outlined,
+                        color: colorScheme.onSurfaceVariant,
                       ),
+                      title: Text(
+                        localizations.estateSwitch,
+                        style: textTheme.bodyMedium!.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
                     ),
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
                   ),
+                  PopupMenuItem<String>(
+                    value: 'language',
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.translate_outlined,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      title: Text(
+                        localizations.languageSwitch,
+                        style: textTheme.bodyMedium!.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+                ],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ],
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                color: colorScheme.surface,
               ),
-              color: colorScheme.surface,
             ),
           ],
         ),
