@@ -143,6 +143,12 @@ abstract class AppLocalizations {
   /// **'Pick Up Stop'**
   String get pickUpStop;
 
+  /// No description provided for @stops.
+  ///
+  /// In en, this message translates to:
+  /// **'Stops'**
+  String get stops;
+
   /// No description provided for @residentFare.
   ///
   /// In en, this message translates to:
@@ -158,7 +164,7 @@ abstract class AppLocalizations {
   /// No description provided for @workday.
   ///
   /// In en, this message translates to:
-  /// **'Mondays to Fridays(except Public Holidays)'**
+  /// **'Mondays - Fridays(except Public Holidays)'**
   String get workday;
 
   /// No description provided for @saturday.

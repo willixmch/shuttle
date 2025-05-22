@@ -48,6 +48,7 @@ dependencies:
   http_cache_file_store: ^2.0.0
   flutter_svg: ^2.0.10+1
   google_fonts: ^6.2.1
+  hugeicons: ^0.0.11
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

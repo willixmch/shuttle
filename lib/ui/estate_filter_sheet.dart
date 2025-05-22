@@ -99,10 +99,14 @@ class EstateFilterSheetState extends State<EstateFilterSheet> {
                           return ListTile(
                             contentPadding: const EdgeInsets.symmetric(horizontal: 8.0), // Item padding
                             title: Text(
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               estate.estateTitleEn, // English title
                               style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurfaceVariant),
                             ),
                             subtitle: Text(
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               estate.estateTitleZh, // Chinese title
                               style: textTheme.titleMedium?.copyWith(color: colorScheme.onSurface),
                             ),

@@ -61,23 +61,28 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
                             color: colorScheme.outline,
                           ),
                         ),
-                        Row(
-                          children: [
-                            Text(
-                              stopTitle,
-                              style: textTheme.titleLarge!.copyWith(
-                                color: colorScheme.onSurface,
-                                height: 1.2,
-                                overflow: TextOverflow.ellipsis,
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width - 120,
+                          child: Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  stopTitle,
+                                  style: textTheme.titleLarge!.copyWith(
+                                    color: colorScheme.onSurface,
+                                    height: 1.2,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
                               ),
-                              maxLines: 1,
-                            ),
-                            Icon(
-                              Icons.arrow_drop_down_rounded,
-                              size: 28,
-                              color: colorScheme.onSurface,
-                            ),
-                          ],
+                              Icon(
+                                Icons.arrow_drop_down_rounded,
+                                size: 28,
+                                color: colorScheme.onSurface,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),

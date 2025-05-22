@@ -34,14 +34,12 @@ class ShuttleCard extends StatelessWidget {
       onTap: onToggle,
       child: Container(
         // Card Styling
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainer,
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
         width: double.infinity,
         padding: const EdgeInsets.all(12),
-        decoration: ShapeDecoration(
-          color: colorScheme.surfaceContainer,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
         // Content
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

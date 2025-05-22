@@ -33,6 +33,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pickUpStop => '上客點';
 
   @override
+  String get stops => '途經車站';
+
+  @override
   String get residentFare => '住戶收費';
 
   @override

@@ -8,6 +8,7 @@
   "routeDetails": "路線詳情",
   "schedule": "時間表",
   "pickUpStop": "上客點",
+  "stops": "途經車站",
   "residentFare": "住戶收費",
   "visitorFare": "訪客收費",
   "workday": "星期一至五（公眾假期除外）",

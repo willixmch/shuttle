@@ -119,6 +119,7 @@ class RouteDetailsState extends State<RouteDetails> {
           ),
           body: Column(
             children: [
+              // Segmented Button
               Container(
                 width: double.infinity,
                 margin: EdgeInsets.all(16),
@@ -155,6 +156,7 @@ class RouteDetailsState extends State<RouteDetails> {
                   onSelectionChanged: _onSegmentChanged,
                 ),
               ),
+              // Content
               Expanded(
                 child: PageView(
                   controller: _pageController,
@@ -166,41 +168,45 @@ class RouteDetailsState extends State<RouteDetails> {
                         : SingleChildScrollView(
                             padding: const EdgeInsets.all(16.0),
                             child: Column(
+                              spacing: 24,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // Fare Info
                                 Row(
                                   spacing: 24,
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     Column(
+                                      spacing: 8,
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           localizations.residentFare,
-                                          style: textTheme.bodySmall!.copyWith(
+                                          style: textTheme.bodyMedium!.copyWith(
                                             color: colorScheme.onSurfaceVariant,
                                           ),
                                         ),
                                         Text(
                                           _route?.residentFare ?? 'N/A',
-                                          style: textTheme.headlineLarge!.copyWith(
+                                          style: textTheme.displaySmall!.copyWith(
                                             color: colorScheme.onSurface,
                                           ),
                                         ),
                                       ],
                                     ),
                                     Column(
+                                      spacing: 8,
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           localizations.visitorFare,
-                                          style: textTheme.bodySmall!.copyWith(
+                                          style: textTheme.bodyMedium!.copyWith(
                                             color: colorScheme.onSurfaceVariant,
                                           ),
                                         ),
                                         Text(
                                           _route?.visitorFare ?? 'N/A',
-                                          style: textTheme.headlineLarge!.copyWith(
+                                          style: textTheme.displaySmall!.copyWith(
                                             color: colorScheme.onSurface,
                                           ),
                                         ),
@@ -208,7 +214,8 @@ class RouteDetailsState extends State<RouteDetails> {
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 24),
+
+                                // Divider
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -216,14 +223,15 @@ class RouteDetailsState extends State<RouteDetails> {
                                       color: colorScheme.outlineVariant,
                                     ),
                                     Text(
-                                      localizations.pickUpStop,
-                                      style: textTheme.bodySmall!.copyWith(
+                                      localizations.stops,
+                                      style: textTheme.labelMedium!.copyWith(
                                         color: colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 8),
+                                
+                                // Stop Diagram
                                 _stopsName.isNotEmpty
                                     ? Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,15 +240,16 @@ class RouteDetailsState extends State<RouteDetails> {
                                           final stop = entry.value;
                                           final List<Widget> widgets = [
                                             Row(
+                                              spacing: 16,
                                               children: [
                                                 SvgPicture.asset(
                                                   'lib/assets/stop_dot.svg',
                                                   height: 24,
                                                   width: 24,
                                                 ),
-                                                const SizedBox(width: 16),
                                                 Expanded(
-                                                  child: Row(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
                                                       Text(
                                                         languageCode == 'zh'
@@ -249,15 +258,16 @@ class RouteDetailsState extends State<RouteDetails> {
                                                         style: textTheme.bodyLarge!.copyWith(
                                                           color: colorScheme.onSurface,
                                                         ),
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
                                                       ),
-                                                      const SizedBox(width: 8),
                                                       Text(
                                                         stop.etaOffset == 0
-                                                            ? '(${localizations.origin})'
-                                                            : stop.boardingStop == false
-                                                                ? '(${localizations.circular})'
-                                                                : '(${stop.etaOffset} ${localizations.minutes})',
-                                                        style: textTheme.bodyLarge!.copyWith(
+                                                            ? localizations.origin
+                                                            : stop.etaOffset == -1
+                                                                ? localizations.circular
+                                                                : '${stop.etaOffset} ${localizations.minutes}',
+                                                        style: textTheme.bodyMedium!.copyWith(
                                                           color: colorScheme.onSurfaceVariant,
                                                         ),
                                                       ),
@@ -270,12 +280,21 @@ class RouteDetailsState extends State<RouteDetails> {
                                           if (index < _stopsName.length - 1) {
                                             widgets.add(
                                               Container(
-                                                alignment: Alignment.centerLeft,
-                                                padding: EdgeInsets.symmetric(horizontal: 10),
-                                                child: SvgPicture.asset(
-                                                  'lib/assets/stop_connector.svg',
-                                                  width: 4,
-                                                  height: 36,
+                                                height: 28,
+                                                alignment: Alignment.bottomLeft,
+                                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                child: Stack(
+                                                  clipBehavior: Clip.none, // Ensure Stack doesn't clip either
+                                                  children: [
+                                                    Positioned(
+                                                      bottom: -10, // Anchor SVG to the bottom
+                                                      child: SvgPicture.asset(
+                                                        'lib/assets/stop_connector.svg',
+                                                        width: 4,
+                                                        height: 48,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             );
@@ -314,6 +333,7 @@ class RouteDetailsState extends State<RouteDetails> {
                                         children: [
                                           Expanded(
                                             child: Column(
+                                              spacing: 8,
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Text(

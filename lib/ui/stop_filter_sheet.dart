@@ -54,6 +54,8 @@ class StopFilterSheet extends StatelessWidget {
                         return ListTile(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 24),
                           title: Text(
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             languageCode == 'zh' ? stop.stopNameZh : stop.stopNameEn,
                             style: textTheme.titleMedium?.copyWith(color: colorScheme.onSurface),
                           ),

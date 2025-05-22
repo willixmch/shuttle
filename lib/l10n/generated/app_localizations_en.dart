@@ -33,13 +33,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pickUpStop => 'Pick Up Stop';
 
   @override
+  String get stops => 'Stops';
+
+  @override
   String get residentFare => 'Resident Fare';
 
   @override
   String get visitorFare => 'Vistor Fare';
 
   @override
-  String get workday => 'Mondays to Fridays(except Public Holidays)';
+  String get workday => 'Mondays - Fridays(except Public Holidays)';
 
   @override
   String get saturday => 'Saturdays';
