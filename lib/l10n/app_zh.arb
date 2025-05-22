@@ -4,6 +4,7 @@
   "noResult": "沒有結果",
   "upcomingEta": "稍後班次",
   "minutes": "分鐘",
+  "hours": "小時",
   "routeDetails": "路線詳情",
   "schedule": "時間表",
   "pickUpStop": "上客點",
@@ -12,5 +13,10 @@
   "workday": "星期一至五（公眾假期除外）",
   "saturday": "星期六",
   "sunday": "星期日",
-  "publicHoliday": "公眾假期"
+  "publicHoliday": "公眾假期",
+  "estateSwitch": "選擇屋苑",
+  "languageSwitch": "English",
+  "noService": "沒有服務",
+  "arriving": "即將到達"
+
 }

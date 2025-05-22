@@ -4,6 +4,7 @@
   "noResult": "No Results",
   "upcomingEta": "Upcoming ETA",
   "minutes": "Minutes",
+  "hours": "Hours",
   "routeDetails": "Details",
   "schedule": "Schedules",
   "pickUpStop": "Pick Up Stop",
@@ -12,5 +13,9 @@
   "workday": "Mondays to Fridays(except Public Holidays)",
   "saturday": "Saturdays",
   "sunday": "Sundays",
-  "publicHoliday": "Public Holidays"
+  "publicHoliday": "Public Holidays",
+  "estateSwitch": "Choose Estate",
+  "languageSwitch": "中文",
+  "noService": "No Service",
+  "arriving": "Arriving"
 }

@@ -119,6 +119,12 @@ abstract class AppLocalizations {
   /// **'Minutes'**
   String get minutes;
 
+  /// No description provided for @hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours'**
+  String get hours;
+
   /// No description provided for @routeDetails.
   ///
   /// In en, this message translates to:
@@ -172,6 +178,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Public Holidays'**
   String get publicHoliday;
+
+  /// No description provided for @estateSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Estate'**
+  String get estateSwitch;
+
+  /// No description provided for @languageSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'中文'**
+  String get languageSwitch;
+
+  /// No description provided for @noService.
+  ///
+  /// In en, this message translates to:
+  /// **'No Service'**
+  String get noService;
+
+  /// No description provided for @arriving.
+  ///
+  /// In en, this message translates to:
+  /// **'Arriving'**
+  String get arriving;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

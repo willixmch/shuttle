@@ -21,6 +21,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get minutes => '分鐘';
 
   @override
+  String get hours => '小時';
+
+  @override
   String get routeDetails => '路線詳情';
 
   @override
@@ -46,4 +49,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get publicHoliday => '公眾假期';
+
+  @override
+  String get estateSwitch => '選擇屋苑';
+
+  @override
+  String get languageSwitch => 'English';
+
+  @override
+  String get noService => '沒有服務';
+
+  @override
+  String get arriving => '即將到達';
 }

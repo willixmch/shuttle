@@ -12,19 +12,27 @@ import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/utils/day_type_checker.dart';
 import 'package:shuttle/services/route_query.dart';
 import 'package:shuttle/services/persistence_estate.dart';
+import 'package:shuttle/utils/eta_calculator.dart';
 import 'package:shuttle/utils/eta_refresh_timer.dart';
 import 'package:shuttle/services/stop_query.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  final void Function(VoidCallback) toggleLanguage; // Updated to accept callback
+  final ValueNotifier<String> languageNotifier;
+
+  const Home({
+    super.key,
+    required this.toggleLanguage,
+    required this.languageNotifier,
+  });
 
   @override
   HomeState createState() => HomeState();
 }
 
 class HomeState extends State<Home> {
-  final PersistenceEstate _persistneceEstate = PersistenceEstate();
+  final PersistenceEstate _persistenceEstate = PersistenceEstate();
   final StopQuery _stopQuery;
   final RouteQuery _routeQuery;
   late final EtaRefreshTimer _etaRefreshTimer;
@@ -71,17 +79,39 @@ class HomeState extends State<Home> {
       getRouteData: () => _cachedRouteData,
       getEffectiveStop: () => _selectedStop,
     );
+    // Listen for language changes (for initialization or other updates)
+    widget.languageNotifier.addListener(_refreshEtaStrings);
   }
 
   @override
   void dispose() {
     _etaRefreshTimer.dispose();
     _etaNotifier.dispose();
+    widget.languageNotifier.removeListener(_refreshEtaStrings);
     super.dispose();
   }
 
+  void _refreshEtaStrings() {
+    // Update etaNotifier and upcomingEtaNotifier for each routeData entry
+    final updatedRouteData = _cachedRouteData.map((entry) {
+      final eta = entry['eta'] as int?;
+      final upcomingEta = entry['upcomingEta'] as List<int>;
+      return {
+        ...entry,
+        'etaNotifier': ValueNotifier<String>(EtaCalculator.formatEta(eta)),
+        'upcomingEtaNotifier': ValueNotifier<List<String>>(
+          upcomingEta.map((e) => EtaCalculator.formatEta(e)).toList(),
+        ),
+      };
+    }).toList();
+    setState(() {
+      _cachedRouteData = updatedRouteData;
+      _etaNotifier.value = updatedRouteData;
+    });
+  }
+
   Future<void> _loadSchedule() async {
-    final persistenceEstate = await _persistneceEstate.estateQuery();
+    final persistenceEstate = await _persistenceEstate.estateQuery();
     if (mounted && persistenceEstate['estate'] != null) {
       setState(() {
         _selectedEstate = persistenceEstate['estate'];
@@ -118,7 +148,7 @@ class HomeState extends State<Home> {
       builder: (context) {
         return EstateFilterSheet(
           onEstateSelected: (Estate estate) async {
-            await _persistneceEstate.saveEstate(estate);
+            await _persistenceEstate.saveEstate(estate);
             setState(() {
               _selectedEstate = estate;
               _selectedStop = null;
@@ -216,6 +246,7 @@ class HomeState extends State<Home> {
               estateTitle: _selectedEstate?.estateTitleZh ?? '-',
               locationOnTap: _showStopFilterSheet,
               stopTitle: _selectedStop?.stopNameZh ?? '-',
+              toggleLanguage: () => widget.toggleLanguage(_refreshEtaStrings),
             ),
           ),
         ],

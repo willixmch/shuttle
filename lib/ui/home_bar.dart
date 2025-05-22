@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shuttle/l10n/generated/app_localizations.dart';
 
 class HomeBar extends StatelessWidget implements PreferredSizeWidget {
   final double toolbarHeight;
   final VoidCallback? estateOnTap;
   final VoidCallback? locationOnTap;
+  final VoidCallback? toggleLanguage;
   final String estateTitle;
   final String stopTitle;
 
@@ -13,6 +15,7 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
     this.toolbarHeight = kToolbarHeight,
     this.estateOnTap,
     this.locationOnTap,
+    this.toggleLanguage,
     required this.estateTitle,
     required this.stopTitle,
   });
@@ -21,6 +24,7 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final localizations = AppLocalizations.of(context)!;
 
     return Container(
       color: colorScheme.surface,
@@ -40,7 +44,7 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
                   children: [
                     Lottie.asset(
                       'lib/assets/pulsing_pin.json',
-                      width: 32,          
+                      width: 32,
                       height: 48,
                       fit: BoxFit.contain,
                       repeat: true,
@@ -51,10 +55,10 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
                       spacing: 4,
                       children: [
                         Text(
-                          estateTitle, 
+                          estateTitle,
                           style: textTheme.bodySmall!.copyWith(
-                            color: colorScheme.outline
-                          )
+                            color: colorScheme.outline,
+                          ),
                         ),
                         Row(
                           children: [
@@ -63,7 +67,7 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
                               style: textTheme.titleLarge!.copyWith(
                                 color: colorScheme.onSurface,
                                 height: 1.2,
-                                overflow: TextOverflow.ellipsis, 
+                                overflow: TextOverflow.ellipsis,
                               ),
                               maxLines: 1,
                             ),
@@ -76,24 +80,62 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
                         ),
                       ],
                     ),
-                    
                   ],
                 ),
               ),
             ),
-            Container(
-              height: 56,
-              alignment: Alignment.bottomCenter,
-              child: IconButton.outlined(
+            PopupMenuButton<String>(
+              icon: Icon(
+                Icons.menu,
                 color: colorScheme.outline,
-                onPressed: estateOnTap, 
-                icon: Icon(Icons.home_work_outlined),
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              ),
+              onSelected: (String value) {
+                if (value == 'estate') {
+                  estateOnTap?.call();
+                } else if (value == 'language') {
+                  toggleLanguage?.call();
+                }
+              },
+              itemBuilder: (BuildContext context) => [
+                PopupMenuItem<String>(
+                  value: 'estate',
+                  child: ListTile(
+                    leading: Icon(
+                      Icons.home_work_outlined,
+                      color: colorScheme.onSurface,
+                    ),
+                    title: Text(
+                      localizations.estateSwitch,
+                      style: textTheme.bodyMedium!.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    contentPadding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
                   ),
                 ),
+                PopupMenuItem<String>(
+                  value: 'language',
+                  child: ListTile(
+                    leading: Icon(
+                      Icons.translate_outlined,
+                      color: colorScheme.onSurface,
+                    ),
+                    title: Text(
+                      localizations.languageSwitch,
+                      style: textTheme.bodyMedium!.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    contentPadding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+              ],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
+              color: colorScheme.surface,
             ),
           ],
         ),

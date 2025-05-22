@@ -21,6 +21,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get minutes => 'Minutes';
 
   @override
+  String get hours => 'Hours';
+
+  @override
   String get routeDetails => 'Details';
 
   @override
@@ -46,4 +49,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get publicHoliday => 'Public Holidays';
+
+  @override
+  String get estateSwitch => 'Choose Estate';
+
+  @override
+  String get languageSwitch => '中文';
+
+  @override
+  String get noService => 'No Service';
+
+  @override
+  String get arriving => 'Arriving';
 }

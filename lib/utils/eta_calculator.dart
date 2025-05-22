@@ -1,10 +1,35 @@
-// lib/utils/eta_calculator.dart
 import 'package:intl/intl.dart';
 import 'package:shuttle/utils/day_type_checker.dart';
-import '../models/schedule.dart';
-import '../models/stop.dart';
+import 'package:shuttle/models/schedule.dart';
+import 'package:shuttle/models/stop.dart';
 
 class EtaCalculator {
+  // Static map for localized strings
+  static String _languageCode = 'en'; // Default, overridden by device language
+  static final Map<String, Map<String, String>> _localizedStrings = {
+    'en': {
+      'noService': 'No Service',
+      'arriving': 'Arriving',
+      'minutes': 'minutes',
+      'hours': 'hours',
+    },
+    'zh': {
+      'noService': '沒有服務',
+      'arriving': '即將到達',
+      'minutes': '分鐘',
+      'hours': '小時',
+    },
+  };
+
+  // Method to update the language
+  static void setLanguage(String languageCode) {
+    if (_localizedStrings.containsKey(languageCode)) {
+      _languageCode = languageCode;
+    } else {
+      _languageCode = 'en'; // Fallback to English
+    }
+  }
+
   // Determines the day type (workday or weekend) based on the given date.
   static String getDayType(DateTime date) {
     return DayTypeChecker.getDayType(date);
@@ -118,25 +143,27 @@ class EtaCalculator {
     return nextDepartureDateTime.difference(currentTime).inMinutes + etaOffset;
   }
 
-  // Helper function to format minutes into a string (e.g., "現時開出", "6 分鐘", or "2 小時 10 分鐘").
+  // Helper function to format minutes into a string (e.g., "Now Departing", "6 minutes", or "2 hours 10 minutes").
   static String formatEta(int? minutes) {
+    final strings = _localizedStrings[_languageCode]!;
+
     if (minutes == null || minutes < 0) {
-      return '沒有服務';
+      return strings['noService']!;
     }
 
     if (minutes == 0) {
-      return '即將開出';
+      return strings['arriving']!;
     }
 
     if (minutes < 60) {
-      return '$minutes 分鐘';
+      return '$minutes ${strings['minutes']}';
     }
 
     final hours = minutes ~/ 60;
     final remainingMinutes = minutes % 60;
     if (remainingMinutes == 0) {
-      return '$hours 小時';
+      return '$hours ${strings['hours']}';
     }
-    return '$hours 小時 $remainingMinutes 分鐘';
+    return '$hours ${strings['hours']} $remainingMinutes ${strings['minutes']}';
   }
 }
