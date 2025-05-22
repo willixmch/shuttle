@@ -11,6 +11,7 @@ class SlidingSchedulePanel extends StatelessWidget {
   final int? expandedCardIndex;
   final Function(int) onToggleCard;
   final bool hasLocationPermission;
+  final ValueNotifier<String> languageNotifier;
 
   const SlidingSchedulePanel({
     super.key,
@@ -21,6 +22,7 @@ class SlidingSchedulePanel extends StatelessWidget {
     required this.expandedCardIndex,
     required this.onToggleCard,
     required this.hasLocationPermission,
+    required this.languageNotifier,
   });
 
   @override
@@ -57,40 +59,46 @@ class SlidingSchedulePanel extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                return ListView.builder(
-                  controller: scrollController,
-                  padding: const EdgeInsets.only(top: 24),
-                  itemCount: routeDataValue.length,
-                  itemBuilder: (context, index) {
-                    final data = routeDataValue[index];
-                    final route = data['route'] as Routes?;
-                    final etaNotifier = data['etaNotifier'] as ValueNotifier<String>;
-                    final upcomingEtaNotifier =
-                        data['upcomingEtaNotifier'] as ValueNotifier<List<String>>;
+                return ValueListenableBuilder<String>(
+                  valueListenable: languageNotifier,
+                  builder: (context, languageCode, child) {
+                    return ListView.builder(
+                      controller: scrollController,
+                      padding: const EdgeInsets.only(top: 24),
+                      itemCount: routeDataValue.length,
+                      itemBuilder: (context, index) {
+                        final data = routeDataValue[index];
+                        final route = data['route'] as Routes?;
+                        final etaNotifier = data['etaNotifier'] as ValueNotifier<String>;
+                        final upcomingEtaNotifier =
+                            data['upcomingEtaNotifier'] as ValueNotifier<List<String>>;
 
-                    if (route == null) {
-                      return const Padding(
-                        padding: EdgeInsets.only(bottom: 12),
-                        child: Card(
-                          child: ListTile(
-                            title: Text('Error'),
-                            subtitle: Text('Invalid route data'),
+                        if (route == null) {
+                          return const Padding(
+                            padding: EdgeInsets.only(bottom: 12),
+                            child: Card(
+                              child: ListTile(
+                                title: Text('Error'),
+                                subtitle: Text('Invalid route data'),
+                              ),
+                            ),
+                          );
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+                          child: ShuttleCard(
+                            routeId: route.routeId,
+                            route: languageCode == 'zh' ? route.routeNameZh : route.routeNameEn,
+                            info: languageCode == 'zh' ? route.infoZh : route.infoEn,
+                            eta: etaNotifier,
+                            upcomingEta: upcomingEtaNotifier,
+                            isExpanded: expandedCardIndex == index,
+                            onToggle: () => onToggleCard(index),
+                            languageNotifier: languageNotifier,
                           ),
-                        ),
-                      );
-                    }
-
-                    return Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-                      child: ShuttleCard(
-                        routeId: route.routeId,
-                        route: route.routeNameZh,
-                        info: route.infoZh,
-                        eta: etaNotifier,
-                        upcomingEta: upcomingEtaNotifier,
-                        isExpanded: expandedCardIndex == index,
-                        onToggle: () => onToggleCard(index),
-                      ),
+                        );
+                      },
                     );
                   },
                 );

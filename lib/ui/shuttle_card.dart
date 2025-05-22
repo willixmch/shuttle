@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:shuttle/l10n/generated/app_localizations.dart';
 import 'package:shuttle/pages/route_details.dart';
 
-// Widget to display a shuttle route card with ETA information.
-// Expands to show upcoming ETAs based on isExpanded, controlled by parent.
 class ShuttleCard extends StatelessWidget {
-  final String routeId; 
+  final String routeId;
   final String route;
   final String info;
   final ValueNotifier<String> eta;
   final ValueNotifier<List<String>> upcomingEta;
   final bool isExpanded;
   final VoidCallback onToggle;
+  final ValueNotifier<String> languageNotifier;
 
   const ShuttleCard({
     super.key,
@@ -22,13 +21,14 @@ class ShuttleCard extends StatelessWidget {
     required this.upcomingEta,
     required this.isExpanded,
     required this.onToggle,
+    required this.languageNotifier,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final localizations = Localizations.of(context, AppLocalizations);
+    final localizations = AppLocalizations.of(context)!;
 
     return GestureDetector(
       onTap: onToggle,
@@ -221,7 +221,8 @@ class ShuttleCard extends StatelessWidget {
                                       builder: (context) => RouteDetails(
                                         routeId: routeId,
                                         routeName: route,
-                                        initialTab: 0, // Route Details
+                                        initialTab: 0,
+                                        languageNotifier: languageNotifier,
                                       ),
                                     ),
                                   );
@@ -246,7 +247,8 @@ class ShuttleCard extends StatelessWidget {
                                       builder: (context) => RouteDetails(
                                         routeId: routeId,
                                         routeName: route,
-                                        initialTab: 1, // Schedule
+                                        initialTab: 1,
+                                        languageNotifier: languageNotifier,
                                       ),
                                     ),
                                   );

@@ -93,7 +93,6 @@ class HomeState extends State<Home> {
   void _refreshEtaStrings() {
     final updatedRouteData = _cachedRouteData.map((entry) {
       final eta = entry['eta'] as int?;
-      // Safely cast upcomingEta, handling dynamic lists
       final upcomingEta = (entry['upcomingEta'] as List<dynamic>?)?.cast<int>() ?? [];
       return {
         ...entry,
@@ -134,7 +133,7 @@ class HomeState extends State<Home> {
         _cachedRouteData = routeData;
         _etaNotifier.value = routeData;
       });
-      _refreshEtaStrings(); // Ensure ETAs are formatted in current language
+      _refreshEtaStrings();
       _etaRefreshTimer.startRefreshTimer();
     }
   }
@@ -177,6 +176,7 @@ class HomeState extends State<Home> {
             });
             await _loadSchedule();
           },
+          languageNotifier: widget.languageNotifier,
         );
       },
     );
@@ -188,69 +188,79 @@ class HomeState extends State<Home> {
     final double minHeight = screenHeight * _minHeightFraction;
     final double maxHeight = screenHeight * _maxHeightFraction + _overlapAmount;
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: [
-          SlidingUpPanel(
-            controller: _panelController,
-            minHeight: minHeight,
-            maxHeight: maxHeight,
-            snapPoint: null,
-            panelBuilder: (scrollController) => SlidingSchedulePanel(
-              scrollController: scrollController,
-              overlapAmount: _overlapAmount,
-              routeData: _cachedRouteData,
-              etaNotifier: _etaNotifier,
-              expandedCardIndex: _expandedCardIndex,
-              onToggleCard: (index) {
-                setState(() {
-                  if (_expandedCardIndex == index) {
-                    _expandedCardIndex = null;
-                  } else {
-                    _expandedCardIndex = index;
-                  }
-                });
-              },
-              hasLocationPermission: _hasLocationPermission,
-            ),
-            body: LeafletMap(
-              isDraggingPanel: _isDraggingPanel,
-              selectedEstate: _selectedEstate,
-              selectedStop: _selectedStop,
-              hasLocationPermission: _hasLocationPermission,
-              onStopSelected: (Stop stop) {
-                setState(() {
-                  _selectedStop = stop;
-                  _expandedCardIndex = null;
-                });
-                _loadSchedule();
-              },
-            ),
-            onPanelSlide: (position) {
-              setState(() {
-                _isDraggingPanel = position > 0.0 && position < 1.0;
-              });
-            },
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(28),
-              topRight: Radius.circular(28),
-            ),
+    return ValueListenableBuilder<String>(
+      valueListenable: widget.languageNotifier,
+      builder: (context, languageCode, child) {
+        return Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: Stack(
+            children: [
+              SlidingUpPanel(
+                controller: _panelController,
+                minHeight: minHeight,
+                maxHeight: maxHeight,
+                snapPoint: null,
+                panelBuilder: (scrollController) => SlidingSchedulePanel(
+                  scrollController: scrollController,
+                  overlapAmount: _overlapAmount,
+                  routeData: _cachedRouteData,
+                  etaNotifier: _etaNotifier,
+                  expandedCardIndex: _expandedCardIndex,
+                  onToggleCard: (index) {
+                    setState(() {
+                      if (_expandedCardIndex == index) {
+                        _expandedCardIndex = null;
+                      } else {
+                        _expandedCardIndex = index;
+                      }
+                    });
+                  },
+                  hasLocationPermission: _hasLocationPermission,
+                  languageNotifier: widget.languageNotifier,
+                ),
+                body: LeafletMap(
+                  isDraggingPanel: _isDraggingPanel,
+                  selectedEstate: _selectedEstate,
+                  selectedStop: _selectedStop,
+                  hasLocationPermission: _hasLocationPermission,
+                  onStopSelected: (Stop stop) {
+                    setState(() {
+                      _selectedStop = stop;
+                      _expandedCardIndex = null;
+                    });
+                    _loadSchedule();
+                  },
+                ),
+                onPanelSlide: (position) {
+                  setState(() {
+                    _isDraggingPanel = position > 0.0 && position < 1.0;
+                  });
+                },
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(28),
+                  topRight: Radius.circular(28),
+                ),
+              ),
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: HomeBar(
+                  estateOnTap: _showEstateFilterSheet,
+                  estateTitle: languageCode == 'zh'
+                      ? _selectedEstate?.estateTitleZh ?? '-'
+                      : _selectedEstate?.estateTitleEn ?? '-',
+                  locationOnTap: _showStopFilterSheet,
+                  stopTitle: languageCode == 'zh'
+                      ? _selectedStop?.stopNameZh ?? '-'
+                      : _selectedStop?.stopNameEn ?? '-',
+                  toggleLanguage: () => widget.toggleLanguage(_refreshEtaStrings),
+                ),
+              ),
+            ],
           ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: HomeBar(
-              estateOnTap: _showEstateFilterSheet,
-              estateTitle: _selectedEstate?.estateTitleZh ?? '-',
-              locationOnTap: _showStopFilterSheet,
-              stopTitle: _selectedStop?.stopNameZh ?? '-',
-              toggleLanguage: () => widget.toggleLanguage(_refreshEtaStrings),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

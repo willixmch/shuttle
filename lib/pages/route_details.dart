@@ -8,13 +8,16 @@ import 'package:shuttle/l10n/generated/app_localizations.dart';
 
 class RouteDetails extends StatefulWidget {
   final String routeId;
-  final String routeName; 
-  final int initialTab; 
+  final String routeName;
+  final int initialTab;
+  final ValueNotifier<String> languageNotifier;
+
   const RouteDetails({
     super.key,
     required this.routeId,
     required this.routeName,
     this.initialTab = 0,
+    required this.languageNotifier,
   });
 
   @override
@@ -25,17 +28,17 @@ class RouteDetailsState extends State<RouteDetails> {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   late int _selectedSegment;
   late final PageController _pageController;
-  Map<String, List<Schedule>> _schedules = {}; // Store schedules by day type
-  List<Stop> _stopsName = []; // Store stops for the route
-  Routes? _route; // Store the route object
-  bool _isLoading = true; // Track loading state
+  Map<String, List<Schedule>> _schedules = {};
+  List<Stop> _stopsName = [];
+  Routes? _route;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _selectedSegment = widget.initialTab; // Set initial tab from navigation
-    _pageController = PageController(initialPage: _selectedSegment); // Set initial page
-    _loadRouteData(); // Fetch route data
+    _selectedSegment = widget.initialTab;
+    _pageController = PageController(initialPage: _selectedSegment);
+    _loadRouteData();
   }
 
   @override
@@ -101,267 +104,252 @@ class RouteDetailsState extends State<RouteDetails> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final localizations = Localizations.of(context, AppLocalizations);
-    
+    final localizations = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.routeName),
-      ),
-      body: Column(
-        children: [
-          // Segmented Button for tab switching
-          Container(
-            width: double.infinity,
-            margin: EdgeInsets.all(16),
-            child: SegmentedButton<int>(
-              style: ButtonStyle(
-                side: WidgetStateProperty.all(
-                  BorderSide(color: colorScheme.surface)
-                ),
-                backgroundColor: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.selected)) {
-                    return null; // Use default theme color for selected segments
-                  }
-                  return colorScheme.surfaceContainerHighest; // Unselected segment background color
-                }),
-                shape: WidgetStateProperty.all(
-                  const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(4)),
-                  ),
-                ),
-              ),
-              segments: [
-                ButtonSegment(
-                  value: 0,
-                  label: Text(localizations.routeDetails),
-                  icon: Icon(Icons.route),
-                ),
-                ButtonSegment(
-                  value: 1,
-                  label: Text(localizations.schedule),
-                  icon: Icon(Icons.table_view),
-                ),
-              ],
-              selected: {_selectedSegment},
-              onSelectionChanged: _onSegmentChanged,
+    return ValueListenableBuilder<String>(
+      valueListenable: widget.languageNotifier,
+      builder: (context, languageCode, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              _route != null
+                  ? (languageCode == 'zh' ? _route!.routeNameZh : _route!.routeNameEn)
+                  : widget.routeName,
             ),
           ),
-          // Content area with swipeable PageView
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: _onPageChanged,
-              physics: const CustomPageViewScrollPhysics(),
-              children: [
-                // Route Details UI
-                _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : SingleChildScrollView(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          spacing: 24,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Route Fares
-                            Row(
-                              spacing: 32,
-                              children: [
-                                Column(
-                                  spacing: 4,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      localizations.residentFare,
-                                      style: textTheme.bodySmall!.copyWith(
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                    Text(
-                                      _route?.residentFare ?? 'N/A',
-                                      style: textTheme.headlineLarge!.copyWith(
-                                        color: colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Column(
-                                  spacing: 4,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      localizations.visitorFare,
-                                      style: textTheme.bodySmall!.copyWith(
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                    Text(
-                                      _route?.visitorFare ?? 'N/A',
-                                      style: textTheme.headlineLarge!.copyWith(
-                                        color: colorScheme.onSurface,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-
-                            //Divider
-                            Column(
-                              spacing: 2,
+          body: Column(
+            children: [
+              Container(
+                width: double.infinity,
+                margin: EdgeInsets.all(16),
+                child: SegmentedButton<int>(
+                  style: ButtonStyle(
+                    side: WidgetStateProperty.all(
+                      BorderSide(color: colorScheme.surface),
+                    ),
+                    backgroundColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return null;
+                      }
+                      return colorScheme.surfaceContainerHighest;
+                    }),
+                    shape: WidgetStateProperty.all(
+                      const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                      ),
+                    ),
+                  ),
+                  segments: [
+                    ButtonSegment(
+                      value: 0,
+                      label: Text(localizations.routeDetails),
+                      icon: Icon(Icons.route),
+                    ),
+                    ButtonSegment(
+                      value: 1,
+                      label: Text(localizations.schedule),
+                      icon: Icon(Icons.table_view),
+                    ),
+                  ],
+                  selected: {_selectedSegment},
+                  onSelectionChanged: _onSegmentChanged,
+                ),
+              ),
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: _onPageChanged,
+                  physics: const CustomPageViewScrollPhysics(),
+                  children: [
+                    _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : SingleChildScrollView(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Divider(
-                                  color: colorScheme.outlineVariant,
+                                Row(
+                                  spacing: 24,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          localizations.residentFare,
+                                          style: textTheme.bodySmall!.copyWith(
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                        Text(
+                                          _route?.residentFare ?? 'N/A',
+                                          style: textTheme.headlineLarge!.copyWith(
+                                            color: colorScheme.onSurface,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          localizations.visitorFare,
+                                          style: textTheme.bodySmall!.copyWith(
+                                            color: colorScheme.onSurfaceVariant,
+                                          ),
+                                        ),
+                                        Text(
+                                          _route?.visitorFare ?? 'N/A',
+                                          style: textTheme.headlineLarge!.copyWith(
+                                            color: colorScheme.onSurface,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  localizations.pickUpStop,
-                                  style: textTheme.bodySmall!.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
+                                const SizedBox(height: 24),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Divider(
+                                      color: colorScheme.outlineVariant,
+                                    ),
+                                    Text(
+                                      localizations.pickUpStop,
+                                      style: textTheme.bodySmall!.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                                const SizedBox(height: 8),
+                                _stopsName.isNotEmpty
+                                    ? Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: _stopsName.asMap().entries.expand((entry) {
+                                          final index = entry.key;
+                                          final stop = entry.value;
+                                          final List<Widget> widgets = [
+                                            Row(
+                                              children: [
+                                                SvgPicture.asset(
+                                                  'lib/assets/stop_dot.svg',
+                                                  height: 24,
+                                                  width: 24,
+                                                ),
+                                                const SizedBox(width: 16),
+                                                Expanded(
+                                                  child: Row(
+                                                    children: [
+                                                      Text(
+                                                        languageCode == 'zh'
+                                                            ? stop.stopNameZh
+                                                            : stop.stopNameEn,
+                                                        style: textTheme.bodyLarge!.copyWith(
+                                                          color: colorScheme.onSurface,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 8),
+                                                      Text(
+                                                        stop.etaOffset == 0
+                                                            ? '(${localizations.origin})'
+                                                            : stop.boardingStop == false
+                                                                ? '(${localizations.circular})'
+                                                                : '(${stop.etaOffset} ${localizations.minutes})',
+                                                        style: textTheme.bodyLarge!.copyWith(
+                                                          color: colorScheme.onSurfaceVariant,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ];
+                                          if (index < _stopsName.length - 1) {
+                                            widgets.add(
+                                              Container(
+                                                alignment: Alignment.centerLeft,
+                                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                                child: SvgPicture.asset(
+                                                  'lib/assets/stop_connector.svg',
+                                                  width: 4,
+                                                  height: 36,
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                          return widgets;
+                                        }).toList(),
+                                      )
+                                    : Text(
+                                        'No Stop Data',
+                                        style: textTheme.bodyLarge!.copyWith(
+                                          color: colorScheme.onSurface,
+                                        ),
+                                      ),
                               ],
                             ),
-                            
-                            // List of Stops
-                            _stopsName.isNotEmpty
-                                ? Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: _stopsName
-                                        .asMap()
-                                        .entries
-                                        .expand((entry) {
-                                      final index = entry.key;
-                                      final stop = entry.value;
-                                      final List<Widget> widgets = [
-                                        Row(
-                                          spacing: 16,
-                                          children: [
-                                            SvgPicture.asset(
-                                              'lib/assets/stop_dot.svg',
-                                              height: 24,
-                                              width: 24,
-                                            ),
-                                            Row(
-                                              spacing: 8,
+                          ),
+                    _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : SingleChildScrollView(
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 48),
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                final dayTypes = [
+                                  {'key': 'workday', 'label': localizations.workday},
+                                  {'key': 'saturday', 'label': localizations.saturday},
+                                  {'key': 'sunday', 'label': localizations.sunday},
+                                  {'key': 'public_holiday', 'label': localizations.publicHoliday},
+                                ];
+
+                                return Column(
+                                  children: dayTypes.map((dayType) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 24.0),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  stop.stopNameZh,
-                                                  style: textTheme.bodyLarge!.copyWith(
+                                                  dayType['label']!,
+                                                  style: textTheme.titleMedium!.copyWith(
                                                     color: colorScheme.onSurface,
                                                   ),
                                                 ),
                                                 Text(
-                                                  stop.etaOffset == 0
-                                                    ? '(${localizations.origin})'
-                                                    : stop.boardingStop == false
-                                                        ? '(${localizations.circular})'
-                                                        : '(${stop.etaOffset} ${localizations.minutes})',
-                                                  style: textTheme.bodyLarge!.copyWith(
+                                                  _schedules[dayType['key']]!.isNotEmpty
+                                                      ? _schedules[dayType['key']]!
+                                                          .map((s) => s.departureTime)
+                                                          .join(', ')
+                                                      : localizations.noService,
+                                                  style: textTheme.bodyMedium!.copyWith(
                                                     color: colorScheme.onSurfaceVariant,
                                                   ),
                                                 ),
                                               ],
                                             ),
-                                          ],
-                                        ),
-                                      ];
-                                      // Add Container between Rows, except after the last stop
-                                      if (index < _stopsName.length - 1) {
-                                        widgets.add(
-                                          Container(
-                                            alignment: Alignment.centerLeft,
-                                            padding: EdgeInsets.symmetric(horizontal: 10),
-                                            child: SvgPicture.asset(
-                                              'lib/assets/stop_connector.svg',
-                                              width: 4,
-                                              height: 36,
-                                            ),
                                           ),
-                                        );
-                                      }
-                                      return widgets;
-                                    }).toList(),
-                                  )
-                                : Text(
-                                    '無巴士站資料',
-                                    style: textTheme.bodyLarge!.copyWith(
-                                      color: colorScheme.onSurface,
-                                    ),
-                                  ),
-                          ],
-                        ),
-                      ),
-                // Schedule UI
-                _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 48),
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            final dayTypes = [
-                              {
-                                'key': 'workday',
-                                'label': localizations.workday,
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                );
                               },
-                              {
-                                'key': 'saturday',
-                                'label': localizations.saturday,
-                              },
-                              {
-                                'key': 'sunday',
-                                'label': localizations.sunday,
-                              },
-                              {
-                                'key': 'public_holiday',
-                                'label': localizations.publicHoliday,
-                              },
-                            ];
-
-                            return Column(
-                              children: dayTypes
-                                  .map((dayType) => Padding(
-                                        padding: const EdgeInsets.only(bottom: 24.0),
-                                        child: Row(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Expanded(
-                                              child: Column(
-                                                spacing: 8,
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    dayType['label']!,
-                                                    style: textTheme.titleMedium!.copyWith(
-                                                      color: colorScheme.onSurface,
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    _schedules[dayType['key']]!.isNotEmpty
-                                                        ? _schedules[dayType['key']]!
-                                                            .map((s) => s.departureTime)
-                                                            .join(', ')
-                                                        : localizations.noService,
-                                                    style: textTheme.bodyMedium!.copyWith(
-                                                      color: colorScheme.onSurfaceVariant,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ))
-                                  .toList(),
-                            );
-                          },
-                        ),
-                      ),
-              ],
-            ),
+                            ),
+                          ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
