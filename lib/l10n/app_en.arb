@@ -3,8 +3,8 @@
   "searchHint": "Search Estate...",
   "noResult": "No Results",
   "upcomingEta": "Upcoming ETA",
-  "minutes": "Minutes",
-  "hours": "Hours",
+  "minutes": "Mins",
+  "hours": "Hrs",
   "routeDetails": "Details",
   "schedule": "Schedules",
   "pickUpStop": "Pick Up Stop",
@@ -15,5 +15,8 @@
   "sunday": "Sundays",
   "publicHoliday": "Public Holidays",
   "estateSwitch": "Choose Estate",
-  "languageSwitch": "繁中"
+  "languageSwitch": "繁中",
+  "origin": "Origin Stop",
+  "circular": "Circular Route",
+  "noService": "No Service"
 }

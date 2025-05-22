@@ -116,13 +116,13 @@ abstract class AppLocalizations {
   /// No description provided for @minutes.
   ///
   /// In en, this message translates to:
-  /// **'Minutes'**
+  /// **'Mins'**
   String get minutes;
 
   /// No description provided for @hours.
   ///
   /// In en, this message translates to:
-  /// **'Hours'**
+  /// **'Hrs'**
   String get hours;
 
   /// No description provided for @routeDetails.
@@ -190,6 +190,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'繁中'**
   String get languageSwitch;
+
+  /// No description provided for @origin.
+  ///
+  /// In en, this message translates to:
+  /// **'Origin Stop'**
+  String get origin;
+
+  /// No description provided for @circular.
+  ///
+  /// In en, this message translates to:
+  /// **'Circular Route'**
+  String get circular;
+
+  /// No description provided for @noService.
+  ///
+  /// In en, this message translates to:
+  /// **'No Service'**
+  String get noService;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

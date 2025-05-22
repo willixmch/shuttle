@@ -253,10 +253,10 @@ class RouteDetailsState extends State<RouteDetails> {
                                                 ),
                                                 Text(
                                                   stop.etaOffset == 0
-                                                    ? '(總站)'
+                                                    ? '(${localizations.origin})'
                                                     : stop.boardingStop == false
-                                                        ? '(循環線)'
-                                                        : '(${stop.etaOffset} 分鐘)',
+                                                        ? '(${localizations.circular})'
+                                                        : '(${stop.etaOffset} ${localizations.minutes})',
                                                   style: textTheme.bodyLarge!.copyWith(
                                                     color: colorScheme.onSurfaceVariant,
                                                   ),
@@ -341,7 +341,7 @@ class RouteDetailsState extends State<RouteDetails> {
                                                         ? _schedules[dayType['key']]!
                                                             .map((s) => s.departureTime)
                                                             .join(', ')
-                                                        : '沒有服務',
+                                                        : localizations.noService,
                                                     style: textTheme.bodyMedium!.copyWith(
                                                       color: colorScheme.onSurfaceVariant,
                                                     ),

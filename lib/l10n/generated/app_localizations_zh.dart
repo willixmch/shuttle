@@ -55,4 +55,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get languageSwitch => 'En';
+
+  @override
+  String get origin => '總站';
+
+  @override
+  String get circular => '循環線';
+
+  @override
+  String get noService => '沒有服務';
 }

@@ -18,10 +18,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get upcomingEta => 'Upcoming ETA';
 
   @override
-  String get minutes => 'Minutes';
+  String get minutes => 'Mins';
 
   @override
-  String get hours => 'Hours';
+  String get hours => 'Hrs';
 
   @override
   String get routeDetails => 'Details';
@@ -55,4 +55,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageSwitch => '繁中';
+
+  @override
+  String get origin => 'Origin Stop';
+
+  @override
+  String get circular => 'Circular Route';
+
+  @override
+  String get noService => 'No Service';
 }

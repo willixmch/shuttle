@@ -10,8 +10,8 @@ class EtaCalculator {
     'en': {
       'noService': 'No Service',
       'arriving': 'Arriving',
-      'minutes': 'minutes',
-      'hours': 'hours',
+      'minutes': 'Mins',
+      'hours': 'Hrs',
     },
     'zh': {
       'noService': '沒有服務',
