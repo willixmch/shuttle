@@ -9,7 +9,7 @@ const mountRegaliaData = {
       'routeNameEn': 'Mount Regalia to Fo Tan Station',
       'infoZh': '',
       'infoEn': '',
-      'residentFare': '0',
+      'residentFare': '\$0',
       'visitorFare': 'N/A',
       'schedules': {
         'workday': [
