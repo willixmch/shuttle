@@ -91,7 +91,7 @@ class HomeBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(top:12),
+              padding: const EdgeInsets.only(top:10),
               child: PopupMenuButton<String>(
                 icon: Icon(
                   Icons.menu,

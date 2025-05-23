@@ -35,7 +35,7 @@ class ShuttleCard extends StatelessWidget {
       child: Container(
         // Card Styling
         decoration: BoxDecoration(
-          color: colorScheme.surfaceContainer,
+          color: colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
         width: double.infinity,
@@ -85,7 +85,7 @@ class ShuttleCard extends StatelessWidget {
                 height: isExpanded
                     ? (upcomingEta.value.isEmpty
                         ? 2 * 32.0 + 100.0
-                        : upcomingEta.value.length * 32.0 + 100.0)
+                        : upcomingEta.value.length * 32.0 + 96.0)
                     : 0.0,
                 child: SingleChildScrollView(
                   physics: const NeverScrollableScrollPhysics(),
@@ -210,7 +210,7 @@ class ShuttleCard extends StatelessWidget {
                                       colorScheme.surfaceContainerHighest,
                                   foregroundColor: colorScheme.onSurfaceVariant,
                                   shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(4)),
+                                      borderRadius: BorderRadius.circular(8)),
                                 ),
                                 onPressed: () {
                                   Navigator.push(
@@ -236,7 +236,7 @@ class ShuttleCard extends StatelessWidget {
                                   foregroundColor:
                                       colorScheme.onPrimaryContainer,
                                   shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(4)),
+                                      borderRadius: BorderRadius.circular(8)),
                                 ),
                                 onPressed: () {
                                   Navigator.push(

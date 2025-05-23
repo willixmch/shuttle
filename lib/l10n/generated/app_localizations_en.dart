@@ -54,7 +54,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get publicHoliday => 'Public Holidays';
 
   @override
-  String get estateSwitch => 'Choose Estate';
+  String get estateSwitch => 'Switch Estate';
 
   @override
   String get languageSwitch => '繁中';

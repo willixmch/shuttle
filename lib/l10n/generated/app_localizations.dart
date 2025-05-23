@@ -188,7 +188,7 @@ abstract class AppLocalizations {
   /// No description provided for @estateSwitch.
   ///
   /// In en, this message translates to:
-  /// **'Choose Estate'**
+  /// **'Switch Estate'**
   String get estateSwitch;
 
   /// No description provided for @languageSwitch.

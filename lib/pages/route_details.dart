@@ -134,9 +134,15 @@ class RouteDetailsState extends State<RouteDetails> {
                       }
                       return colorScheme.surfaceContainerHighest;
                     }),
+                    foregroundColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return null;
+                      }
+                      return colorScheme.onSurfaceVariant;
+                    }),
                     shape: WidgetStateProperty.all(
                       const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
                       ),
                     ),
                   ),
@@ -255,7 +261,7 @@ class RouteDetailsState extends State<RouteDetails> {
                                                         languageCode == 'zh'
                                                             ? stop.stopNameZh
                                                             : stop.stopNameEn,
-                                                        style: textTheme.bodyLarge!.copyWith(
+                                                        style: textTheme.titleMedium!.copyWith(
                                                           color: colorScheme.onSurface,
                                                         ),
                                                         maxLines: 1,
