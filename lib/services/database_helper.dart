@@ -227,6 +227,17 @@ class DatabaseHelper {
     return result.map((e) => Stop.fromMap(e)).toList();
   }
 
+  // Fetches stops for a route where boardingStop = 1
+  Future<List<Stop>> getBoardingStopsForRoute(String routeId) async {
+    final db = await database;
+    final result = await db.query(
+      'stops',
+      where: 'routeId = ? AND boardingStop = 1',
+      whereArgs: [routeId],
+    );
+    return result.map((e) => Stop.fromMap(e)).toList();
+  }
+
   // Fetches unique boarding stops for an estate
   Future<List<Stop>> getBoardingStopsForEstate(String estateId) async {
     final db = await database;

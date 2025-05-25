@@ -33,7 +33,7 @@ class RouteQuery {
       }
 
       // Fetch stops associated with the current route
-      final stops = await _dbHelper.getStopsForRoute(route.routeId);
+      final stops = await _dbHelper.getBoardingStopsForRoute(route.routeId);
       // Skip routes that don't include the selected stop
       if (selectedStop != null &&
           !stops.any((stop) => stop.stopId == selectedStop.stopId)) {
