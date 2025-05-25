@@ -5,8 +5,10 @@ const lakeviewGardenData = {
   'routes': [
     {
       'routeId': 'NR817-A',
-      'routeName': '往大圍站',
-      'info': '',
+      'routeNameZh': '往大圍站',
+      'routeNameEn': 'To Tai Wai Station',
+      'infoZh': '',
+      'infoEn': '',
       'residentFare': '\$0',
       'visitorFare': '\$0',
       'schedules': {

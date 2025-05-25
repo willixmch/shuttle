@@ -5,10 +5,12 @@ const royalAscotData = {
   'routes': [
     {
       'routeId': 'NR815-A',
-      'routeName': '往沙田新城市廣場',
-      'info': '',
-      'residentFare': '\$0',
-      'visitorFare': '\$0',
+      'routeNameZh': '駿景園至沙田新城市廣場',
+      'routeNameEn': 'Royal Ascot - New Town Plaza',
+      'infoZh': '',
+      'infoEn': '',
+      'residentFare': '\$4.5',
+      'visitorFare': '\$4.5',
       'schedules': {
         'workday': [
           '06:30', '06:40', '06:50', '07:00', '07:08', '07:16', '07:24', '07:32', '07:40', '07:48',
@@ -68,16 +70,26 @@ const royalAscotData = {
         {
           'stopId': 'NR815-1',
           'stopNameZh': '火炭駿景園（平台）',
-          'etaOffset': 0,
+          'stopNameEn': 'Royal Ascot Podium',
+          'etaOffset': -1,
           'latitude': 22.401189,
           'longitude': 114.202804,
         },
         {
           'stopId': 'NR815-2',
           'stopNameZh': '新城市廣場第 1 期',
+          'stopNameEn': 'New Town Plaza I,',
           'etaOffset': 11,
           'latitude': 22.382120,
           'longitude': 114.188587,
+        },
+        {
+          'stopId': 'NR815-1',
+          'stopNameZh': '火炭駿景園（平台）',
+          'stopNameEn': 'Royal Ascot Podium',
+          'etaOffset': -1,
+          'latitude': 22.401189,
+          'longitude': 114.202804,
         },
       ],
     },

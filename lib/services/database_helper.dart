@@ -1,13 +1,14 @@
-import 'package:shuttle/data/NR818_golden_time_villa.dart';
-import 'package:shuttle/data/nr810_parc_royal.dart';
-import 'package:shuttle/data/nr819_granville_garden.dart';
-import 'package:shuttle/data/nr820_shatin_heights.dart';
-import 'package:shuttle/data/nr822_vista_paradiso.dart';
-import 'package:shuttle/data/nr826_villa_athena.dart';
-import 'package:shuttle/data/nr83_kwong_yuen_estate.dart';
-import 'package:shuttle/data/nr817_lakeview_garden.dart';
-import 'package:shuttle/data/nr815_royal_ascot.dart';
-import 'package:shuttle/data/nr829_the_castello.dart';
+// import 'package:shuttle/data/NR818_golden_time_villa.dart';
+// import 'package:shuttle/data/nr810_parc_royal.dart';
+// import 'package:shuttle/data/nr819_granville_garden.dart';
+// import 'package:shuttle/data/nr820_shatin_heights.dart';
+// import 'package:shuttle/data/nr822_vista_paradiso.dart';
+// import 'package:shuttle/data/nr826_villa_athena.dart';
+// import 'package:shuttle/data/nr83_kwong_yuen_estate.dart';
+// import 'package:shuttle/data/nr817_lakeview_garden.dart';
+// import 'package:shuttle/data/nr815_royal_ascot.dart';
+// import 'package:shuttle/data/nr829_the_castello.dart';
+import 'package:shuttle/data/nr845_mount_regalia.dart';
 import 'package:shuttle/data/nr538_the_regent.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -102,6 +103,7 @@ class DatabaseHelper {
     // await _insertEstateData(db, vistaParadisoData);
     // await _insertEstateData(db, villaAthenaData);
     // await _insertEstateData(db, theCastelloData);
+    await _insertEstateData(db, mountRegaliaData);
   }
 
   // Inserts estate, route, schedule, and stop data

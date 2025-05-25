@@ -5,10 +5,12 @@ const parcRoyaleData = {
   'routes': [
     {
       'routeId': 'NR810-A',
-      'routeName': '往九龍塘站',
-      'info': '',
-      'residentFare': '\$0',
-      'visitorFare': '\$0',
+      'routeNameZh': '聚龍居至九龍塘站',
+      'routeNameEn': 'Parc Royale - Kowloon Tong Station',
+      'infoZh': '',
+      'infoEn': '',
+      'residentFare': '\$4/12',
+      'visitorFare': '\$4/12',
       'schedules': {
         'workday': [
           '07:00', '07:20', '07:40', '08:00', '08:20', '08:40', '09:00', '09:20', '09:40', '10:00',
@@ -22,23 +24,33 @@ const parcRoyaleData = {
           '15:20', '15:40', '16:00', '16:20', '16:40', '17:00', '17:20', '17:40', '18:00', '18:20',
           '18:40', '19:00', '19:20', '19:40', '20:00', '20:20', '20:40', '21:00', '21:20'
         ],
-        'sunday': [], // No service on Sundays
-        'public_holiday': [] // No service on public holidays
+        'sunday': [],
+        'public_holiday': []
       },
       'stops': [
         {
           'stopId': 'NR810-1',
-          'stopNameZh': '顯泰街 8 號（聚龍居內）',
-          'etaOffset': 0,
+          'stopNameZh': '聚龍居內',
+          'stopNameEn': 'Inside Parc Royale',
+          'etaOffset': -1,
           'latitude': 022.362362, 
           'longitude': 114.175513,
         },
         {
           'stopId': 'NR810-2',
-          'stopNameZh': '多福道一般上落客區',
+          'stopNameZh': '多福道',
+          'stopNameEn': 'To Fuk Road',
           'etaOffset': 17,
           'latitude': 22.338003, 
           'longitude': 114.1737390,
+        },
+        {
+          'stopId': 'NR810-100',
+          'stopNameZh': '聚龍居內',
+          'stopNameEn': 'Inside Parc Royale',
+          'etaOffset': -1,
+          'latitude': 022.362362, 
+          'longitude': 114.175513,
         },
       ],
     },

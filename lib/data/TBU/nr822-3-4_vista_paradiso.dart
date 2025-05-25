@@ -1,5 +1,5 @@
 const vistaParadisoData = {
-  'estateId': 'NR82X',
+  'estateId': 'NR822/3/4',
   'estateTitleZh': '聽濤雅苑',
   'estateTitleEn': 'Vista Paradiso',
   'routes': [
@@ -34,21 +34,21 @@ const vistaParadisoData = {
       },
       'stops': [
         {
-          'stopId': 'NR82X-1',
+          'stopId': 'NR822/3/4-1',
           'stopNameZh': '馬鞍山聽濤雅苑內停車場',
           'etaOffset': 0,
           'latitude': 22.418982,
           'longitude': 114.225263,
         },
         {
-          'stopId': 'NR82X-2',
+          'stopId': 'NR822/3/4-2',
           'stopNameZh': '大學站的士站',
           'etaOffset': 0,
           'latitude': 22.413010,
           'longitude': 114.210935,
         },
         {
-          'stopId': 'NR82X-3',
+          'stopId': 'NR822/3/4-3',
           'stopNameZh': '大學站收費錶泊車位',
           'etaOffset': 0,
           'latitude': 22.412520,
@@ -78,14 +78,14 @@ const vistaParadisoData = {
       },
       'stops': [
         {
-          'stopId': 'NR82X-1',
+          'stopId': 'NR822/3/4-1',
           'stopNameZh': '馬鞍山聽濤雅苑內停車場',
           'etaOffset': 0,
           'latitude': 22.418982,
           'longitude': 114.225263,
         },
         {
-          'stopId': 'NR82X-4',
+          'stopId': 'NR822/3/4-4',
           'stopNameZh': '上元街鑽石山站',
           'etaOffset': 0,
           'latitude': 22.339791,
@@ -123,14 +123,14 @@ const vistaParadisoData = {
       },
       'stops': [
         {
-          'stopId': 'NR82X-1',
+          'stopId': 'NR822/3/4-1',
           'stopNameZh': '馬鞍山聽濤雅苑內停車場',
           'etaOffset': 0,
           'latitude': 22.418982,
           'longitude': 114.225263,
         },
         {
-          'stopId': 'NR82X-5',
+          'stopId': 'NR822/3/4-5',
           'stopNameZh': '鞍駿街',
           'etaOffset': 0,
           'latitude': 22.425806,

@@ -4,7 +4,7 @@ const mountRegaliaData = {
   'estateTitleEn': 'Mount Regalia',
   'routes': [
     {
-      'routeId': 'NR845',
+      'routeId': 'NR845-A',
       'routeNameZh': '富豪山峰至火炭站',
       'routeNameEn': 'Mount Regalia to Fo Tan Station',
       'infoZh': '',
