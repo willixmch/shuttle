@@ -1,15 +1,3 @@
-// import 'package:shuttle/data/NR818_golden_time_villa.dart';
-// import 'package:shuttle/data/nr810_parc_royal.dart';
-// import 'package:shuttle/data/nr819_granville_garden.dart';
-// import 'package:shuttle/data/nr820_shatin_heights.dart';
-// import 'package:shuttle/data/nr822_vista_paradiso.dart';
-// import 'package:shuttle/data/nr826_villa_athena.dart';
-// import 'package:shuttle/data/nr83_kwong_yuen_estate.dart';
-// import 'package:shuttle/data/nr817_lakeview_garden.dart';
-// import 'package:shuttle/data/nr815_royal_ascot.dart';
-// import 'package:shuttle/data/nr829_the_castello.dart';
-import 'package:shuttle/data/nr845_mount_regalia.dart';
-import 'package:shuttle/data/nr538_the_regent.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:shuttle/models/estate.dart';
@@ -17,9 +5,25 @@ import 'package:shuttle/models/routes.dart';
 import 'package:shuttle/models/schedule.dart';
 import 'package:shuttle/models/stop.dart';
 
+// import 'package:shuttle/data/shatin_NR818_golden_time_villa.dart';
+// import 'package:shuttle/data/shatin_nr819_granville_garden.dart';
+// import 'package:shuttle/data/shatin_nr820_shatin_heights.dart';
+// import 'package:shuttle/data/shatin_nr822_vista_paradiso.dart';
+// import 'package:shuttle/data/shatin_nr826_villa_athena.dart';
+// import 'package:shuttle/data/shatin_nr817_lakeview_garden.dart';
+// import 'package:shuttle/data/shatin_nr829_the_castello.dart';
+
+import 'package:shuttle/data/shatin_nr83_kwong_yuen_estate.dart';
+import 'package:shuttle/data/shatin_nr810_parc_royal.dart';
+import 'package:shuttle/data/shatin_nr815_royal_ascot.dart';
+import 'package:shuttle/data/shatin_nr843_el_futuro.dart';
+import 'package:shuttle/data/shatin_nr845_mount_regalia.dart';
+import 'package:shuttle/data/taipo_nr538_the_regent.dart';
+
 // Manages SQLite database for shuttle bus data (singleton)
 class DatabaseHelper {
-  static final DatabaseHelper instance = DatabaseHelper._init(); // Singleton instance
+  static final DatabaseHelper instance =
+      DatabaseHelper._init(); // Singleton instance
   static Database? _database; // Database instance
 
   DatabaseHelper._init(); // Private constructor
@@ -92,63 +96,62 @@ class DatabaseHelper {
     ''');
 
     // Insert initial data
+
+    await _insertEstateData(db, kwongYuenEstateData);
+    await _insertEstateData(db, parcRoyaleData);
+    await _insertEstateData(db, royalAscotData);
+    await _insertEstateData(db, elFuturoData);
+    await _insertEstateData(db, mountRegaliaData);
+    await _insertEstateData(db, mountRegaliaData);
     await _insertEstateData(db, theRegentData);
-    // await _insertEstateData(db, kwongYuenEstateData);
-    // await _insertEstateData(db, royalAscotData);
     // await _insertEstateData(db, lakeviewGardenData);
-    // await _insertEstateData(db, parcRoyaleData);
     // await _insertEstateData(db, goldenTimeVillasData);
     // await _insertEstateData(db, granvilleGardenData);
     // await _insertEstateData(db, shatinHeightsData);
     // await _insertEstateData(db, vistaParadisoData);
     // await _insertEstateData(db, villaAthenaData);
     // await _insertEstateData(db, theCastelloData);
-    await _insertEstateData(db, mountRegaliaData);
   }
 
   // Inserts estate, route, schedule, and stop data
-  Future<void> _insertEstateData(Database db, Map<String, dynamic> estateData) async {
+  Future<void> _insertEstateData(
+    Database db,
+    Map<String, dynamic> estateData,
+  ) async {
     // Insert estate
-    await db.insert(
-      'estates',
-      {
-        'estateId': estateData['estateId'],
-        'estateTitleZh': estateData['estateTitleZh'],
-        'estateTitleEn': estateData['estateTitleEn'],
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('estates', {
+      'estateId': estateData['estateId'],
+      'estateTitleZh': estateData['estateTitleZh'],
+      'estateTitleEn': estateData['estateTitleEn'],
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
 
     // Insert routes
     for (var route in estateData['routes']) {
-      await db.insert(
-        'routes',
-        {
-          'routeId': route['routeId'],
-          'estateId': estateData['estateId'],
-          'routeNameZh': route['routeNameZh'],
-          'routeNameEn': route['routeNameEn'],
-          'infoZh': route['infoZh'],
-          'infoEn': route['infoEn'],
-          'residentFare': route['residentFare'],
-          'visitorFare': route['visitorFare'],
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await db.insert('routes', {
+        'routeId': route['routeId'],
+        'estateId': estateData['estateId'],
+        'routeNameZh': route['routeNameZh'],
+        'routeNameEn': route['routeNameEn'],
+        'infoZh': route['infoZh'],
+        'infoEn': route['infoEn'],
+        'residentFare': route['residentFare'],
+        'visitorFare': route['visitorFare'],
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
 
       // Insert schedules for workday/weekend
       if (route['schedules'] != null) {
-        for (var dayType in ['workday', 'saturday', 'sunday', 'public_holiday']) {
+        for (var dayType in [
+          'workday',
+          'saturday',
+          'sunday',
+          'public_holiday',
+        ]) {
           for (var time in route['schedules'][dayType] ?? []) {
-            await db.insert(
-              'schedules',
-              {
-                'routeId': route['routeId'],
-                'dayType': dayType,
-                'departureTime': time,
-              },
-              conflictAlgorithm: ConflictAlgorithm.ignore,
-            );
+            await db.insert('schedules', {
+              'routeId': route['routeId'],
+              'dayType': dayType,
+              'departureTime': time,
+            }, conflictAlgorithm: ConflictAlgorithm.ignore);
           }
         }
       }
@@ -157,20 +160,18 @@ class DatabaseHelper {
       if (route['stops'] != null) {
         for (var i = 0; i < route['stops'].length; i++) {
           var stop = route['stops'][i];
-          await db.insert(
-            'stops',
-            {
-              'stopId': stop['stopId'],
-              'routeId': route['routeId'],
-              'stopNameZh': stop['stopNameZh'],
-              'stopNameEn': stop['stopNameEn'],
-              'etaOffset': stop['etaOffset'],
-              'latitude': stop['latitude'],
-              'longitude': stop['longitude'],
-              'boardingStop': stop['boardingStop'] ?? (i == 0 ? 1 : 0), // Default first stop as boarding
-            },
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
+          await db.insert('stops', {
+            'stopId': stop['stopId'],
+            'routeId': route['routeId'],
+            'stopNameZh': stop['stopNameZh'],
+            'stopNameEn': stop['stopNameEn'],
+            'etaOffset': stop['etaOffset'],
+            'latitude': stop['latitude'],
+            'longitude': stop['longitude'],
+            'boardingStop':
+                stop['boardingStop'] ??
+                (i == 0 ? 1 : 0), // Default first stop as boarding
+          }, conflictAlgorithm: ConflictAlgorithm.replace);
         }
       }
     }
@@ -202,7 +203,10 @@ class DatabaseHelper {
   }
 
   // Fetches schedules for a route and day type
-  Future<List<Schedule>> getSchedulesForRoute(String routeId, String dayType) async {
+  Future<List<Schedule>> getSchedulesForRoute(
+    String routeId,
+    String dayType,
+  ) async {
     final db = await database;
     final result = await db.query(
       'schedules',
@@ -226,13 +230,16 @@ class DatabaseHelper {
   // Fetches unique boarding stops for an estate
   Future<List<Stop>> getBoardingStopsForEstate(String estateId) async {
     final db = await database;
-    final result = await db.rawQuery('''
+    final result = await db.rawQuery(
+      '''
       SELECT DISTINCT s.stopId, MIN(s.routeId) AS routeId, s.stopNameZh, s.stopNameEn, MIN(s.etaOffset) AS etaOffset, s.latitude, s.longitude, s.boardingStop
       FROM stops s
       JOIN routes r ON s.routeId = r.routeId
       WHERE r.estateId = ? AND s.boardingStop = 1
       GROUP BY s.stopId, s.stopNameZh, s.stopNameEn, s.latitude, s.longitude
-    ''', [estateId]);
+    ''',
+      [estateId],
+    );
     return result.map((e) => Stop.fromMap(e)).toList();
   }
 }

@@ -6,7 +6,7 @@ const elFuturoData = {
     {
       'routeId': 'NR843-A',
       'routeNameZh': '名日˙九肚山至火炭站',
-      'routeNameEn': 'El Futuro – Fo Tan Station',
+      'routeNameEn': 'El Futuro - Fo Tan Station',
       'infoZh': '',
       'infoEn': '',
       'residentFare': '\$0',

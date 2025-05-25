@@ -74,6 +74,7 @@ const royalAscotData = {
           'etaOffset': -1,
           'latitude': 22.401189,
           'longitude': 114.202804,
+          'boardingStop': true,
         },
         {
           'stopId': 'NR815-2',
@@ -82,6 +83,7 @@ const royalAscotData = {
           'etaOffset': 11,
           'latitude': 22.382120,
           'longitude': 114.188587,
+          'boardingStop': true,
         },
         {
           'stopId': 'NR815-1',
@@ -90,6 +92,7 @@ const royalAscotData = {
           'etaOffset': -1,
           'latitude': 22.401189,
           'longitude': 114.202804,
+          'boardingStop': false,
         },
       ],
     },

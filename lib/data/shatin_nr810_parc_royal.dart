@@ -35,6 +35,7 @@ const parcRoyaleData = {
           'etaOffset': -1,
           'latitude': 022.362362, 
           'longitude': 114.175513,
+          'boardingStop': true,
         },
         {
           'stopId': 'NR810-2',
@@ -43,6 +44,7 @@ const parcRoyaleData = {
           'etaOffset': 17,
           'latitude': 22.338003, 
           'longitude': 114.1737390,
+          'boardingStop': true,
         },
         {
           'stopId': 'NR810-100',
@@ -51,6 +53,7 @@ const parcRoyaleData = {
           'etaOffset': -1,
           'latitude': 022.362362, 
           'longitude': 114.175513,
+          'boardingStop': false,
         },
       ],
     },
