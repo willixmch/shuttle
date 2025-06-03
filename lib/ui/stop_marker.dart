@@ -11,13 +11,10 @@ class StopMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final markerColor = selected ? colorScheme.primary : colorScheme.outline;
+    final stopMarker = selected ? 'lib/assets/stop_marker_selected.svg' : 'lib/assets/stop_marker_unselected.svg';
 
     return SvgPicture.asset(
-      'lib/assets/stop_marker.svg',
-      // If the SVG supports color replacement
-      colorFilter: ColorFilter.mode(markerColor, BlendMode.srcIn),
+      stopMarker,
     );
   }
 }
