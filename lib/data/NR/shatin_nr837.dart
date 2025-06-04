@@ -1,4 +1,4 @@
-const peakOneData = {
+const nr837 = {
   'estateId': 'NR837',
   'estateTitleZh': '壹號雲頂',
   'estateTitleEn': 'Peak One',

@@ -1,4 +1,4 @@
-const oneSilverSeaData = {
+const kr17 = {
   'estateId': 'KR17',
   'estateTitleZh': '一號銀海',
   'estateTitleEn': 'One Silver Sea',

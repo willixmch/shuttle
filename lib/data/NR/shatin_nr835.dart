@@ -1,4 +1,4 @@
-const laCostaData = {
+const nr835 = {
   'estateId': 'NR835',
   'estateTitleZh': '嘉華星濤灣',
   'estateTitleEn': 'La Costa',

@@ -5,7 +5,7 @@ const nr538 = {
   'routes': [
     {
       'routeId': 'NR538-A',
-      'routeNameZh': 'A 線',
+      'routeNameZh': 'A線',
       'routeNameEn': 'A Line',
       'infoZh': '由第2座開出',
       'infoEn': 'From Tower 2',
@@ -114,7 +114,7 @@ const nr538 = {
     },
     {
       'routeId': 'NR538-B',
-      'routeNameZh': 'B 線',
+      'routeNameZh': 'B線',
       'routeNameEn': 'B Line',
       'infoZh': '由第18座開出',
       'infoEn': 'From Tower 18',
@@ -220,7 +220,7 @@ const nr538 = {
     },
     {
       'routeId': 'NR538-C',
-      'routeNameZh': 'C 線',
+      'routeNameZh': 'C線',
       'routeNameEn': 'C Line',
       'infoZh': '由第9座開出',
       'infoEn': 'From Tower 9',

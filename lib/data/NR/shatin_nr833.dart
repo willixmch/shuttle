@@ -1,4 +1,4 @@
-const julimountGardenData = {
+const nr833 = {
   'estateId': 'NR833',
   'estateTitleZh': '瑞峰花園',
   'estateTitleEn': 'Julimount Garden',

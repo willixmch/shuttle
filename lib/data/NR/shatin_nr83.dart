@@ -1,4 +1,4 @@
-const kwongYuenEstateData = {
+const nr83 = {
   'estateId': 'NR83',
   'estateTitleZh': '廣源邨',
   'estateTitleEn': 'Kwong Yuen Estate',

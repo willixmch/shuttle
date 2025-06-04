@@ -1,12 +1,12 @@
-const theRegaliaData = {
+const kr11 = {
   'estateId': 'KR11',
   'estateTitleZh': '爵士花園',
   'estateTitleEn': 'The Regalia',
   'routes': [
     {
       'routeId': 'KR11-A',
-      'routeNameZh': 'A線',
-      'routeNameEn': 'Route A',
+      'routeNameZh': 'A 線',
+      'routeNameEn': 'A Line',
       'infoZh': '',
       'infoEn': '',
       'residentFare': '\$0',
@@ -54,7 +54,7 @@ const theRegaliaData = {
     {
       'routeId': 'KR11-B',
       'routeNameZh': 'B線',
-      'routeNameEn': 'Route B',
+      'routeNameEn': 'B Line',
       'infoZh': '',
       'infoEn': '',
       'residentFare': '\$0',
@@ -88,8 +88,8 @@ const theRegaliaData = {
           'stopNameZh': '眾坊街',
           'stopNameEn': 'Public Square Street',
           'etaOffset': 9,
-          'latitude': 22.310083,
-          'longitude': 114.170299,
+          'latitude': 22.3100,
+          'longitude': 114.1702,
           'boardingStop': true,
         },
         {
@@ -106,7 +106,7 @@ const theRegaliaData = {
     {
       'routeId': 'KR11-C',
       'routeNameZh': 'C線',
-      'routeNameEn': 'Route C',
+      'routeNameEn': 'C Line',
       'infoZh': '',
       'infoEn': '',
       'residentFare': '\$0',
@@ -147,7 +147,7 @@ const theRegaliaData = {
         {
           'stopId': 'KR11-4',
           'stopNameZh': '佐敦站',
-          'stopNameEn': 'Jordan MTR Station',
+          'stopNameEn': 'Jordan Station',
           'latitude': 22.3062,
           'longitude': 114.1720,
           'boardingStop': true,

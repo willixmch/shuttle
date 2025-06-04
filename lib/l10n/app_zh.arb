@@ -8,7 +8,7 @@
   "routeDetails": "路線詳情",
   "schedule": "時間表",
   "pickUpStop": "上客點",
-  "stops": "途經車站",
+  "stops": "途經車站（車程）",
   "residentFare": "住戶收費",
   "visitorFare": "訪客收費",
   "workday": "星期一至五（公眾假期除外）",
@@ -17,7 +17,7 @@
   "publicHoliday": "公眾假期",
   "estateSwitch": "選擇屋苑",
   "languageSwitch": "En",
-  "origin": "總站",
+  "origin": "起始站",
   "circular": "循環線",
   "noService": "沒有服務"
 }

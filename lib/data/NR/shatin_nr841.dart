@@ -1,4 +1,4 @@
-const stMichelData = {
+const nr841 = {
   'estateId': 'NR841',
   'estateTitleZh': '瓏珀山',
   'estateTitleEn': 'St. Michel',

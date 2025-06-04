@@ -1,4 +1,4 @@
-const monteVistaData = {
+const nr831_8 = {
   'estateId': 'NR831/8',
   'estateTitleZh': '翠景花園',
   'estateTitleEn': 'Monte Vista',

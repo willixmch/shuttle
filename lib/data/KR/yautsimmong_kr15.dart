@@ -1,4 +1,4 @@
-const hamptonPlaceData = {
+const kr15 = {
   'estateId': 'KR15',
   'estateTitleZh': '凱帆軒',
   'estateTitleEn': 'Hampton Place',

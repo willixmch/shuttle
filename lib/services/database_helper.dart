@@ -1,24 +1,34 @@
+import 'package:shuttle/data/KR/kowlooncity_kr51.dart';
+import 'package:shuttle/data/KR/shamshuipo_kr41_2.dart';
+import 'package:shuttle/data/KR/shamshuipo_kr45.dart';
+import 'package:shuttle/data/KR/yautsimmong_kr11.dart';
+import 'package:shuttle/data/KR/yautsimmong_kr12.dart';
+import 'package:shuttle/data/KR/yautsimmong_kr13.dart';
+import 'package:shuttle/data/KR/yautsimmong_kr14.dart';
+import 'package:shuttle/data/KR/yautsimmong_kr15.dart';
+import 'package:shuttle/data/KR/yautsimmong_kr17.dart';
+import 'package:shuttle/data/KR/yautsimmong_kr18.dart';
+import 'package:shuttle/data/NR/shatin_nr83.dart';
+import 'package:shuttle/data/NR/shatin_nr810.dart';
+import 'package:shuttle/data/NR/shatin_nr815.dart';
+import 'package:shuttle/data/NR/shatin_nr831_8.dart';
+import 'package:shuttle/data/NR/shatin_nr833.dart';
+import 'package:shuttle/data/NR/shatin_nr835.dart';
+import 'package:shuttle/data/NR/shatin_nr837.dart';
+import 'package:shuttle/data/NR/shatin_nr839.dart';
+import 'package:shuttle/data/NR/shatin_nr840.dart';
+import 'package:shuttle/data/NR/shatin_nr841.dart';
+import 'package:shuttle/data/NR/shatin_nr842.dart';
+import 'package:shuttle/data/NR/shatin_nr843.dart';
+import 'package:shuttle/data/NR/shatin_nr845.dart';
+import 'package:shuttle/data/NR/taipo_nr538.dart';
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/models/routes.dart';
 import 'package:shuttle/models/schedule.dart';
 import 'package:shuttle/models/stop.dart';
-
-// import 'package:shuttle/data/shatin_NR818_golden_time_villa.dart';
-// import 'package:shuttle/data/shatin_nr819_granville_garden.dart';
-// import 'package:shuttle/data/shatin_nr820_shatin_heights.dart';
-// import 'package:shuttle/data/shatin_nr822_vista_paradiso.dart';
-// import 'package:shuttle/data/shatin_nr826_villa_athena.dart';
-// import 'package:shuttle/data/shatin_nr817_lakeview_garden.dart';
-// import 'package:shuttle/data/shatin_nr829_the_castello.dart';
-
-import 'package:shuttle/data/shatin_nr83.dart';
-import 'package:shuttle/data/shatin_nr810.dart';
-import 'package:shuttle/data/shatin_nr815.dart';
-import 'package:shuttle/data/shatin_nr843.dart';
-import 'package:shuttle/data/shatin_nr845.dart';
-import 'package:shuttle/data/taipo_nr538.dart';
 
 // Manages SQLite database for shuttle bus data (singleton)
 class DatabaseHelper {
@@ -95,85 +105,120 @@ class DatabaseHelper {
     )
     ''');
 
-    // Insert initial data
+    // Create indexes for query optimization
+    await db.execute('CREATE INDEX idx_routes_estateId ON routes(estateId)');
+    await db.execute('CREATE INDEX idx_schedules_routeId ON schedules(routeId)');
+    await db.execute('CREATE INDEX idx_stops_routeId ON stops(routeId)');
 
-    await _insertEstateData(db, kwongYuenEstateData);
-    await _insertEstateData(db, parcRoyaleData);
-    await _insertEstateData(db, royalAscotData);
-    await _insertEstateData(db, elFuturoData);
-    await _insertEstateData(db, mountRegaliaData);
-    await _insertEstateData(db, mountRegaliaData);
-    await _insertEstateData(db, nr538);
-    // await _insertEstateData(db, lakeviewGardenData);
-    // await _insertEstateData(db, goldenTimeVillasData);
-    // await _insertEstateData(db, granvilleGardenData);
-    // await _insertEstateData(db, shatinHeightsData);
-    // await _insertEstateData(db, vistaParadisoData);
-    // await _insertEstateData(db, villaAthenaData);
-    // await _insertEstateData(db, theCastelloData);
+    // List of all estate data
+    final estateDataList = [
+
+      //KR
+
+      // Kowloon City
+      kr51,
+      // Sham Shui Po
+      kr41_2,
+      kr45,
+      // Yau Tsim Mong
+      kr11,
+      kr12,
+      kr13,
+      kr14,
+      kr15,
+      kr17,
+      kr18,
+      
+      // NR
+      
+      // Sha Tin
+      nr83,
+      nr810,
+      nr815,
+      nr831_8,
+      nr833,
+      nr835,
+      nr837,
+      nr839,
+      nr840,
+      nr841,
+      nr842,
+      nr843,
+      nr845,
+      // Tai Po
+      nr538,
+    ];
+
+    // Insert all estate data
+    for (var estateData in estateDataList) {
+      await _insertEstateData(db, estateData);
+    }
   }
 
-  // Inserts estate, route, schedule, and stop data
-  Future<void> _insertEstateData(
-    Database db,
-    Map<String, dynamic> estateData,
-  ) async {
-    // Insert estate
-    await db.insert('estates', {
-      'estateId': estateData['estateId'],
-      'estateTitleZh': estateData['estateTitleZh'],
-      'estateTitleEn': estateData['estateTitleEn'],
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  // Inserts estate, route, schedule, and stop data using batch transactions
+  Future<void> _insertEstateData(Database db, Map<String, dynamic> estateData) async {
+    try {
+      final batch = db.batch();
 
-    // Insert routes
-    for (var route in estateData['routes']) {
-      await db.insert('routes', {
-        'routeId': route['routeId'],
+      // Insert estate
+      batch.insert('estates', {
         'estateId': estateData['estateId'],
-        'routeNameZh': route['routeNameZh'],
-        'routeNameEn': route['routeNameEn'],
-        'infoZh': route['infoZh'],
-        'infoEn': route['infoEn'],
-        'residentFare': route['residentFare'],
-        'visitorFare': route['visitorFare'],
+        'estateTitleZh': estateData['estateTitleZh'],
+        'estateTitleEn': estateData['estateTitleEn'],
       }, conflictAlgorithm: ConflictAlgorithm.replace);
 
-      // Insert schedules for workday/weekend
-      if (route['schedules'] != null) {
-        for (var dayType in [
-          'workday',
-          'saturday',
-          'sunday',
-          'public_holiday',
-        ]) {
-          for (var time in route['schedules'][dayType] ?? []) {
-            await db.insert('schedules', {
+      // Insert routes
+      for (var route in estateData['routes']) {
+        batch.insert('routes', {
+          'routeId': route['routeId'],
+          'estateId': estateData['estateId'],
+          'routeNameZh': route['routeNameZh'],
+          'routeNameEn': route['routeNameEn'],
+          'infoZh': route['infoZh'],
+          'infoEn': route['infoEn'],
+          'residentFare': route['residentFare'],
+          'visitorFare': route['visitorFare'],
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+        // Insert schedules for workday/weekend
+        if (route['schedules'] != null) {
+          for (var dayType in [
+            'workday',
+            'saturday',
+            'sunday',
+            'public_holiday',
+          ]) {
+            for (var time in route['schedules'][dayType] ?? []) {
+              batch.insert('schedules', {
+                'routeId': route['routeId'],
+                'dayType': dayType,
+                'departureTime': time,
+              }, conflictAlgorithm: ConflictAlgorithm.ignore);
+            }
+          }
+        }
+
+        // Insert stops with ETA offset, coordinates, and boardingStop
+        if (route['stops'] != null) {
+          for (var i = 0; i < route['stops'].length; i++) {
+            var stop = route['stops'][i];
+            batch.insert('stops', {
+              'stopId': stop['stopId'],
               'routeId': route['routeId'],
-              'dayType': dayType,
-              'departureTime': time,
-            }, conflictAlgorithm: ConflictAlgorithm.ignore);
+              'stopNameZh': stop['stopNameZh'],
+              'stopNameEn': stop['stopNameEn'],
+              'etaOffset': stop['etaOffset'],
+              'latitude': stop['latitude'],
+              'longitude': stop['longitude'],
+              'boardingStop': stop['boardingStop'] ?? (i == 0 ? 1 : 0),
+            }, conflictAlgorithm: ConflictAlgorithm.replace);
           }
         }
       }
 
-      // Insert stops with ETA offset, coordinates, and boardingStop
-      if (route['stops'] != null) {
-        for (var i = 0; i < route['stops'].length; i++) {
-          var stop = route['stops'][i];
-          await db.insert('stops', {
-            'stopId': stop['stopId'],
-            'routeId': route['routeId'],
-            'stopNameZh': stop['stopNameZh'],
-            'stopNameEn': stop['stopNameEn'],
-            'etaOffset': stop['etaOffset'],
-            'latitude': stop['latitude'],
-            'longitude': stop['longitude'],
-            'boardingStop':
-                stop['boardingStop'] ??
-                (i == 0 ? 1 : 0), // Default first stop as boarding
-          }, conflictAlgorithm: ConflictAlgorithm.replace);
-        }
-      }
+      await batch.commit(noResult: true);
+    } catch (e) {
+      rethrow;
     }
   }
 

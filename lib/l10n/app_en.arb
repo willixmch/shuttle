@@ -8,7 +8,7 @@
   "routeDetails": "Details",
   "schedule": "Schedules",
   "pickUpStop": "Pick Up Stop",
-  "stops": "Stops",
+  "stops": "Stops(Drive Time)",
   "residentFare": "Resident Fare",
   "visitorFare": "Vistor Fare",
   "workday": "Mondays - Fridays(except Public Holidays)",

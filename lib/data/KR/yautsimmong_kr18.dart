@@ -1,4 +1,4 @@
-const imperialCullinanData = {
+const kr18 = {
   'estateId': 'KR18',
   'estateTitleZh': '瓏璽',
   'estateTitleEn': 'Imperial Cullinan',

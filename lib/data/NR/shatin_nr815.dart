@@ -1,4 +1,4 @@
-const royalAscotData = {
+const nr815 = {
   'estateId': 'NR815',
   'estateTitleZh': '駿景園',
   'estateTitleEn': 'Royal Ascot',

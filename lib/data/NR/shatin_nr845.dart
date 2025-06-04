@@ -1,4 +1,4 @@
-const mountRegaliaData = {
+const nr845 = {
   'estateId': 'NR845',
   'estateTitleZh': '富豪山峰',
   'estateTitleEn': 'Mount Regalia',

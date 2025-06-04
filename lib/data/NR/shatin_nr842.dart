@@ -1,4 +1,4 @@
-const mountArcadiaData = {
+const nr842 = {
   'estateId': 'NR842',
   'estateTitleZh': '畢架•金峰',
   'estateTitleEn': 'Mount Arcadia',

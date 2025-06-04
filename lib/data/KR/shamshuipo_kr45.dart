@@ -1,4 +1,4 @@
-const montRougeMontVerraData = {
+const kr45 = {
   'estateId': 'KR45',
   'estateTitleZh': '緹山及緹外',
   'estateTitleEn': 'Mont Rouge & Mont Verra',

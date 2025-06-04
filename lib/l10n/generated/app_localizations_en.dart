@@ -33,7 +33,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pickUpStop => 'Pick Up Stop';
 
   @override
-  String get stops => 'Stops';
+  String get stops => 'Stops(Drive Time)';
 
   @override
   String get residentFare => 'Resident Fare';

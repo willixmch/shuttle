@@ -33,7 +33,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pickUpStop => '上客點';
 
   @override
-  String get stops => '途經車站';
+  String get stops => '途經車站（車程）';
 
   @override
   String get residentFare => '住戶收費';
@@ -60,7 +60,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get languageSwitch => 'En';
 
   @override
-  String get origin => '總站';
+  String get origin => '起始站';
 
   @override
   String get circular => '循環線';

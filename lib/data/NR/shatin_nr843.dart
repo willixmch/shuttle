@@ -1,4 +1,4 @@
-const elFuturoData = {
+const nr843 = {
   'estateId': 'NR843',
   'estateTitleZh': '名日˙九肚山',
   'estateTitleEn': 'El Futuro',

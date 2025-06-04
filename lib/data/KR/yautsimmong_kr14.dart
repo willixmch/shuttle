@@ -1,4 +1,4 @@
-const theCoronationData = {
+const kr14 = {
   'estateId': 'KR14',
   'estateTitleZh': '御金・國峯',
   'estateTitleEn': 'The Coronation',

@@ -1,4 +1,4 @@
-const kingsParkVillaData = {
+const kr12 = {
   'estateId': 'KR12',
   'estateTitleZh': '帝庭園',
   'estateTitleEn': 'King\'s Park Villa',

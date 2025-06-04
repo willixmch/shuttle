@@ -146,7 +146,7 @@ abstract class AppLocalizations {
   /// No description provided for @stops.
   ///
   /// In en, this message translates to:
-  /// **'Stops'**
+  /// **'Stops(Drive Time)'**
   String get stops;
 
   /// No description provided for @residentFare.

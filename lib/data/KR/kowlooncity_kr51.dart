@@ -1,4 +1,4 @@
-const oneBeaconHillData = {
+const kr51 = {
   'estateId': 'KR51',
   'estateTitleZh': '畢架山一號',
   'estateTitleEn': 'One Beacon Hill',

@@ -1,4 +1,4 @@
-const dragonsRangeData = {
+const nr839 = {
   'estateId': 'NR839',
   'estateTitleZh': '沙田玖瓏山',
   'estateTitleEn': 'Dragons Range',
