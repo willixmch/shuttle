@@ -54,7 +54,7 @@ const kr41_2 = {
           'boardingStop': true,
         },
         {
-          'stopId': 'KR41/2-1',
+          'stopId': 'KR41/2-100',
           'stopNameZh': '畢架山花園',
           'stopNameEn': 'Beacon Heights',
           'etaOffset': -1,
@@ -112,7 +112,7 @@ const kr41_2 = {
           'boardingStop': true,
         },
         {
-          'stopId': 'KR41/2-1',
+          'stopId': 'KR41/2-100',
           'stopNameZh': '畢架山花園',
           'stopNameEn': 'Beacon Heights',
           'etaOffset': -1,

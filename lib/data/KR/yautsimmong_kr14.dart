@@ -49,7 +49,7 @@ const kr14 = {
           'boardingStop': true,
         },
         {
-          'stopId': 'KR14-1',
+          'stopId': 'KR14-100',
           'stopNameZh': '御金・國峯',
           'stopNameEn': 'The Coronation',
           'etaOffset': -1,
@@ -117,7 +117,7 @@ const kr14 = {
           'boardingStop': true,
         },
         {
-          'stopId': 'KR14-1',
+          'stopId': 'KR14-100',
           'stopNameZh': '御金・國峯',
           'stopNameEn': 'The Coronation',
           'etaOffset': -1,

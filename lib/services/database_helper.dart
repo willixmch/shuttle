@@ -1,5 +1,6 @@
 import 'package:shuttle/data/KR/kowlooncity_kr51.dart';
 import 'package:shuttle/data/KR/shamshuipo_kr41_2.dart';
+import 'package:shuttle/data/KR/shamshuipo_kr44.dart';
 import 'package:shuttle/data/KR/shamshuipo_kr45.dart';
 import 'package:shuttle/data/KR/yautsimmong_kr11.dart';
 import 'package:shuttle/data/KR/yautsimmong_kr12.dart';
@@ -119,6 +120,7 @@ class DatabaseHelper {
       kr51,
       // Sham Shui Po
       kr41_2,
+      kr44,
       kr45,
       // Yau Tsim Mong
       kr11,

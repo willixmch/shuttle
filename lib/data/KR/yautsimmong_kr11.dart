@@ -41,7 +41,7 @@ const kr11 = {
           'boardingStop': true,
         },
         {
-          'stopId': 'KR11-1',
+          'stopId': 'KR11-100',
           'stopNameZh': '爵士花園',
           'stopNameEn': 'The Regalia',
           'etaOffset': -1,
@@ -93,7 +93,7 @@ const kr11 = {
           'boardingStop': true,
         },
         {
-          'stopId': 'KR11-1',
+          'stopId': 'KR11-100',
           'stopNameZh': '爵士花園',
           'stopNameEn': 'The Regalia',
           'etaOffset': -1,
@@ -148,12 +148,13 @@ const kr11 = {
           'stopId': 'KR11-4',
           'stopNameZh': '佐敦站',
           'stopNameEn': 'Jordan Station',
+          'etaOffset': 10,
           'latitude': 22.3062,
           'longitude': 114.1720,
           'boardingStop': true,
         },
         {
-          'stopId': 'KR11-1',
+          'stopId': 'KR11-100',
           'stopNameZh': '爵士花園',
           'stopNameEn': 'The Regalia',
           'etaOffset': -1,

@@ -53,7 +53,7 @@ const kr51 = {
           'boardingStop': true,
         },
         {
-          'stopId': 'KR51-1',
+          'stopId': 'KR51-100',
           'stopNameZh': '畢架山一號',
           'stopNameEn': 'One Beacon Hill',
           'etaOffset': -1,
