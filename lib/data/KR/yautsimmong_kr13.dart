@@ -10,7 +10,7 @@ const kingsParkHillData = {
       'infoZh': '',
       'infoEn': '',
       'residentFare': '\$0',
-      'visitorFare': '',
+      'visitorFare': 'N/A',
       'schedules': {
         'workday': [
           '07:00', '07:30', '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
@@ -65,7 +65,7 @@ const kingsParkHillData = {
       'infoZh': '',
       'infoEn': '',
       'residentFare': '\$0',
-      'visitorFare': '',
+      'visitorFare': 'N/A',
       'schedules': {
         'workday': [
           '07:15', '07:45', '08:15', '08:45', '09:15', '09:45', '10:15', '10:45', '11:15', '11:45',

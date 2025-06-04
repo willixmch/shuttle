@@ -1,4 +1,4 @@
-const theRegentData = {
+const nr538 = {
   'estateId': 'NR538',
   'estateTitleZh': '天鑽',
   'estateTitleEn': 'The Regent',

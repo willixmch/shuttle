@@ -5,12 +5,12 @@ const theCoronationData = {
   'routes': [
     {
       'routeId': 'KR14-A',
-      'routeNameZh': '御金・國峯-九龍站',
-      'routeNameEn': 'The Coronation to Kowloon Station',
+      'routeNameZh': '御金・國峯 - 九龍站',
+      'routeNameEn': 'The Coronation - Kowloon Station',
       'infoZh': '',
       'infoEn': '',
       'residentFare': '\$0',
-      'visitorFare': '',
+      'visitorFare': 'N/A',
       'schedules': {
         'workday': [
           '07:00', '07:20', '07:40', '08:00', '08:20', '08:40', '09:00', '10:20', '10:40', '17:20',
@@ -61,12 +61,12 @@ const theCoronationData = {
     },
     {
       'routeId': 'KR14-B',
-      'routeNameZh': '御金・國峯-九龍站(特別班次)',
-      'routeNameEn': 'The Coronation to Kowloon Station (Special Services)',
+      'routeNameZh': '御金・國峯 - 九龍站(特別班次)',
+      'routeNameEn': 'The Coronation - Kowloon Station (Special Services)',
       'infoZh': '',
       'infoEn': '',
       'residentFare': '\$0',
-      'visitorFare': '',
+      'visitorFare': 'N/A',
       'schedules': {
         'workday': [
           '09:20', '09:50', '10:20', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00',

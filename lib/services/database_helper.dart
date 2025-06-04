@@ -13,12 +13,12 @@ import 'package:shuttle/models/stop.dart';
 // import 'package:shuttle/data/shatin_nr817_lakeview_garden.dart';
 // import 'package:shuttle/data/shatin_nr829_the_castello.dart';
 
-import 'package:shuttle/data/shatin_nr83_kwong_yuen_estate.dart';
-import 'package:shuttle/data/shatin_nr810_parc_royal.dart';
-import 'package:shuttle/data/shatin_nr815_royal_ascot.dart';
-import 'package:shuttle/data/shatin_nr843_el_futuro.dart';
-import 'package:shuttle/data/shatin_nr845_mount_regalia.dart';
-import 'package:shuttle/data/taipo_nr538_the_regent.dart';
+import 'package:shuttle/data/shatin_nr83.dart';
+import 'package:shuttle/data/shatin_nr810.dart';
+import 'package:shuttle/data/shatin_nr815.dart';
+import 'package:shuttle/data/shatin_nr843.dart';
+import 'package:shuttle/data/shatin_nr845.dart';
+import 'package:shuttle/data/taipo_nr538.dart';
 
 // Manages SQLite database for shuttle bus data (singleton)
 class DatabaseHelper {
@@ -103,7 +103,7 @@ class DatabaseHelper {
     await _insertEstateData(db, elFuturoData);
     await _insertEstateData(db, mountRegaliaData);
     await _insertEstateData(db, mountRegaliaData);
-    await _insertEstateData(db, theRegentData);
+    await _insertEstateData(db, nr538);
     // await _insertEstateData(db, lakeviewGardenData);
     // await _insertEstateData(db, goldenTimeVillasData);
     // await _insertEstateData(db, granvilleGardenData);
