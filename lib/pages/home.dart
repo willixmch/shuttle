@@ -44,7 +44,7 @@ class HomeState extends State<Home> {
   bool _hasLocationPermission = false;
 
   final PanelController _panelController = PanelController();
-  final double _minHeightFraction = 0.28;
+  final double _minHeightFraction = 0.45;
   final double _maxHeightFraction = 1.0;
   final double _overlapAmount = 20.0;
   bool _isDraggingPanel = false;
@@ -57,7 +57,6 @@ class HomeState extends State<Home> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _panelController.open();
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();

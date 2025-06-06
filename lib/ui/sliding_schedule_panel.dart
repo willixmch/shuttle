@@ -64,7 +64,7 @@ class SlidingSchedulePanel extends StatelessWidget {
                   builder: (context, languageCode, child) {
                     return ListView.builder(
                       controller: scrollController,
-                      padding: const EdgeInsets.only(top: 24),
+                      padding: const EdgeInsets.only(top: 12),
                       itemCount: routeDataValue.length,
                       itemBuilder: (context, index) {
                         final data = routeDataValue[index];

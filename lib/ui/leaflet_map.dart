@@ -34,7 +34,7 @@ class LeafletMap extends StatefulWidget {
 class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   late final AnimatedMapController _mapController;
   LatLng? _currentLocation;
-  static const double _userZoomLevel = 18.0;
+  static const double _userZoomLevel = 17.0;
   bool _showLocateMeFab = true;
   CachedTileProvider? _tileProvider;
   late final Future<void> _tileProviderFuture;
@@ -82,6 +82,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         _mapController.animateTo(
           dest: LatLng(widget.selectedStop!.latitude, widget.selectedStop!.longitude),
           zoom: _userZoomLevel,
+          offset: Offset(0, -80),
           duration: const Duration(milliseconds: 500),
         );
       }
@@ -143,6 +144,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
       _mapController.animateTo(
         dest: _currentLocation!,
         zoom: _userZoomLevel,
+        offset: Offset(0, -80),
         duration: const Duration(milliseconds: 500),
       );
       setState(() {
@@ -208,12 +210,14 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                 MarkerLayer(
                   markers: _stops.map((stop) {
                     return Marker(
+                      alignment: Alignment.topCenter,
                       point: LatLng(stop.latitude, stop.longitude),
                       child: GestureDetector(
                         onTap: () {
                           _mapController.animateTo(
                             dest: LatLng(stop.latitude, stop.longitude),
                             zoom: _userZoomLevel,
+                            offset: Offset(0, -80),
                             duration: const Duration(milliseconds: 500),
                           );
                           widget.onStopSelected?.call(stop);
@@ -231,7 +235,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
             ),
             Positioned(
               right: 16.0,
-              bottom: screenHeight * 0.32,
+              bottom: screenHeight * 0.48,
               child: AnimatedOpacity(
                 opacity: widget.hasLocationPermission && _showLocateMeFab ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 200),
