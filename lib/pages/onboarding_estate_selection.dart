@@ -79,8 +79,8 @@ class OnboardingEstateSelectionState extends State<OnboardingEstateSelection> {
               bottom: false,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
-                child: Text('Select your estate', style: textTheme.headlineLarge,),
-              )
+                child: Text('Select your estate', style: textTheme.headlineLarge),
+              ),
             ),
             SearchBar(
               controller: _searchController,
@@ -97,7 +97,7 @@ class OnboardingEstateSelectionState extends State<OnboardingEstateSelection> {
                   : _filteredEstates.isEmpty
                       ? const Center(child: Text('No results found'))
                       : ListView.separated(
-                          padding: EdgeInsets.only(bottom: 20), 
+                          padding: EdgeInsets.only(bottom: 20),
                           itemCount: _filteredEstates.length,
                           itemBuilder: (context, index) {
                             final estate = _filteredEstates[index];

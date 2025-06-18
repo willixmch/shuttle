@@ -15,10 +15,10 @@ class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  _MyAppState createState() => _MyAppState();
+  MyAppState createState() => MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class MyAppState extends State<MyApp> {
   Locale _locale = const Locale('en');
   final ValueNotifier<String> _languageNotifier = ValueNotifier('en');
   bool _isFirstLaunch = true;

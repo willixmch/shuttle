@@ -18,17 +18,10 @@ class OnboardingLocationPermission extends StatefulWidget {
 }
 
 class OnboardingLocationPermissionState extends State<OnboardingLocationPermission> {
-  bool _hasLocationPermission = false;
-
   Future<void> _requestLocationPermission() async {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
-      setState(() {
-        _hasLocationPermission = true;
-      });
+      await Geolocator.requestPermission();
     }
     await _completeOnboarding();
     _navigateToHome();
@@ -51,7 +44,6 @@ class OnboardingLocationPermissionState extends State<OnboardingLocationPermissi
         builder: (context) => Home(
           toggleLanguage: widget.toggleLanguage,
           languageNotifier: widget.languageNotifier,
-          hasLocationPermission: _hasLocationPermission,
         ),
       ),
     );
@@ -70,6 +62,8 @@ class OnboardingLocationPermissionState extends State<OnboardingLocationPermissi
             Image.asset(
               'lib/assets/location_illustration.png',
               width: double.infinity,
+              height: MediaQuery.of(context).size.height * 0.4,
+              fit: BoxFit.contain,
             ),
             // Content below illustration
             Padding(
@@ -96,6 +90,7 @@ class OnboardingLocationPermissionState extends State<OnboardingLocationPermissi
                           ),
                           child: const Text('Show Closest Stop'),
                         ),
+                        const SizedBox(height: 8), // Spacing between buttons
                         TextButton(
                           onPressed: _skipLocationPermission,
                           style: TextButton.styleFrom(
