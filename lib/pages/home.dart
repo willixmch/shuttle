@@ -20,11 +20,13 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 class Home extends StatefulWidget {
   final void Function(VoidCallback) toggleLanguage;
   final ValueNotifier<String> languageNotifier;
+  final bool? hasLocationPermission;
 
   const Home({
     super.key,
     required this.toggleLanguage,
     required this.languageNotifier,
+    this.hasLocationPermission,
   });
 
   @override
@@ -41,7 +43,7 @@ class HomeState extends State<Home> {
   Estate? _selectedEstate;
   Stop? _selectedStop;
   int? _expandedCardIndex;
-  bool _hasLocationPermission = false;
+  late bool _hasLocationPermission;
 
   final PanelController _panelController = PanelController();
   final double _minHeightFraction = 0.45;
@@ -56,14 +58,8 @@ class HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-      _hasLocationPermission = permission == LocationPermission.always || permission == LocationPermission.whileInUse;
-      await _loadSchedule();
-    });
+    _hasLocationPermission = widget.hasLocationPermission ?? false;
+    _loadSchedule();
     DayTypeChecker.initialize();
     _etaNotifier = ValueNotifier<List<Map<String, dynamic>>>([]);
     _etaRefreshTimer = EtaRefreshTimer(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shuttle/theme/theme.dart';
 import 'package:shuttle/theme/util.dart';
 import 'package:shuttle/pages/home.dart';
-import 'package:shuttle/pages/onboarding_estate_screen.dart';
+import 'package:shuttle/pages/onboarding_estate_selection.dart';
 import 'package:shuttle/l10n/generated/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shuttle/utils/eta_calculator.dart';
@@ -58,7 +58,7 @@ class _MyAppState extends State<MyApp> {
       _languageNotifier.value = newLanguageCode;
     });
     EtaCalculator.setLanguage(newLanguageCode);
-    onLanguageChanged(); // Notify Home after all updates
+    onLanguageChanged();
   }
 
   @override
@@ -73,7 +73,10 @@ class _MyAppState extends State<MyApp> {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: _isFirstLaunch
-          ? const OnboardingEstateScreen()
+          ? OnboardingEstateSelection(
+              toggleLanguage: _toggleLanguage,
+              languageNotifier: _languageNotifier,
+            )
           : Home(
               toggleLanguage: _toggleLanguage,
               languageNotifier: _languageNotifier,

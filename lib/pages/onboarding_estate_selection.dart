@@ -2,15 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/services/persistence_estate.dart';
+import 'package:shuttle/pages/onboarding_location_permission.dart';
 
-class OnboardingEstateScreen extends StatefulWidget {
-  const OnboardingEstateScreen({super.key});
+class OnboardingEstateSelection extends StatefulWidget {
+  final void Function(VoidCallback) toggleLanguage;
+  final ValueNotifier<String> languageNotifier;
+
+  const OnboardingEstateSelection({
+    super.key,
+    required this.toggleLanguage,
+    required this.languageNotifier,
+  });
 
   @override
-  OnboardingEstateScreenState createState() => OnboardingEstateScreenState();
+  OnboardingEstateSelectionState createState() => OnboardingEstateSelectionState();
 }
 
-class OnboardingEstateScreenState extends State<OnboardingEstateScreen> {
+class OnboardingEstateSelectionState extends State<OnboardingEstateSelection> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   List<Estate> _estates = [];
@@ -61,14 +69,19 @@ class OnboardingEstateScreenState extends State<OnboardingEstateScreen> {
     final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select Your Estate'),
-        centerTitle: true,
-      ),
       body: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
+          spacing: 8,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
+                child: Text('Select your estate', style: textTheme.headlineLarge,),
+              )
+            ),
             SearchBar(
               controller: _searchController,
               focusNode: _searchFocusNode,
@@ -78,13 +91,13 @@ class OnboardingEstateScreenState extends State<OnboardingEstateScreen> {
               padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 16.0)),
               elevation: const WidgetStatePropertyAll(0.0),
             ),
-            const SizedBox(height: 16.0),
             Expanded(
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _filteredEstates.isEmpty
                       ? const Center(child: Text('No results found'))
                       : ListView.separated(
+                          padding: EdgeInsets.only(bottom: 20), 
                           itemCount: _filteredEstates.length,
                           itemBuilder: (context, index) {
                             final estate = _filteredEstates[index];
@@ -106,7 +119,12 @@ class OnboardingEstateScreenState extends State<OnboardingEstateScreen> {
                                 await PersistenceEstate().saveEstate(estate);
                                 Navigator.pushReplacement(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const Placeholder()), // Placeholder for location screen
+                                  MaterialPageRoute(
+                                    builder: (context) => OnboardingLocationPermission(
+                                      toggleLanguage: widget.toggleLanguage,
+                                      languageNotifier: widget.languageNotifier,
+                                    ),
+                                  ),
                                 );
                               },
                             );

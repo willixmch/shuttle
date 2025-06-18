@@ -94,6 +94,7 @@ flutter:
   - lib/assets/stop_marker_unselected.svg
   - lib/assets/stop_dot.svg
   - lib/assets/stop_connector.svg
+  - lib/assets/location_illustration.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
