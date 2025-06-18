@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shuttle/theme/theme.dart';
 import 'package:shuttle/theme/util.dart';
 import 'package:shuttle/pages/home.dart';
+import 'package:shuttle/pages/onboarding_estate_screen.dart';
 import 'package:shuttle/l10n/generated/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shuttle/utils/eta_calculator.dart';
@@ -18,19 +19,22 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  Locale _locale = const Locale('en'); // Default to English
-  final ValueNotifier<String> _languageNotifier = ValueNotifier('en'); // Notify language changes
+  Locale _locale = const Locale('en');
+  final ValueNotifier<String> _languageNotifier = ValueNotifier('en');
+  bool _isFirstLaunch = true;
 
   @override
   void initState() {
     super.initState();
-    _loadLocale();
+    _checkFirstLaunch();
   }
 
-  Future<void> _loadLocale() async {
+  Future<void> _checkFirstLaunch() async {
     final prefs = await SharedPreferences.getInstance();
+    final isFirstLaunch = prefs.getBool('isFirstLaunch') ?? true;
     String languageCode = prefs.getString('languageCode') ?? await _getDeviceLanguage();
     setState(() {
+      _isFirstLaunch = isFirstLaunch;
       _locale = Locale(languageCode);
       _languageNotifier.value = languageCode;
     });
@@ -64,14 +68,16 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: theme.light(), // Use light theme for simplicity
+      theme: theme.light(),
       locale: _locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: Home(
-        toggleLanguage: _toggleLanguage,
-        languageNotifier: _languageNotifier,
-      ),
+      home: _isFirstLaunch
+          ? const OnboardingEstateScreen()
+          : Home(
+              toggleLanguage: _toggleLanguage,
+              languageNotifier: _languageNotifier,
+            ),
     );
   }
 }
