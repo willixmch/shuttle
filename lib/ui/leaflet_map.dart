@@ -16,6 +16,8 @@ class LeafletMap extends StatefulWidget {
   final Estate? selectedEstate;
   final Stop? selectedStop;
   final bool hasLocationPermission;
+  final LatLng? currentLocation;
+  final bool isLocationReady;
   final ValueChanged<Stop>? onStopSelected;
 
   const LeafletMap({
@@ -24,6 +26,8 @@ class LeafletMap extends StatefulWidget {
     this.selectedEstate,
     this.selectedStop,
     required this.hasLocationPermission,
+    this.currentLocation,
+    required this.isLocationReady,
     this.onStopSelected,
   });
 
@@ -33,8 +37,6 @@ class LeafletMap extends StatefulWidget {
 
 class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   late final AnimatedMapController _mapController;
-  LatLng? _currentLocation;
-  static const double _userZoomLevel = 17.0;
   bool _showLocateMeFab = true;
   CachedTileProvider? _tileProvider;
   late final Future<void> _tileProviderFuture;
@@ -56,10 +58,10 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     });
 
     _fetchStops();
-    // Defer _startLocationUpdates until after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _startLocationUpdates();
+        _animateToInitialPosition();
+        _startLocationStream();
       }
     });
 
@@ -92,8 +94,9 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         );
       }
     }
-    if (widget.hasLocationPermission != oldWidget.hasLocationPermission) {
-      _startLocationUpdates();
+    if (widget.hasLocationPermission != oldWidget.hasLocationPermission ||
+        widget.isLocationReady != oldWidget.isLocationReady) {
+      _startLocationStream();
     }
   }
 
@@ -119,44 +122,60 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> _startLocationUpdates() async {
-    if (!widget.hasLocationPermission || _isStreamStarted) {
-      return;
-    }
-
-    try {
-      final initialPosition = await Geolocator.getCurrentPosition();
-      if (mounted) {
-        setState(() {
-          _currentLocation = LatLng(initialPosition.latitude, initialPosition.longitude);
-          _isStreamStarted = true;
-        });
-
-        // Animate to current location
-        _mapController.animateTo(
-          dest: _currentLocation!,
-          zoom: _userZoomLevel,
-          offset: const Offset(0, -80),
-          duration: const Duration(milliseconds: 500),
-        );
-        _showLocateMeFab = false;
-      }
-
-      _positionStream = Geolocator.getPositionStream(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          distanceFilter: 5,
-        ),
+  void _animateToInitialPosition() {
+    if (widget.selectedStop != null) {
+      _mapController.animateTo(
+        dest: LatLng(widget.selectedStop!.latitude, widget.selectedStop!.longitude),
+        zoom: _userZoomLevel,
+        offset: const Offset(0, -80),
+        duration: const Duration(milliseconds: 500),
       );
-    } catch (e) {
-      // Handle failure silently
+      _showLocateMeFab = false;
+    } else if (widget.isLocationReady && widget.currentLocation != null) {
+      _mapController.animateTo(
+        dest: widget.currentLocation!,
+        zoom: _userZoomLevel,
+        offset: const Offset(0, -80),
+        duration: const Duration(milliseconds: 500),
+      );
+      _showLocateMeFab = false;
     }
   }
 
+  void _startLocationStream() {
+    if (!widget.isLocationReady || _isStreamStarted) {
+      setState(() {
+        _isStreamStarted = false;
+        _positionStream = null;
+      });
+      return;
+    }
+
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 5,
+      ),
+    );
+    setState(() {
+      _isStreamStarted = true;
+    });
+  }
+
   void _recenterMap() {
-    if (_currentLocation != null) {
+    if (widget.currentLocation != null && widget.isLocationReady) {
       _mapController.animateTo(
-        dest: _currentLocation!,
+        dest: widget.currentLocation!,
+        zoom: _userZoomLevel,
+        offset: const Offset(0, -80),
+        duration: const Duration(milliseconds: 500),
+      );
+      setState(() {
+        _showLocateMeFab = false;
+      });
+    } else if (widget.selectedStop != null) {
+      _mapController.animateTo(
+        dest: LatLng(widget.selectedStop!.latitude, widget.selectedStop!.longitude),
         zoom: _userZoomLevel,
         offset: const Offset(0, -80),
         duration: const Duration(milliseconds: 500),
@@ -167,6 +186,8 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     }
   }
 
+  static const double _userZoomLevel = 17.0;
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -175,8 +196,12 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
 
     final initialCenter = widget.selectedStop != null
         ? LatLng(widget.selectedStop!.latitude, widget.selectedStop!.longitude)
-        : const LatLng(22.3964, 114.1095);
-    final initialZoom = widget.selectedStop != null ? _userZoomLevel : 12.0;
+        : widget.currentLocation != null && widget.isLocationReady
+            ? widget.currentLocation!
+            : const LatLng(22.3964, 114.1095);
+    final initialZoom = widget.selectedStop != null || widget.isLocationReady
+        ? _userZoomLevel
+        : 12.0;
 
     return FutureBuilder<void>(
       future: _tileProviderFuture,
@@ -208,7 +233,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                   retinaMode: RetinaMode.isHighDensity(context),
                   tileProvider: _tileProvider!,
                 ),
-                if (_isStreamStarted && widget.hasLocationPermission)
+                if (_isStreamStarted && widget.isLocationReady)
                   CurrentLocationLayer(
                     positionStream: _positionStream?.map(
                       (position) => LocationMarkerPosition(

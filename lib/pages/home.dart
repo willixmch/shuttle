@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:shuttle/ui/estate_filter_sheet.dart';
 import 'package:shuttle/ui/home_bar.dart';
 import 'package:shuttle/ui/sliding_schedule_panel.dart';
@@ -42,6 +43,8 @@ class HomeState extends State<Home> {
   Stop? _selectedStop;
   int? _expandedCardIndex;
   bool _hasLocationPermission = false;
+  LatLng? _currentLocation;
+  bool _isLocationReady = false;
 
   final PanelController _panelController = PanelController();
   final double _minHeightFraction = 0.45;
@@ -100,10 +103,35 @@ class HomeState extends State<Home> {
     });
   }
 
+  Future<void> _fetchCurrentLocation() async {
+    try {
+      final position = await Geolocator.getCurrentPosition();
+      if (mounted) {
+        setState(() {
+          _currentLocation = LatLng(position.latitude, position.longitude);
+          _isLocationReady = true;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLocationReady = false;
+        });
+      }
+    }
+  }
+
   Future<void> _loadSchedule() async {
     // Check location permission
     final permission = await Geolocator.checkPermission();
     _hasLocationPermission = permission == LocationPermission.always || permission == LocationPermission.whileInUse;
+
+    // Fetch location if permitted
+    if (_hasLocationPermission) {
+      await _fetchCurrentLocation();
+    } else {
+      _isLocationReady = false;
+    }
 
     final persistenceEstate = await _persistenceEstate.estateQuery();
     if (mounted && persistenceEstate['estate'] != null) {
@@ -116,6 +144,7 @@ class HomeState extends State<Home> {
       _selectedStop = await _stopQuery.getInitialStop(
         _selectedEstate!.estateId,
         _hasLocationPermission,
+        currentLocation: _currentLocation,
       );
     }
 
@@ -219,6 +248,8 @@ class HomeState extends State<Home> {
                   selectedEstate: _selectedEstate,
                   selectedStop: _selectedStop,
                   hasLocationPermission: _hasLocationPermission,
+                  currentLocation: _currentLocation,
+                  isLocationReady: _isLocationReady,
                   onStopSelected: (Stop stop) {
                     setState(() {
                       _selectedStop = stop;
