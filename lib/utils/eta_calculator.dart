@@ -58,7 +58,8 @@ class EtaCalculator {
         hours: departureTime.hour,
         minutes: departureTime.minute,
       ));
-      final difference = departureDateTime.difference(currentTime).inMinutes + etaOffset;
+      // Round up to the nearest minute
+      final difference = (departureDateTime.difference(currentTime).inSeconds / 60).ceil() + etaOffset;
       return {'time': schedule.departureTime, 'difference': difference};
     }).toList();
 
@@ -114,7 +115,8 @@ class EtaCalculator {
           hours: departureTime.hour,
           minutes: departureTime.minute,
         ));
-        final difference = departureDateTime.difference(currentTime).inMinutes;
+        // Round up to the nearest minute for comparison
+        final difference = (departureDateTime.difference(currentTime).inSeconds / 60).ceil();
         return difference == adjustedLastEta;
       },
       orElse: () => Schedule(id: 0, routeId: '', dayType: '', departureTime: ''),
@@ -140,7 +142,8 @@ class EtaCalculator {
       hours: timeFormat.parse(nextDepartureTime).hour,
       minutes: timeFormat.parse(nextDepartureTime).minute,
     ));
-    return nextDepartureDateTime.difference(currentTime).inMinutes + etaOffset;
+    // Round up to the nearest minute
+    return (nextDepartureDateTime.difference(currentTime).inSeconds / 60).ceil() + etaOffset;
   }
 
   // Helper function to format minutes into a string (e.g., "Now Departing", "6 minutes", or "2 hours 10 minutes").
