@@ -56,7 +56,12 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     });
 
     _fetchStops();
-    _startLocationUpdates();
+    // Defer _startLocationUpdates until after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _startLocationUpdates();
+      }
+    });
 
     _mapController.mapController.mapEventStream.listen((event) {
       if ((event is MapEventMove || event is MapEventMoveEnd) &&
@@ -82,7 +87,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         _mapController.animateTo(
           dest: LatLng(widget.selectedStop!.latitude, widget.selectedStop!.longitude),
           zoom: _userZoomLevel,
-          offset: Offset(0, -80),
+          offset: const Offset(0, -80),
           duration: const Duration(milliseconds: 500),
         );
       }
@@ -114,28 +119,37 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
     }
   }
 
-  void _startLocationUpdates() async {
-    if (widget.hasLocationPermission && !_isStreamStarted) {
-      try {
-        final initialPosition = await Geolocator.getCurrentPosition();
-        if (mounted) {
-          setState(() {
-            _currentLocation = LatLng(initialPosition.latitude, initialPosition.longitude);
-          });
-        }
+  Future<void> _startLocationUpdates() async {
+    if (!widget.hasLocationPermission || _isStreamStarted) {
+      return;
+    }
 
-        _positionStream = Geolocator.getPositionStream(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.high,
-            distanceFilter: 5,
-          ),
-        );
+    try {
+      final initialPosition = await Geolocator.getCurrentPosition();
+      if (mounted) {
         setState(() {
+          _currentLocation = LatLng(initialPosition.latitude, initialPosition.longitude);
           _isStreamStarted = true;
         });
-      } catch (e) {
-        // Handle failure silently
+
+        // Animate to current location
+        _mapController.animateTo(
+          dest: _currentLocation!,
+          zoom: _userZoomLevel,
+          offset: const Offset(0, -80),
+          duration: const Duration(milliseconds: 500),
+        );
+        _showLocateMeFab = false;
       }
+
+      _positionStream = Geolocator.getPositionStream(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 5,
+        ),
+      );
+    } catch (e) {
+      // Handle failure silently
     }
   }
 
@@ -144,7 +158,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
       _mapController.animateTo(
         dest: _currentLocation!,
         zoom: _userZoomLevel,
-        offset: Offset(0, -80),
+        offset: const Offset(0, -80),
         duration: const Duration(milliseconds: 500),
       );
       setState(() {
@@ -217,7 +231,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                           _mapController.animateTo(
                             dest: LatLng(stop.latitude, stop.longitude),
                             zoom: _userZoomLevel,
-                            offset: Offset(0, -80),
+                            offset: const Offset(0, -80),
                             duration: const Duration(milliseconds: 500),
                           );
                           widget.onStopSelected?.call(stop);

@@ -56,7 +56,6 @@ class HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    _checkLocationPermission();
     _loadSchedule();
     DayTypeChecker.initialize();
     _etaNotifier = ValueNotifier<List<Map<String, dynamic>>>([]);
@@ -73,11 +72,6 @@ class HomeState extends State<Home> {
       getEffectiveStop: () => _selectedStop,
     );
     widget.languageNotifier.addListener(_refreshEtaStrings);
-  }
-
-  Future<void> _checkLocationPermission() async {
-    final permission = await Geolocator.checkPermission();
-    _hasLocationPermission = permission == LocationPermission.always || permission == LocationPermission.whileInUse;
   }
 
   @override
@@ -107,6 +101,10 @@ class HomeState extends State<Home> {
   }
 
   Future<void> _loadSchedule() async {
+    // Check location permission
+    final permission = await Geolocator.checkPermission();
+    _hasLocationPermission = permission == LocationPermission.always || permission == LocationPermission.whileInUse;
+
     final persistenceEstate = await _persistenceEstate.estateQuery();
     if (mounted && persistenceEstate['estate'] != null) {
       setState(() {

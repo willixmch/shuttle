@@ -30,9 +30,6 @@ class OnboardingEstateSelectionState extends State<OnboardingEstateSelection> {
     super.initState();
     _loadEstates();
     _searchController.addListener(_filterEstates);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _searchFocusNode.requestFocus();
-    });
   }
 
   @override
