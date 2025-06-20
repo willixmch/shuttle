@@ -14,7 +14,6 @@ import 'package:shuttle/utils/day_type_checker.dart';
 import 'package:shuttle/services/route_query.dart';
 import 'package:shuttle/services/persistence_estate.dart';
 import 'package:shuttle/utils/eta_calculator.dart';
-import 'package:shuttle/utils/eta_refresh_timer.dart';
 import 'package:shuttle/services/stop_query.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
@@ -36,7 +35,7 @@ class HomeState extends State<Home> {
   final PersistenceEstate _persistenceEstate = PersistenceEstate();
   final StopQuery _stopQuery;
   final RouteQuery _routeQuery;
-  late final EtaRefreshTimer _etaRefreshTimer;
+  late final EtaCalculator _etaCalculator;
   List<Map<String, dynamic>> _cachedRouteData = [];
   late ValueNotifier<List<Map<String, dynamic>>> _etaNotifier;
   Estate? _selectedEstate;
@@ -62,7 +61,7 @@ class HomeState extends State<Home> {
     _loadSchedule();
     DayTypeChecker.initialize();
     _etaNotifier = ValueNotifier<List<Map<String, dynamic>>>([]);
-    _etaRefreshTimer = EtaRefreshTimer(
+    _etaCalculator = EtaCalculator(
       onUpdate: (updatedRouteData) {
         if (mounted) {
           setState(() {
@@ -79,7 +78,7 @@ class HomeState extends State<Home> {
 
   @override
   void dispose() {
-    _etaRefreshTimer.dispose();
+    _etaCalculator.dispose();
     _etaNotifier.dispose();
     widget.languageNotifier.removeListener(_refreshEtaStrings);
     super.dispose();
@@ -159,7 +158,7 @@ class HomeState extends State<Home> {
         _etaNotifier.value = routeData;
       });
       _refreshEtaStrings();
-      _etaRefreshTimer.startRefreshTimer();
+      _etaCalculator.startRefreshTimer();
     }
   }
 

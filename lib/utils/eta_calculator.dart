@@ -1,9 +1,12 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:shuttle/utils/day_type_checker.dart';
 import 'package:shuttle/models/schedule.dart';
 import 'package:shuttle/models/stop.dart';
+import 'package:shuttle/utils/day_type_checker.dart';
 
-class EtaCalculator {
+// Combined service to manage ETA calculations, periodic updates, and app lifecycle events.
+class EtaCalculator with WidgetsBindingObserver {
   // Static map for localized strings
   static String _languageCode = 'en'; // Default, overridden by device language
   static final Map<String, Map<String, String>> _localizedStrings = {
@@ -21,12 +24,28 @@ class EtaCalculator {
     },
   };
 
+  Timer? _refreshTimer;
+  final Function(List<Map<String, dynamic>>)? onUpdate;
+  final List<Map<String, dynamic>> Function()? getRouteData;
+  final Stop? Function()? getEffectiveStop;
+
+  EtaCalculator({
+    this.onUpdate,
+    this.getRouteData,
+    this.getEffectiveStop,
+  }) {
+    // Register as a WidgetsBindingObserver to listen for lifecycle events
+    WidgetsBinding.instance.addObserver(this);
+    // Start the periodic timer
+    startRefreshTimer();
+  }
+
   // Method to update the language
   static void setLanguage(String languageCode) {
     if (_localizedStrings.containsKey(languageCode)) {
       _languageCode = languageCode;
     } else {
-      _languageCode = 'en'; // Fallback to English
+      _languageCode = 'en';
     }
   }
 
@@ -35,7 +54,15 @@ class EtaCalculator {
     return DayTypeChecker.getDayType(date);
   }
 
-  // Calculates the next ETA and upcoming ETAs for a route based on the current time and stop offset.
+  // Helper method to parse a schedule time into a DateTime for the current day.
+  static DateTime _parseScheduleTime(String departureTime, DateTime currentTime) {
+    final timeFormat = DateFormat('HH:mm');
+    final today = DateTime(currentTime.year, currentTime.month, currentTime.day);
+    final parsedTime = timeFormat.parse(departureTime);
+    return today.add(Duration(hours: parsedTime.hour, minutes: parsedTime.minute));
+  }
+
+  // Calculates the next ETA and upcoming ETAs for a route based on the schedule time plus etaOffset.
   // Returns a map with 'eta' (int, minutes) and 'upcomingEta' (List<int>, minutes).
   static Map<String, dynamic> calculateEtas(
     List<Schedule> schedules,
@@ -46,107 +73,37 @@ class EtaCalculator {
       return {'eta': null, 'upcomingEta': []};
     }
 
-    // Use 0 as default etaOffset if stop is null
     final etaOffset = stop?.etaOffset ?? 0;
-
-    // Parse schedule times and calculate time differences.
-    final timeFormat = DateFormat('HH:mm');
-    final today = DateTime(currentTime.year, currentTime.month, currentTime.day);
-    final timeDifferences = schedules.map((schedule) {
-      final departureTime = timeFormat.parse(schedule.departureTime);
-      final departureDateTime = today.add(Duration(
-        hours: departureTime.hour,
-        minutes: departureTime.minute,
-      ));
-      // Round up to the nearest minute
-      final difference = (departureDateTime.difference(currentTime).inSeconds / 60).ceil() + etaOffset;
-      return {'time': schedule.departureTime, 'difference': difference};
-    }).toList();
-
-    // Filter future departures (difference > 0) and sort by time.
-    final futureDepartures = timeDifferences
-        .where((d) {
-          final difference = d['difference'];
-          return difference != null && (difference as int) > 0;
+    // Filter schedules with arrival times (departure + offset) after current time
+    final futureDepartures = schedules
+        .map((schedule) {
+          final departureTime = _parseScheduleTime(schedule.departureTime, currentTime);
+          // Add etaOffset to get the actual arrival time at the stop
+          return departureTime.add(Duration(minutes: etaOffset));
         })
+        .where((arrivalTime) => arrivalTime.isAfter(currentTime))
         .toList()
-      ..sort((a, b) {
-        final aDiff = a['difference'] as int;
-        final bDiff = b['difference'] as int;
-        return aDiff.compareTo(bDiff);
-      });
+      ..sort();
 
     if (futureDepartures.isEmpty) {
       return {'eta': null, 'upcomingEta': []};
     }
 
-    // Get the next ETA and up to 2 upcoming ETAs as integers.
-    final nextEtaMinutes = futureDepartures[0]['difference'] as int;
-    final upcomingEta = futureDepartures
-        .skip(1)
-        .take(2)
-        .map((d) => d['difference'] as int)
-        .toList();
+    // Calculate ETAs based on the difference between arrival time and current time
+    final etas = futureDepartures.map((arrivalTime) {
+      final minutes = arrivalTime.difference(currentTime).inSeconds / 60;
+      // Use floor for non-base stops (etaOffset > 0), ceil for base stops
+      return etaOffset > 0 ? minutes.floor() : minutes.ceil();
+    }).toList();
 
-    return {'eta': nextEtaMinutes, 'upcomingEta': upcomingEta};
+    // Return the first ETA and up to two upcoming ETAs
+    return {
+      'eta': etas.isEmpty ? null : etas[0],
+      'upcomingEta': etas.skip(1).take(2).toList(),
+    };
   }
 
-  // Helper function to calculate the next ETA after a given list of ETAs.
-  static int? calculateNextEta(
-    List<Schedule> schedules,
-    DateTime currentTime,
-    int lastEtaMinutes,
-    Stop? stop,
-  ) {
-    final timeFormat = DateFormat('HH:mm');
-    final today = DateTime(currentTime.year, currentTime.month, currentTime.day);
-
-    // Use 0 as default etaOffset if stop is null
-    final etaOffset = stop?.etaOffset ?? 0;
-
-    // Adjust last ETA to account for stop offset
-    final adjustedLastEta = lastEtaMinutes - etaOffset;
-
-    // Find the schedule time that corresponds to the last ETA.
-    final lastDepartureTime = schedules.firstWhere(
-      (schedule) {
-        final departureTime = timeFormat.parse(schedule.departureTime);
-        final departureDateTime = today.add(Duration(
-          hours: departureTime.hour,
-          minutes: departureTime.minute,
-        ));
-        // Round up to the nearest minute for comparison
-        final difference = (departureDateTime.difference(currentTime).inSeconds / 60).ceil();
-        return difference == adjustedLastEta;
-      },
-      orElse: () => Schedule(id: 0, routeId: '', dayType: '', departureTime: ''),
-    );
-
-    if (lastDepartureTime.departureTime.isEmpty) {
-      return null;
-    }
-
-    // Find the next schedule time after the last departure.
-    final sortedSchedules = schedules
-        .map((s) => s.departureTime)
-        .toList()
-      ..sort((a, b) => timeFormat.parse(a).compareTo(timeFormat.parse(b)));
-    final lastIndex = sortedSchedules.indexOf(lastDepartureTime.departureTime);
-
-    if (lastIndex == -1 || lastIndex == sortedSchedules.length - 1) {
-      return null; // No more departures.
-    }
-
-    final nextDepartureTime = sortedSchedules[lastIndex + 1];
-    final nextDepartureDateTime = today.add(Duration(
-      hours: timeFormat.parse(nextDepartureTime).hour,
-      minutes: timeFormat.parse(nextDepartureTime).minute,
-    ));
-    // Round up to the nearest minute
-    return (nextDepartureDateTime.difference(currentTime).inSeconds / 60).ceil() + etaOffset;
-  }
-
-  // Helper function to format minutes into a string (e.g., "Now Departing", "6 minutes", or "2 hours 10 minutes").
+  // Helper function to format minutes into a string (e.g., "Arriving", "6 Mins", or "2 Hrs 10 Mins").
   static String formatEta(int? minutes) {
     final strings = _localizedStrings[_languageCode]!;
 
@@ -168,5 +125,174 @@ class EtaCalculator {
       return '$hours ${strings['hours']}';
     }
     return '$hours ${strings['hours']} $remainingMinutes ${strings['minutes']}';
+  }
+
+  // Starts a timer to trigger at the start of each minute to decrement ETAs and handle expiry.
+  void startRefreshTimer() {
+    _refreshTimer?.cancel();
+
+    final now = DateTime.now();
+    final secondsUntilNextMinute = 60 - now.second;
+    final initialDelay = Duration(seconds: secondsUntilNextMinute);
+
+    _refreshTimer = Timer(initialDelay, () {
+      _updateEtas();
+      _refreshTimer = Timer.periodic(const Duration(seconds: 60), (timer) {
+        _updateEtas();
+      });
+    });
+  }
+
+  // Updates ETAs for all routes and triggers the onUpdate callback for periodic timer updates.
+  void _updateEtas() {
+    if (getRouteData == null || onUpdate == null || getEffectiveStop == null) {
+      return;
+    }
+
+    final routeData = getRouteData!();
+    final effectiveStop = getEffectiveStop!();
+    final currentTime = DateTime.now();
+
+    if (routeData.isNotEmpty) {
+      final updatedRouteData = routeData.map((data) {
+        final schedules = data['schedules'] as List<Schedule>;
+        int? currentEta = data['eta'] as int?;
+        List<int> upcomingEta = List<int>.from(data['upcomingEta'] as List);
+        final etaNotifier = data['etaNotifier'] as ValueNotifier<String>;
+        final upcomingEtaNotifier = data['upcomingEtaNotifier'] as ValueNotifier<List<String>>;
+
+        // If no stop or no schedules, clear ETAs
+        if (effectiveStop == null || schedules.isEmpty) {
+          etaNotifier.value = formatEta(null);
+          upcomingEtaNotifier.value = [];
+          return {
+            'route': data['route'],
+            'estate': data['estate'],
+            'schedules': schedules,
+            'eta': null,
+            'upcomingEta': <int>[],
+            'etaNotifier': etaNotifier,
+            'upcomingEtaNotifier': upcomingEtaNotifier,
+          };
+        }
+
+        // Decrement ETAs if currentEta is valid and not expired
+        if (currentEta != null && currentEta > -1) {
+          currentEta = currentEta - 1;
+          upcomingEta = upcomingEta.map((eta) => eta - 1).toList();
+        }
+
+        // If currentEta is null or expired, handle promotion or recalculate
+        if (currentEta == null || currentEta <= -1) {
+          if (upcomingEta.isNotEmpty) {
+            currentEta = upcomingEta.removeAt(0); // Promote first upcoming ETA
+          } else {
+            // Recalculate to check for new ETAs
+            final etas = calculateEtas(schedules, currentTime, effectiveStop);
+            currentEta = etas['eta'] as int?;
+            upcomingEta = List<int>.from(etas['upcomingEta'] as List);
+          }
+
+          // If still fewer than 2 upcoming ETAs, try to replenish
+          if (upcomingEta.length < 2 && schedules.isNotEmpty) {
+            final etas = calculateEtas(schedules, currentTime, effectiveStop);
+            final newUpcomingEtas = etas['upcomingEta'] as List<int>;
+            for (var eta in newUpcomingEtas) {
+              if (upcomingEta.length < 2 && !upcomingEta.contains(eta)) {
+                upcomingEta.add(eta);
+              }
+            }
+          }
+        }
+
+        // Update notifiers, ensuring only first 2 upcoming ETAs are shown
+        etaNotifier.value = formatEta(currentEta);
+        upcomingEtaNotifier.value = upcomingEta.take(2).map((e) => formatEta(e)).toList();
+
+        return {
+          'route': data['route'],
+          'estate': data['estate'],
+          'schedules': schedules,
+          'eta': currentEta,
+          'upcomingEta': upcomingEta,
+          'etaNotifier': etaNotifier,
+          'upcomingEtaNotifier': upcomingEtaNotifier,
+        };
+      }).toList();
+
+      onUpdate!(updatedRouteData);
+    }
+  }
+
+  // Refreshes ETAs by recalculating for all routes, used for app resume or manual refresh.
+  void refreshEtas() {
+    if (getRouteData == null || onUpdate == null || getEffectiveStop == null) {
+      return;
+    }
+
+    final routeData = getRouteData!();
+    final effectiveStop = getEffectiveStop!();
+    final currentTime = DateTime.now();
+
+    if (routeData.isNotEmpty) {
+      final updatedRouteData = routeData.map((data) {
+        final schedules = data['schedules'] as List<Schedule>;
+        final etaNotifier = data['etaNotifier'] as ValueNotifier<String>;
+        final upcomingEtaNotifier = data['upcomingEtaNotifier'] as ValueNotifier<List<String>>;
+
+        // If no stop or no schedules, clear ETAs
+        if (effectiveStop == null || schedules.isEmpty) {
+          etaNotifier.value = formatEta(null);
+          upcomingEtaNotifier.value = [];
+          return {
+            'route': data['route'],
+            'estate': data['estate'],
+            'schedules': schedules,
+            'eta': null,
+            'upcomingEta': <int>[],
+            'etaNotifier': etaNotifier,
+            'upcomingEtaNotifier': upcomingEtaNotifier,
+          };
+        }
+
+        // Recalculate fresh ETAs
+        final etas = calculateEtas(schedules, currentTime, effectiveStop);
+        final currentEta = etas['eta'] as int?;
+        final upcomingEta = List<int>.from(etas['upcomingEta'] as List);
+
+        // Update notifiers, ensuring only first 2 upcoming ETAs are shown
+        etaNotifier.value = formatEta(currentEta);
+        upcomingEtaNotifier.value = upcomingEta.take(2).map((e) => formatEta(e)).toList();
+
+        return {
+          'route': data['route'],
+          'estate': data['estate'],
+          'schedules': schedules,
+          'eta': currentEta,
+          'upcomingEta': upcomingEta,
+          'etaNotifier': etaNotifier,
+          'upcomingEtaNotifier': upcomingEtaNotifier,
+        };
+      }).toList();
+
+      onUpdate!(updatedRouteData);
+    }
+  }
+
+  // Handles app lifecycle events to refresh ETAs on resume.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Refresh ETAs when the app resumes
+      refreshEtas();
+      // Restart the timer to align with the next minute boundary
+      startRefreshTimer();
+    }
+  }
+
+  // Cancels the refresh timer and removes observer.
+  void dispose() {
+    _refreshTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
   }
 }
