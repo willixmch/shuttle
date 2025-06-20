@@ -19,5 +19,9 @@
   "languageSwitch": "En",
   "origin": "起始站",
   "circular": "循環線",
-  "noService": "沒有服務"
+  "noService": "沒有服務",
+  "selectEstate": "選擇屋苑",
+  "locationPermissionText": "開啟位置權限以便尋找最接近你的車站",
+  "showClosestStop": "顯示最近車站",
+  "notNow": "暫時不要"
 }

@@ -3,6 +3,7 @@ import 'package:shuttle/models/estate.dart';
 import 'package:shuttle/services/database_helper.dart';
 import 'package:shuttle/services/persistence_estate.dart';
 import 'package:shuttle/pages/onboarding_location_permission.dart';
+import 'package:shuttle/l10n/generated/app_localizations.dart';
 
 class OnboardingEstateSelection extends StatefulWidget {
   final void Function(VoidCallback) toggleLanguage;
@@ -64,6 +65,7 @@ class OnboardingEstateSelectionState extends State<OnboardingEstateSelection> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: Container(
@@ -76,13 +78,13 @@ class OnboardingEstateSelectionState extends State<OnboardingEstateSelection> {
               bottom: false,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
-                child: Text('Select your estate', style: textTheme.headlineLarge),
+                child: Text(localizations.selectEstate, style: textTheme.headlineLarge),
               ),
             ),
             SearchBar(
               controller: _searchController,
               focusNode: _searchFocusNode,
-              hintText: 'Search estates',
+              hintText: localizations.searchHint,
               leading: const Icon(Icons.search),
               textStyle: WidgetStatePropertyAll(textTheme.bodyLarge),
               padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 16.0)),
@@ -92,7 +94,7 @@ class OnboardingEstateSelectionState extends State<OnboardingEstateSelection> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _filteredEstates.isEmpty
-                      ? const Center(child: Text('No results found'))
+                      ? Center(child: Text(localizations.noResult))
                       : ListView.separated(
                           padding: EdgeInsets.only(bottom: 20),
                           itemCount: _filteredEstates.length,

@@ -67,4 +67,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noService => 'No Service';
+
+  @override
+  String get selectEstate => 'Select your estate';
+
+  @override
+  String get locationPermissionText => 'Allow location access while using HK Shuttle ETA to find the closest stop';
+
+  @override
+  String get showClosestStop => 'Show Closest Stop';
+
+  @override
+  String get notNow => 'Not now';
 }

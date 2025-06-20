@@ -131,7 +131,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
         duration: const Duration(milliseconds: 500),
       );
       _showLocateMeFab = false;
-    } else if (widget.isLocationReady && widget.currentLocation != null) {
+    } else if (widget.hasLocationPermission && widget.isLocationReady && widget.currentLocation != null) {
       _mapController.animateTo(
         dest: widget.currentLocation!,
         zoom: _userZoomLevel,
@@ -143,7 +143,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   }
 
   void _startLocationStream() {
-    if (!widget.isLocationReady || _isStreamStarted) {
+    if (!widget.hasLocationPermission || !widget.isLocationReady || _isStreamStarted) {
       setState(() {
         _isStreamStarted = false;
         _positionStream = null;
@@ -163,7 +163,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
   }
 
   void _recenterMap() {
-    if (widget.currentLocation != null && widget.isLocationReady) {
+    if (widget.currentLocation != null && widget.hasLocationPermission && widget.isLocationReady) {
       _mapController.animateTo(
         dest: widget.currentLocation!,
         zoom: _userZoomLevel,
@@ -196,10 +196,10 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
 
     final initialCenter = widget.selectedStop != null
         ? LatLng(widget.selectedStop!.latitude, widget.selectedStop!.longitude)
-        : widget.currentLocation != null && widget.isLocationReady
+        : widget.currentLocation != null && widget.hasLocationPermission && widget.isLocationReady
             ? widget.currentLocation!
             : const LatLng(22.3964, 114.1095);
-    final initialZoom = widget.selectedStop != null || widget.isLocationReady
+    final initialZoom = widget.selectedStop != null || (widget.hasLocationPermission && widget.isLocationReady)
         ? _userZoomLevel
         : 12.0;
 
@@ -233,7 +233,7 @@ class LeafletMapState extends State<LeafletMap> with TickerProviderStateMixin {
                   retinaMode: RetinaMode.isHighDensity(context),
                   tileProvider: _tileProvider!,
                 ),
-                if (_isStreamStarted && widget.isLocationReady)
+                if (_isStreamStarted && widget.hasLocationPermission && widget.isLocationReady)
                   CurrentLocationLayer(
                     positionStream: _positionStream?.map(
                       (position) => LocationMarkerPosition(

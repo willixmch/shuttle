@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shuttle/pages/home.dart';
+import 'package:shuttle/l10n/generated/app_localizations.dart';
 
 class OnboardingLocationPermission extends StatefulWidget {
   final void Function(VoidCallback) toggleLanguage;
@@ -53,6 +54,7 @@ class OnboardingLocationPermissionState extends State<OnboardingLocationPermissi
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
@@ -73,7 +75,7 @@ class OnboardingLocationPermissionState extends State<OnboardingLocationPermissi
                 children: [
                   // Description text
                   Text(
-                    'Allow location access while using HK Shuttle ETA to find the closest stop',
+                    localizations.locationPermissionText,
                     style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
                     textAlign: TextAlign.center,
                   ),
@@ -88,7 +90,7 @@ class OnboardingLocationPermissionState extends State<OnboardingLocationPermissi
                           style: FilledButton.styleFrom(
                             minimumSize: const Size(double.infinity, 48), // Fill available width
                           ),
-                          child: const Text('Show Closest Stop'),
+                          child: Text(localizations.showClosestStop),
                         ),
                         const SizedBox(height: 8), // Spacing between buttons
                         TextButton(
@@ -97,7 +99,7 @@ class OnboardingLocationPermissionState extends State<OnboardingLocationPermissi
                             minimumSize: const Size(double.infinity, 48), // Fill available width
                           ),
                           child: Text(
-                            'Not now',
+                            localizations.notNow,
                             style: TextStyle(color: colorScheme.onSurfaceVariant),
                           ),
                         ),

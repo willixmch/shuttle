@@ -67,4 +67,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get noService => '沒有服務';
+
+  @override
+  String get selectEstate => '選擇屋苑';
+
+  @override
+  String get locationPermissionText => '開啟位置權限以便尋找最接近你的車站';
+
+  @override
+  String get showClosestStop => '顯示最近車站';
+
+  @override
+  String get notNow => '暫時不要';
 }

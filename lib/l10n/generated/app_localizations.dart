@@ -214,6 +214,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No Service'**
   String get noService;
+
+  /// No description provided for @selectEstate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select your estate'**
+  String get selectEstate;
+
+  /// No description provided for @locationPermissionText.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location access while using HK Shuttle ETA to find the closest stop'**
+  String get locationPermissionText;
+
+  /// No description provided for @showClosestStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Closest Stop'**
+  String get showClosestStop;
+
+  /// No description provided for @notNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get notNow;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

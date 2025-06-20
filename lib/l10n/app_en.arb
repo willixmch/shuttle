@@ -19,5 +19,9 @@
   "languageSwitch": "繁中",
   "origin": "Origin Stop",
   "circular": "Circular Route",
-  "noService": "No Service"
+  "noService": "No Service",
+  "selectEstate": "Select your estate",
+  "locationPermissionText": "Allow location access while using HK Shuttle ETA to find the closest stop",
+  "showClosestStop": "Show Closest Stop",
+  "notNow": "Not now"
 }
